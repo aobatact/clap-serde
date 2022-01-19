@@ -1,3 +1,5 @@
+use std::fmt::Pointer;
+
 use crate::AppWrap;
 use clap::App;
 use serde::{
@@ -48,7 +50,7 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
         }
 
         //TODO: check the first key to get name from the input?
-        //currently the name change in `Clap::App::name` doesn't change the `Clap::App::id` so might cause problems? 
+        //currently the name change in `Clap::App::name` doesn't change the `Clap::App::id` so might cause problems?
         while let Some(key) = map.next_key::<&str>()? {
             app = match key {
                 "name" => parse_value!(app, map, &str, name),
@@ -72,7 +74,7 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
                 "help_message" | "version_message" => {
                     return Err(<A::Error>::custom("deprecated fields"))
                 }
-                "args" => todo!(),
+                "args" => map.next_value_seed(crate::arg_de::Args(app))?,
                 "subcommands" => map.next_value_seed(SubCommands(app))?,
                 "groups" => {
                     todo!()
@@ -89,6 +91,7 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
 }
 
 struct NameSeed<'a>(&'a str);
+
 impl<'de> DeserializeSeed<'de> for NameSeed<'de> {
     type Value = AppWrap<'de>;
 
@@ -108,27 +111,26 @@ impl<'de> DeserializeSeed<'de> for SubCommands<'de> {
     where
         D: serde::Deserializer<'de>,
     {
-        struct SubCommandVisitor<'a>(App<'a>);
-        impl<'de> Visitor<'de> for SubCommandVisitor<'de> {
-            type Value = App<'de>;
+        deserializer.deserialize_map(self)
+    }
+}
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("Subcommand")
-            }
+impl<'de> Visitor<'de> for SubCommands<'de> {
+    type Value = App<'de>;
 
-            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
-            where
-                A: serde::de::MapAccess<'de>,
-            {
-                let mut app = self.0;
-                while let Some(name) = map.next_key::<&str>()? {
-                    let sub = map.next_value_seed(NameSeed(name))?;
-                    app = app.subcommand(sub);
-                }
-                Ok(app)
-            }
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("Subcommand")
+    }
+
+    fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        let mut app = self.0;
+        while let Some(name) = map.next_key::<&str>()? {
+            let sub = map.next_value_seed(NameSeed(name))?;
+            app = app.subcommand(sub);
         }
-
-        deserializer.deserialize_map(SubCommandVisitor(self.0))
+        Ok(app)
     }
 }
