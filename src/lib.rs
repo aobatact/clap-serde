@@ -1,4 +1,6 @@
-use clap::{App, Arg};
+use clap::{App, Arg, ArgGroup};
+
+#[macro_use]
 mod de;
 
 #[cfg(test)]
@@ -33,5 +35,21 @@ impl<'a> From<ArgWrap<'a>> for Arg<'a> {
 impl<'a> From<Arg<'a>> for ArgWrap<'a> {
     fn from(arg: Arg<'a>) -> Self {
         ArgWrap { arg }
+    }
+}
+
+struct ArgGroupWrap<'a> {
+    group: ArgGroup<'a>,
+}
+
+impl<'a> From<ArgGroupWrap<'a>> for ArgGroup<'a> {
+    fn from(group: ArgGroupWrap<'a>) -> Self {
+        group.group
+    }
+}
+
+impl<'a> From<ArgGroup<'a>> for ArgGroupWrap<'a> {
+    fn from(group: ArgGroup<'a>) -> Self {
+        ArgGroupWrap { group }
     }
 }
