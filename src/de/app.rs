@@ -69,10 +69,13 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
                 "visible_aliases" => parse_value!(app, map, ref Vec<&str>, visible_aliases), //TODO: no alloc
                 "display_order" => parse_value!(app, map, usize, display_order),
                 // "help_message" => parse_value!(app, map, &str, help_message), .. are deprecated.
-                "help_message" | "version_message" => {
-                    return Err(<A::Error>::custom("deprecated fields"))
+                x @ ("help_message" | "version_message") => {
+                    return Err(<A::Error>::custom(format_args!(
+                        "deprecated app field : {}",
+                        x
+                    )))
                 }
-                "args" => map.next_value_seed(crate::arg_de::Args(app))?,
+                "args" => map.next_value_seed(super::arg::Args(app))?,
                 "subcommands" => map.next_value_seed(SubCommands(app))?,
                 "groups" => {
                     todo!()

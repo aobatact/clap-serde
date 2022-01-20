@@ -9,6 +9,15 @@ use clap::App;
 //     assert_eq!(app.get_name(), "app_clap_serde");
 // }
 
+// #[test]
+// fn name_yaml_2(){
+//     use serde::de::Deserialize;
+//     const NAME_YAML: &'static str = "name: app_clap_serde";
+//     let de = serde_yaml::Deserializer::from_str(NAME_YAML);
+//     let app: App = AppWrap::deserialize(de).expect("parse failed").into();
+//     assert_eq!(app.get_name(), "app_clap_serde");
+// }
+
 #[test]
 fn name_json() {
     const CLAP_JSON: &'static str = "{ \"name\" : \"app_clap_serde\" }";

@@ -1,6 +1,5 @@
 use clap::{App, Arg};
-mod app_de;
-mod arg_de;
+mod de;
 
 #[cfg(test)]
 mod tests;

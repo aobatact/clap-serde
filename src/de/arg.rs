@@ -34,6 +34,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                 "help" => parse_value!(arg, map, &str, help),
                 "long_help" => parse_value!(arg, map, &str, long_help),
                 "required" => parse_value!(arg, map, bool, required),
+                "required_if_eq" => todo!(), //parse_value!(arg, map, ),
                 "takes_value" => parse_value!(arg, map, bool, takes_value),
                 "index" => parse_value!(arg, map, usize, index),
                 "global" => parse_value!(arg, map, bool, global),
@@ -72,6 +73,17 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                 }
                 "requierd_unless_present_all" => {
                     parse_value!(arg, map, ref Vec<&str>, required_unless_present_all)
+                }
+                dep @ ("required_if"
+                | "required_ifs"
+                | "multiple"
+                | "required_unless"
+                | "required_unless_one"
+                | "required_unless_all") => {
+                    return Err(Error::custom(format_args!(
+                        "deprecated arg field : {}",
+                        dep
+                    )))
                 }
                 unkonw => return Err(Error::unknown_field(unkonw, &[""])),
             }
