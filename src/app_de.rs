@@ -1,5 +1,3 @@
-use std::fmt::Pointer;
-
 use crate::AppWrap;
 use clap::App;
 use serde::{
