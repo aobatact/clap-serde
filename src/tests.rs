@@ -184,7 +184,6 @@ fn args_toml() {
         && x.get_long() == Some("banana")));
 }
 
-
 #[test]
 fn groups_toml() {
     const CLAP_TOML: &'static str = r#"

@@ -64,11 +64,11 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
                 "version_message",
             ]
             [
-                "args" => {map.next_value_seed(super::arg::Args(app))? }
-                "subcommands" => {map.next_value_seed(SubCommands(app))?}
-                "groups" => {map.next_value_seed(super::group::Groups(app))?}
-                "seting" => {todo!()}
-                "setings" => {todo!()}
+                "args" => map.next_value_seed(super::arg::Args(app))?
+                "subcommands" => map.next_value_seed(SubCommands(app))?
+                "groups" => map.next_value_seed(super::group::Groups(app))?
+                "seting" => todo!()
+                "setings" => todo!()
             ]);
         }
 

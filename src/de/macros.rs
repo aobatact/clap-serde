@@ -14,7 +14,7 @@ macro_rules! parse_value {
             $( ( ref $value_type_r:ty, $register_r : ident) ),* $(,)?
         )* }
         $(, deprecated:[$($dep:pat,)*])?
-        $([$( $sp_pat : pat => {$sp_exp : expr} )+ ])? ) => {
+        $([$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => {
         match $key {
             $(
                 $( stringify!($register) => parse_value_inner!($app, $map, $target_type, $value_type, $register), )*
