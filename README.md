@@ -1,4 +1,4 @@
-Deserializer for clap using serde.
+Provides a wrapper to deserialize clap app using serde.
 
 ## toml
 

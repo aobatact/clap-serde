@@ -2,6 +2,9 @@
 name = "clap-serde"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Provides a wrapper to deserialize clap app using serde."
+repository = "https://github.com/aobatact/clap-serde"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
