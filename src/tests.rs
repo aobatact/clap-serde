@@ -183,3 +183,28 @@ fn args_toml() {
         && x.get_short() == Some('b')
         && x.get_long() == Some("banana")));
 }
+
+
+#[test]
+fn groups_toml() {
+    const CLAP_TOML: &'static str = r#"
+        name = "app_clap_serde"
+        version = "1.0"
+        author = "aobat"
+        about = "test-clap-serde"
+        [subcommands]
+        sub1 = { about = "subcommand_1" }
+        [subcommands.sub2]
+        about = "subcommand_2"
+        [args]
+        apple = { short = "a" }
+        banana = { short = "b", long = "banana", aliases = ["musa_spp"] }
+        [groups]
+        fruit = { args = ["apple", "banana"] }
+    "#;
+    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+        .expect("parse failed")
+        .into();
+    assert_eq!(app.get_name(), "app_clap_serde");
+    assert_eq!(app.get_about(), Some("test-clap-serde"));
+}
