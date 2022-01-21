@@ -1,3 +1,5 @@
+#![doc  = include_str!("../README.md")]
+
 use clap::{App, Arg, ArgGroup};
 
 #[macro_use]
@@ -6,6 +8,22 @@ mod de;
 #[cfg(test)]
 mod tests;
 
+/**
+Wrapper of [`App`] to deserialize.
+```
+const CLAP_TOML: &'static str = r#"
+name = "app_clap_serde"
+version = "1.0"
+author = "tester"
+about = "test-clap-serde"
+"#;
+let app: clap::App = toml::from_str::<clap_serde::AppWrap>(CLAP_TOML)
+    .expect("parse failed")
+    .into();
+assert_eq!(app.get_name(), "app_clap_serde");
+assert_eq!(app.get_about(), Some("test-clap-serde"));
+```
+*/
 #[derive(Debug, Clone)]
 pub struct AppWrap<'a> {
     app: App<'a>,
@@ -23,6 +41,7 @@ impl<'a> From<App<'a>> for AppWrap<'a> {
     }
 }
 
+/// Wrapper of [`Arg`] to deserialize with [`DeserializeSeed`](`serde::de::DeserializeSeed`).
 #[derive(Debug, Clone)]
 pub struct ArgWrap<'a> {
     arg: Arg<'a>,
