@@ -6,6 +6,7 @@ mod de;
 #[cfg(test)]
 mod tests;
 
+#[derive(Debug, Clone)]
 pub struct AppWrap<'a> {
     app: App<'a>,
 }
@@ -22,6 +23,7 @@ impl<'a> From<App<'a>> for AppWrap<'a> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ArgWrap<'a> {
     arg: Arg<'a>,
 }
@@ -38,7 +40,7 @@ impl<'a> From<Arg<'a>> for ArgWrap<'a> {
     }
 }
 
-struct ArgGroupWrap<'a> {
+pub(crate) struct ArgGroupWrap<'a> {
     group: ArgGroup<'a>,
 }
 

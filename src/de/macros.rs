@@ -29,3 +29,23 @@ macro_rules! parse_value {
         }
     }
 }
+
+macro_rules! enum_de {
+    ($basety : ident, $newty :ident, $(#[$derive_meta:meta])* { $( $( #[ $cfg_meta:meta ] )? $var: ident ,)* } ) => {
+        $(#[$derive_meta])*
+        pub(crate) enum $newty {
+            $(  $(#[$cfg_meta])* $var , )*
+        }
+
+        impl From<$newty> for $basety {
+            fn from(s : $newty) -> $basety {
+                match s {
+                    $(
+                        $(#[$cfg_meta])*
+                        $newty::$var => $basety::$var,
+                    )*
+                }
+            }
+        }
+    };
+}

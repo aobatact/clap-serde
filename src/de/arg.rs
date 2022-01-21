@@ -1,8 +1,15 @@
+use super::argsetting::{ArgSettingSeed, ArgSettingsSeed};
 use crate::ArgWrap;
 use clap::{App, Arg};
 use serde::de::{DeserializeSeed, Error, Visitor};
 
-struct ArgVisitor<'a>(&'a str);
+pub struct ArgVisitor<'a>(Arg<'a>);
+
+impl<'a> ArgVisitor<'a> {
+    fn new_str(v: &'a str) -> Self {
+        Self(Arg::new(v))
+    }
+}
 
 impl<'a> Visitor<'a> for ArgVisitor<'a> {
     type Value = ArgWrap<'a>;
@@ -15,7 +22,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
     where
         A: serde::de::MapAccess<'a>,
     {
-        let mut arg = Arg::new(self.0);
+        let mut arg = self.0;
 
         //TODO: handle_vec_or_str
         while let Some(key) = map.next_key::<&str>()? {
@@ -73,6 +80,12 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "env" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }
                         #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
+                    "setting" => {
+                        arg.setting(map.next_value_seed(ArgSettingSeed)?)
+                    }
+                    "settings" => {
+                        arg.setting(map.next_value_seed(ArgSettingsSeed)?)
+                    }
                 ]
             );
         }
@@ -88,6 +101,17 @@ impl<'de> DeserializeSeed<'de> for ArgVisitor<'de> {
         D: serde::Deserializer<'de>,
     {
         deserializer.deserialize_map(self)
+    }
+}
+
+impl<'de> DeserializeSeed<'de> for ArgWrap<'de> {
+    type Value = ArgWrap<'de>;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_map(ArgVisitor(self.arg))
     }
 }
 
@@ -116,7 +140,7 @@ impl<'de> Visitor<'de> for Args<'de> {
     {
         let mut app = self.0;
         while let Some(name) = map.next_key::<&str>()? {
-            app = app.arg(map.next_value_seed(ArgVisitor(name))?);
+            app = app.arg(map.next_value_seed(ArgVisitor::new_str(name))?);
         }
         Ok(app)
     }

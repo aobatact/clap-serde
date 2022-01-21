@@ -12,7 +12,7 @@ impl<'de> Deserialize<'de> for AppWrap<'de> {
         D: serde::Deserializer<'de>,
     {
         deserializer
-            .deserialize_map(AppVisitor(TMP_APP_NAME))
+            .deserialize_map(AppVisitor(App::new(TMP_APP_NAME)))
             //check the name so as not to expose the tmp name.
             .and_then(|r| {
                 if r.app.get_name() != TMP_APP_NAME {
@@ -24,7 +24,7 @@ impl<'de> Deserialize<'de> for AppWrap<'de> {
     }
 }
 
-struct AppVisitor<'a>(&'a str);
+struct AppVisitor<'a>(App<'a>);
 
 impl<'a> Visitor<'a> for AppVisitor<'a> {
     type Value = AppWrap<'a>;
@@ -37,7 +37,7 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
     where
         A: serde::de::MapAccess<'a>,
     {
-        let mut app = App::new(self.0);
+        let mut app = self.0;
         //TODO: check the first key to get name from the input?
         //currently the name change in `Clap::App::name` doesn't change the `Clap::App::id` so might cause problems?
         while let Some(key) = map.next_key::<&str>()? {
@@ -67,8 +67,8 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
                 "args" => map.next_value_seed(super::arg::Args(app))?
                 "subcommands" => map.next_value_seed(SubCommands(app))?
                 "groups" => map.next_value_seed(super::group::Groups(app))?
-                "seting" => todo!()
-                "setings" => todo!()
+                "seting" => app.setting(map.next_value_seed(super::appsettings::AppSettingSeed)?)
+                "setings" => app.setting(map.next_value_seed(super::appsettings::AppSettingsSeed)?)
             ]);
         }
 
@@ -76,7 +76,7 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
     }
 }
 
-struct NameSeed<'a>(&'a str);
+pub struct NameSeed<'a>(&'a str);
 
 impl<'de> DeserializeSeed<'de> for NameSeed<'de> {
     type Value = AppWrap<'de>;
@@ -85,7 +85,18 @@ impl<'de> DeserializeSeed<'de> for NameSeed<'de> {
     where
         D: serde::Deserializer<'de>,
     {
-        deserializer.deserialize_map(AppVisitor(self.0))
+        deserializer.deserialize_map(AppVisitor(App::new(self.0)))
+    }
+}
+
+impl<'de> DeserializeSeed<'de> for AppWrap<'de> {
+    type Value = AppWrap<'de>;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_map(AppVisitor(self.app))
     }
 }
 
