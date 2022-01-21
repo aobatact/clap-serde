@@ -38,53 +38,38 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
         A: serde::de::MapAccess<'a>,
     {
         let mut app = App::new(self.0);
-        macro_rules! parse_value {
-            ( $app : ident, $map : ident, $value_type:ty, $register : ident) => {
-                App::$register($app, $map.next_value::<$value_type>()?)
-            };
-            ( $app : ident, $map : ident, ref $value_type:ty, $register : ident) => {
-                App::$register($app, &$map.next_value::<$value_type>()?)
-            };
-        }
-
         //TODO: check the first key to get name from the input?
         //currently the name change in `Clap::App::name` doesn't change the `Clap::App::id` so might cause problems?
         while let Some(key) = map.next_key::<&str>()? {
-            app = match key {
-                "name" => parse_value!(app, map, &str, name),
-                "version" => parse_value!(app, map, &str, version),
-                "long_version" => parse_value!(app, map, &str, long_version),
-                "author" => parse_value!(app, map, &str, author),
-                "bin_name" => parse_value!(app, map, &str, bin_name),
-                "about" => parse_value!(app, map, &str, about),
-                "long_about" => parse_value!(app, map, &str, long_about),
-                "before_help" => parse_value!(app, map, &str, before_help),
-                "after_help" => parse_value!(app, map, &str, after_help),
-                "template" => parse_value!(app, map, &str, help_template),
-                "usage" => parse_value!(app, map, &str, override_usage),
-                "help" => parse_value!(app, map, &str, override_help),
-                "alias" => parse_value!(app, map, &str, alias),
-                "aliases" => parse_value!(app, map, ref Vec<&str>, aliases), //TODO: no alloc
-                "visible_alias" => parse_value!(app, map, &str, visible_alias),
-                "visible_aliases" => parse_value!(app, map, ref Vec<&str>, visible_aliases), //TODO: no alloc
-                "display_order" => parse_value!(app, map, usize, display_order),
-                // "help_message" => parse_value!(app, map, &str, help_message), .. are deprecated.
-                x @ ("help_message" | "version_message") => {
-                    return Err(<A::Error>::custom(format_args!(
-                        "deprecated app field : {}",
-                        x
-                    )))
-                }
-                "args" => map.next_value_seed(super::arg::Args(app))?,
-                "subcommands" => map.next_value_seed(SubCommands(app))?,
-                "groups" => {
-                    todo!()
-                }
-                "setting" | "settings" => {
-                    todo!()
-                }
-                _ => app, //currently it ignores the invlid field
-            }
+            app = parse_value!(key, app, map, App, {
+                (&str, name),
+                (&str, version),
+                (&str, long_version),
+                (&str, author),
+                (&str, bin_name),
+                (&str, about),
+                (&str, long_about),
+                (&str, before_help),
+                (&str, after_help),
+                (&str, help_template),
+                (&str, override_usage),
+                (&str, override_help),
+                (&str, alias),
+                (&str, visible_alias),
+                (ref Vec<&str>, visible_aliases),
+                (usize, display_order),
+            },
+            deprecated: [
+                "help_message",
+                "version_message",
+            ]
+            [
+                "args" => {map.next_value_seed(super::arg::Args(app))? }
+                "subcommands" => {map.next_value_seed(SubCommands(app))?}
+                "groups" => {map.next_value_seed(super::group::Groups(app))?}
+                "seting" => {todo!()}
+                "setings" => {todo!()}
+            ]);
         }
 
         Ok(AppWrap { app })
