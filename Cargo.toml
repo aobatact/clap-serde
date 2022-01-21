@@ -8,6 +8,9 @@ repository = "https://github.com/aobatact/clap-serde"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+env = [ "clap/env" ]
+
 [dependencies]
 clap = { version = "3.0", default-features = false, features = ["std"]}
 serde = { version = "1", features = ["derive"]}
