@@ -1,9 +1,11 @@
 #![doc  = include_str!("../README.md")]
 
 use std::ops::Deref;
-
 use clap::{App, Arg, ArgGroup};
 use serde::Deserializer;
+
+#[cfg(all(feature = "kebab-case-setting", feature = "snake-case-setting"))]
+compile_error!("Either feature \"kebab-case-setting\" or \"snake-case-setting\" should be set");
 
 #[macro_use]
 mod de;
