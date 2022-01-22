@@ -1,11 +1,11 @@
 use serde::{
     de::{
         value::{MapDeserializer, SeqDeserializer},
-        Error as _, Expected, IntoDeserializer, Unexpected,
+        Error as _, IntoDeserializer, Unexpected,
     },
     Deserializer,
 };
-use yaml_rust::{Yaml, YamlLoader};
+use yaml_rust::{Yaml};
 
 /**
 Deserializing from [`Yaml`]
@@ -206,7 +206,7 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
     }
 
     ///not supported
-    fn deserialize_bytes<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    fn deserialize_bytes<V>(self, _visitor: V) -> Result<V::Value, Self::Error>
     where
         V: serde::de::Visitor<'de>,
     {
@@ -214,7 +214,7 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
     }
 
     ///not supported
-    fn deserialize_byte_buf<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    fn deserialize_byte_buf<V>(self, _visitor: V) -> Result<V::Value, Self::Error>
     where
         V: serde::de::Visitor<'de>,
     {
@@ -246,8 +246,8 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
     ///unimplemented
     fn deserialize_unit_struct<V>(
         self,
-        name: &'static str,
-        visitor: V,
+        _name: &'static str,
+        _visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: serde::de::Visitor<'de>,
@@ -258,8 +258,8 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
     ///unimplemented
     fn deserialize_newtype_struct<V>(
         self,
-        name: &'static str,
-        visitor: V,
+        _name: &'static str,
+        _visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: serde::de::Visitor<'de>,
@@ -281,7 +281,7 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
     }
 
     ///unimplemented
-    fn deserialize_tuple<V>(self, len: usize, visitor: V) -> Result<V::Value, Self::Error>
+    fn deserialize_tuple<V>(self, _len: usize, _visitor: V) -> Result<V::Value, Self::Error>
     where
         V: serde::de::Visitor<'de>,
     {
@@ -291,9 +291,9 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
     ///unimplemented
     fn deserialize_tuple_struct<V>(
         self,
-        name: &'static str,
-        len: usize,
-        visitor: V,
+        _name: &'static str,
+        _len: usize,
+        _visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: serde::de::Visitor<'de>,
@@ -333,9 +333,9 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
     ///unimplemented
     fn deserialize_struct<V>(
         self,
-        name: &'static str,
-        fields: &'static [&'static str],
-        visitor: V,
+        _name: &'static str,
+        _fields: &'static [&'static str],
+        _visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: serde::de::Visitor<'de>,
