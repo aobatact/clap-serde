@@ -53,4 +53,14 @@ assert_eq!(app.get_about(), Some("test-clap-serde"));
 ```
 
 ## yaml
-Not working because [serde_yaml](https://crates.io/crates/serde_yaml) only accepts `DeserializeOwned`.
+Not working now because [serde_yaml](https://crates.io/crates/serde_yaml) only accepts `DeserializeOwned`.
+
+# features
+- env
+Enables env feature in clap.
+
+## (settings name letter)
+Settings names format for [`AppSettings`](`clap::AppSettings`) and [`ArgSettings`](`clap::ArgSettings`).
+- PascalCase (no-feature, same as variants name in enum)
+- kebab-case (kebab-case-setting)
+- snake_case (snake-case-setting)
