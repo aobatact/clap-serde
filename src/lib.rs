@@ -1,12 +1,38 @@
 #![doc  = include_str!("../README.md")]
 
+use std::ops::Deref;
+
 use clap::{App, Arg, ArgGroup};
+use serde::Deserializer;
 
 #[macro_use]
 mod de;
 
 #[cfg(test)]
 mod tests;
+
+/**
+Deserialize [`App`] from [`Deserializer`].
+```
+const CLAP_TOML: &'static str = r#"
+name = "app_clap_serde"
+version = "1.0"
+author = "tester"
+about = "test-clap-serde"
+"#;
+let app = clap_serde::load(&mut toml::Deserializer::new(CLAP_TOML))
+    .expect("parse failed");
+assert_eq!(app.get_name(), "app_clap_serde");
+assert_eq!(app.get_about(), Some("test-clap-serde"));
+```
+*/
+pub fn load<'de, D>(de: D) -> Result<App<'de>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    use serde::Deserialize;
+    AppWrap::deserialize(de).map(|a| a.into())
+}
 
 /**
 Wrapper of [`App`] to deserialize.
@@ -38,6 +64,14 @@ impl<'a> From<AppWrap<'a>> for App<'a> {
 impl<'a> From<App<'a>> for AppWrap<'a> {
     fn from(app: App<'a>) -> Self {
         AppWrap { app }
+    }
+}
+
+impl<'a> Deref for AppWrap<'a> {
+    type Target = App<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.app
     }
 }
 
