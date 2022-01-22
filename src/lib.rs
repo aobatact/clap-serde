@@ -5,7 +5,7 @@ use clap::{App, Arg, ArgGroup};
 use serde::Deserializer;
 
 #[cfg(all(feature = "kebab-case-setting", feature = "snake-case-setting"))]
-compile_error!("Either feature \"kebab-case-setting\" or \"snake-case-setting\" should be set");
+compile_error!("Feature \"kebab-case-setting\" and \"snake-case-setting\" collides. At most one should be set.");
 
 #[macro_use]
 mod de;
