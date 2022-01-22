@@ -1,22 +1,64 @@
 use crate::AppWrap;
 use clap::App;
 
-//currently fails... beacuse serde_yaml only supports `DeserializeOwned` and no zero copy deserialization
-// #[test]
-// fn name_yaml() {
-//     const NAME_YAML: &'static str = "name : app_clap_serde";
-//     let app: App = serde_yaml::from_str::<AppWrap>(NAME_YAML).expect("parse failed").into();
-//     assert_eq!(app.get_name(), "app_clap_serde");
-// }
+#[cfg(feature = "yaml")]
+#[test]
+fn name_yaml() {
+    use yaml_rust::Yaml;
 
-// #[test]
-// fn name_yaml_2(){
-//     use serde::de::Deserialize;
-//     const NAME_YAML: &'static str = "name: app_clap_serde";
-//     let de = serde_yaml::Deserializer::from_str(NAME_YAML);
-//     let app: App = AppWrap::deserialize(de).expect("parse failed").into();
-//     assert_eq!(app.get_name(), "app_clap_serde");
-// }
+    const NAME_YAML: &'static str = "name: app_clap_serde\n";
+    let yaml =
+        Yaml::Array(yaml_rust::YamlLoader::load_from_str(NAME_YAML).expect("fail to make yaml"));
+    let app = crate::load(crate::yaml::YamlWrap::new(&yaml)).expect("parse failed");
+    assert_eq!(app.get_name(), "app_clap_serde");
+}
+
+#[cfg(feature = "yaml")]
+#[test]
+fn test_yaml() {
+    use yaml_rust::Yaml;
+
+    const NAME_YAML: &'static str = r#"
+name: app_clap_serde
+version : "1.0"
+about : yaml_support!
+author : yaml_supporter
+
+args:
+    - apple : 
+        - short: a
+    - banana:
+        - short: b
+        - long: banana
+        - aliases :
+            - musa_spp
+
+subcommands:
+    - sub1: 
+        - about : subcommand_1
+    - sub2: 
+        - about : subcommand_2
+
+"#;
+    let yaml =
+        Yaml::Array(yaml_rust::YamlLoader::load_from_str(NAME_YAML).expect("fail to make yaml"));
+    let app = crate::load(crate::yaml::YamlWrap::new(&yaml)).expect("parse failed");
+    assert_eq!(app.get_name(), "app_clap_serde");
+    let subs = app.get_subcommands().collect::<Vec<_>>();
+    assert!(subs
+        .iter()
+        .any(|x| x.get_name() == "sub1" && x.get_about() == Some("subcommand_1")));
+    assert!(subs
+        .iter()
+        .any(|x| x.get_name() == "sub2" && x.get_about() == Some("subcommand_2")));
+    let args = app.get_arguments().collect::<Vec<_>>();
+    assert!(args
+        .iter()
+        .any(|x| x.get_name() == "apple" && x.get_short() == Some('a')));
+    assert!(args.iter().any(|x| x.get_name() == "banana"
+        && x.get_short() == Some('b')
+        && x.get_long() == Some("banana")));
+}
 
 #[test]
 fn name_json() {

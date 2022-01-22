@@ -1,17 +1,22 @@
 #![doc  = include_str!("../README.md")]
 
-use std::ops::Deref;
 use clap::{App, Arg, ArgGroup};
 use serde::Deserializer;
+use std::ops::Deref;
 
 #[cfg(all(feature = "kebab-case-setting", feature = "snake-case-setting"))]
 compile_error!("Feature \"kebab-case-setting\" and \"snake-case-setting\" collides. At most one should be set.");
 
 #[macro_use]
 mod de;
+#[cfg(feature = "yaml")]
+mod yaml;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(feature = "yaml")]
+pub use yaml::{YamlWrap, yaml_to_app};
 
 /**
 Deserialize [`App`] from [`Deserializer`].
