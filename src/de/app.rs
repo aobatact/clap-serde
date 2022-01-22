@@ -5,6 +5,8 @@ use serde::{
     Deserialize,
 };
 
+use super::appsettings::AppSetting1;
+
 const TMP_APP_NAME: &'static str = "__tmp__deserialize__name__";
 impl<'de> Deserialize<'de> for AppWrap<'de> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -67,8 +69,16 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
                 "args" => map.next_value_seed(super::arg::Args(app))?
                 "subcommands" => map.next_value_seed(SubCommands(app))?
                 "groups" => map.next_value_seed(super::group::Groups(app))?
-                "seting" => app.setting(map.next_value_seed(super::appsettings::AppSettingSeed)?)
-                "setings" => app.setting(map.next_value_seed(super::appsettings::AppSettingsSeed)?)
+                "setting" => app.setting(map.next_value_seed(super::appsettings::AppSettingSeed)?)
+                "settings" => app.setting(map.next_value_seed(super::appsettings::AppSettingsSeed)?)
+                "global_setting" => app.global_setting(map.next_value_seed(super::appsettings::AppSettingSeed)?)
+                "global_settings" => {
+                    let sets = map.next_value::<Vec<AppSetting1>>()?.into_iter().map(|s|s.into());
+                    for s in sets{
+                        app = app.global_setting(s);
+                    }
+                    app
+                }
             ]);
         }
 
