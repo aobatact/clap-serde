@@ -44,6 +44,7 @@ pub fn yaml_to_app<'a>(yaml: &'a Yaml) -> Result<clap::App<'a>, Error> {
 }
 
 /// Wrapper to use [`Yaml`] as [`Deserializer`].
+/// 
 /// Currently this implement functions in [`Deserializer`] that is only needed in deserializing into `App`.
 /// Recommend to use [`yaml_to_app`] instead.
 pub struct YamlWrap<'a> {
