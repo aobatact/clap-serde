@@ -18,12 +18,12 @@ impl<'de> Visitor<'de> for GroupVisitor<'de> {
         let mut group = ArgGroup::new(self.0);
         while let Some(key) = map.next_key::<&str>()? {
             group = parse_value!(key, group, map, ArgGroup, {
-                (bool, required),
-                (bool, multiple),
-                (&str, arg),
-                (ref Vec<&str>, args),
-                (&str, requires),
-                (&str, name),
+                (required, bool),
+                (multiple, bool),
+                (arg, &str),
+                ref (args, Vec<&str>),
+                (requires, &str),
+                (name, &str),
             });
         }
 

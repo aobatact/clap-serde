@@ -44,50 +44,50 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
         //currently the name change in `Clap::App::name` doesn't change the `Clap::App::id` so might cause problems?
         while let Some(key) = map.next_key::<&str>()? {
             app = parse_value!(key, app, map, App, {
-                (&str, about),
-                (&str, after_help),
-                (&str, after_long_help),
-                (&str, alias),
-                (ref Vec<&str>, aliases),
+                (about, &str),
+                (after_help, &str),
+                (after_long_help, &str),
+                (alias, &str),
+                ref (aliases, Vec<&str>),
                 //arg : not supported single arg(now)
                 //args : specialized
-                (&str, author),
-                (&str, before_help),
-                (&str, before_long_help),
-                (&str, bin_name),
+                (author, &str),
+                (before_help, &str),
+                (before_long_help, &str),
+                (bin_name, &str),
                 // color : todo
-                (usize, display_order),
+                (display_order, usize),
                 // error : todo
                 // global_setting : specialized(now)
                 // global_settings : specialized (though the original method is deprecated)
                 // group : not supported single group
                 // groups : specialized
-                (Option<&str>, help_heading),
-                (&str, help_template),
-                (&str, long_about),
-                (&str, long_flag),
-                (&str, long_flag_alias),
-                (ref Vec<&str>, long_flag_aliases),
-                (&str, long_version),
-                (usize, max_term_width),
-                (&str, name),
-                (&str, override_help),
-                (&str, override_usage),
+                (help_heading, Option<&str>),
+                (help_template, &str),
+                (long_about, &str),
+                (long_flag, &str),
+                (long_flag_alias, &str),
+                ref (long_flag_aliases, Vec<&str>),
+                (long_version, &str),
+                (max_term_width, usize),
+                (name, &str),
+                (override_help, &str),
+                (override_usage, &str),
                 // setting : specialized
                 // settings : specialized (though the original method is deprecated)
-                (char, short_flag),
-                (char, short_flag_alias),
-                (ref Vec<char>, short_flag_aliases),
+                (short_flag, char),
+                (short_flag_alias, char),
+                ref (short_flag_aliases, Vec<char>),
                 // subcommand : not supported single subcommand(now)
                 // subcommands : specialized
-                (usize, term_width),
-                (&str, version),
-                (&str, visible_alias),
-                (ref Vec<&str>, visible_aliases),
-                (&str, visible_long_flag_alias),
-                (ref Vec<&str>, visible_long_flag_aliases),
-                (char, visible_short_flag_alias),
-                (ref Vec<char>, visible_short_flag_aliases),
+                (term_width, usize),
+                (version, &str),
+                (visible_alias, &str),
+                ref (visible_aliases, Vec<&str>),
+                (visible_long_flag_alias, &str),
+                ref (visible_long_flag_aliases, Vec<&str>),
+                (visible_short_flag_alias, char),
+                ref (visible_short_flag_aliases, Vec<char>),
             },
             deprecated: [
                 "help_message",

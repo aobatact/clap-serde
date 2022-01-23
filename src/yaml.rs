@@ -5,7 +5,7 @@ use serde::{
     },
     Deserializer,
 };
-use yaml_rust::{Yaml};
+use yaml_rust::Yaml;
 
 /**
 Deserializing from [`Yaml`]
@@ -17,7 +17,7 @@ about : yaml_support!
 author : yaml_supporter
 
 args:
-    - apple : 
+    - apple :
         - short: a
     - banana:
         - short: b
@@ -26,9 +26,9 @@ args:
             - musa_spp
 
 subcommands:
-    - sub1: 
+    - sub1:
         - about : subcommand_1
-    - sub2: 
+    - sub2:
         - about : subcommand_2
 
 "#;
@@ -44,7 +44,7 @@ pub fn yaml_to_app<'a>(yaml: &'a Yaml) -> Result<clap::App<'a>, Error> {
 }
 
 /// Wrapper to use [`Yaml`] as [`Deserializer`].
-/// 
+///
 /// Currently this implement functions in [`Deserializer`] that is only needed in deserializing into `App`.
 /// Recommend to use [`yaml_to_app`] instead.
 pub struct YamlWrap<'a> {
