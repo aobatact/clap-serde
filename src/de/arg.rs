@@ -23,7 +23,6 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
     {
         let mut arg = self.0;
 
-        //TODO: handle_vec_or_str
         while let Some(key) = map.next_key::<&str>()? {
             arg = parse_value!(key, arg, map, Arg, {
                     (alias, &str),
