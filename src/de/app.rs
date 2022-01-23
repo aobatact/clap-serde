@@ -44,27 +44,56 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
         //currently the name change in `Clap::App::name` doesn't change the `Clap::App::id` so might cause problems?
         while let Some(key) = map.next_key::<&str>()? {
             app = parse_value!(key, app, map, App, {
-                (&str, name),
-                (&str, version),
-                (&str, long_version),
-                (&str, author),
-                (&str, bin_name),
                 (&str, about),
-                (&str, long_about),
-                (&str, before_help),
                 (&str, after_help),
-                (&str, help_template),
-                (&str, override_usage),
-                (&str, override_help),
+                (&str, after_long_help),
                 (&str, alias),
+                (ref Vec<&str>, aliases),
+                //arg : not supported single arg(now)
+                //args : specialized
+                (&str, author),
+                (&str, before_help),
+                (&str, before_long_help),
+                (&str, bin_name),
+                // color : todo
+                (usize, display_order),
+                // error : todo
+                // global_setting : specialized(now)
+                // global_settings : specialized (though the original method is deprecated)
+                // group : not supported single group
+                // groups : specialized
+                // help_heading : todo
+                (&str, help_template),
+                (&str, long_about),
+                // long_flag : todo
+                // long_flag_alias : todo
+                // long_flag_aliases : todo
+                (&str, long_version),
+                // max_term_width : todo
+                (&str, name),
+                (&str, override_help),
+                (&str, override_usage),
+                // setting : specialized
+                // settings : specialized (though the original method is deprecated)
+                // short_flag : todo
+                // short_flag_alias : todo
+                // short_flag_aliases : todo
+                // subcommand : not supported single subcommand(now)
+                // subcommands : specialized
+                // term_width : todo
+                (&str, version),
                 (&str, visible_alias),
                 (ref Vec<&str>, visible_aliases),
-                (usize, display_order),
+                // visible_long_flag_alias : todo
+                // visible_long_flag__aliases :todo
+                // visible_short_flag_alias : todo
+                // visible_short_flag__aliases :todo
             },
             deprecated: [
                 "help_message",
                 "version_message",
             ]
+            //specialized behavior
             [
                 "args" => map.next_value_seed(super::arg::Args(app))?
                 "subcommands" => map.next_value_seed(SubCommands(app))?
