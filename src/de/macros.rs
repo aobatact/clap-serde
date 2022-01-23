@@ -27,7 +27,7 @@ macro_rules! parse_value {
                     let (v0, v1) = $map.next_value::<($value_type_t0, $value_type_t1)>()?;
                     <$target_type>::$register_t($app, v0, v1)
                 }
-            )*)*            
+            )*)*
             $($(
                 stringify!($register_3t) => {
                     let (v0, v1, v2) = $map.next_value::<($value_type_3t0, $value_type_3t1, $value_type_3t2)>()?;

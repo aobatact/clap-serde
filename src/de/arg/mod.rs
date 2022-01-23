@@ -1,6 +1,9 @@
+use self::value_hint::ValueHintSeed;
 use crate::ArgWrap;
 use clap::{App, Arg};
 use serde::de::{DeserializeSeed, Error, Visitor};
+
+mod value_hint;
 
 pub struct ArgVisitor<'a>(Arg<'a>);
 
@@ -89,7 +92,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (takes_value, bool),
                     (use_delimiter, bool),
                     // validator_regex
-                    // value_hint
+                    // value_hint : specialized
                     (value_delimiter, char),
                     (value_name, &str),
                     ref (value_names, Vec<&str>),
@@ -102,7 +105,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                 tuple2: {
                     (required_if_eq, (&str, &str)),
                     (requires_if, (&str, &str)),
-                },                
+                },
                 tuple3: {
                     (default_value_if, (&str, Option<&str>, Option<&str>)),
                 },
@@ -135,6 +138,9 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "hide_env_values" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, bool, hide_env_values) }
                         #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
+                    "value_hint" => {
+                        arg.value_hint(map.next_value_seed(ValueHintSeed)?)
+                    }
                 ]
             );
         }
