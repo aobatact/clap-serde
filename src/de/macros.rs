@@ -51,6 +51,8 @@ macro_rules! convert_case{
     }
 }
 
+// if const heap is stabilized, should convert the target keys instead.
+
 #[cfg(feature = "kebab-case-key")]
 macro_rules! convert_case{
     ($key:ident) => {

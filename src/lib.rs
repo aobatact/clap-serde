@@ -1,3 +1,4 @@
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![doc  = include_str!("../README.md")]
 
 use clap::{App, Arg, ArgGroup};
@@ -18,6 +19,8 @@ compile_error!("Case setting feature is conflicting. Only one should be set.");
 mod de;
 #[cfg(feature = "yaml")]
 mod yaml;
+#[cfg(feature = "docsrs")]
+pub mod documents;
 
 #[cfg(test)]
 mod tests;

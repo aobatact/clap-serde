@@ -7,6 +7,8 @@ description = "Provides a wrapper to deserialize clap app using serde."
 repository = "https://github.com/aobatact/clap-serde"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata.docs.rs]
+features = ["docsrs"]
 
 [features]
 default = [ "snake-case-key", "yaml"]
@@ -16,6 +18,7 @@ kebab-case-key = [ "convert_case" ]
 snake-case-key = []
 yaml = [ "yaml-rust"]
 color = ["clap/color"]
+docsrs = ["snake-case-key", "yaml", "env", "color"]
 
 [dependencies]
 clap = { version = "3.0", default-features = false, features = ["std"]}
