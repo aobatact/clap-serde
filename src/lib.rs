@@ -4,8 +4,15 @@ use clap::{App, Arg, ArgGroup};
 use serde::Deserializer;
 use std::ops::Deref;
 
-#[cfg(all(feature = "kebab-case-setting", feature = "snake-case-setting"))]
-compile_error!("Feature \"kebab-case-setting\" and \"snake-case-setting\" collides. At most one should be set.");
+#[cfg(not(any(feature = "kebab-case-key", feature = "snake-case-key", feature = "pascal-case-key")))]
+compile_error!("Case setting feature is missing. Either one should be set.");
+
+#[cfg(any(
+    all(feature = "kebab-case-key", feature = "snake-case-key"),
+    all(feature = "kebab-case-key", feature = "pascal-case-key"),
+    all(feature = "pascal-case-key", feature = "snake-case-key"),
+))]
+compile_error!("Case setting feature is conflicting. Only one should be set.");
 
 #[macro_use]
 mod de;

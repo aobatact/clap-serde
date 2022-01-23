@@ -96,11 +96,11 @@ Enables to use yaml. Enabled by default.
 ## color
 Enablse color feature in clap.
 
-## (settings name letter)
-Settings names format for [`AppSettings`](`clap::AppSettings`).
-#### pascal-case-setting 
-PascalCase. Same as variants name in enum.
-#### kebab-case-setting 
-kebab-case. Enabled by default.
-#### snake-case-setting 
-snake_case.
+## (key case settings)
+Settings names format for keys and [`AppSettings`](`clap::AppSettings`).
+#### snake-case-key
+snake_case. Enabled by default.
+#### pascal-case-key
+PascalCase. Same as variants name in enum at `AppSettings`.
+#### kebab-case-key 
+kebab-case.

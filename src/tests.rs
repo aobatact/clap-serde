@@ -39,17 +39,17 @@ subcommands:
     - sub2: 
         - about : subcommand_2
 
-setting: trailing-var-arg
+setting: trailing_var_arg
 
 settings: 
-    - help-expected
+    - help_expected
 
-global_setting: color-auto
-global_setting: no-binary-name
+global_setting: color_auto
+global_setting: no_binary_name
 
 global_settings: 
-    - next-line-help
-    - propagate-version
+    - next_line_help
+    - propagate_version
 "#;
     let yaml =
         Yaml::Array(yaml_rust::YamlLoader::load_from_str(NAME_YAML).expect("fail to make yaml"));

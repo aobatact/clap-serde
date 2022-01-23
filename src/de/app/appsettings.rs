@@ -3,8 +3,8 @@ use serde::{de::DeserializeSeed, Deserialize};
 
 enum_de!(AppSettings,AppSetting1,
     #[derive(Deserialize, Clone, Copy)]
-    #[cfg_attr(feature = "kebab-case-setting" ,serde(rename_all = "kebab-case"))]
-    #[cfg_attr(feature = "snake-case-setting" ,serde(rename_all = "snake_case"))]
+    #[cfg_attr(feature = "kebab-case-key" ,serde(rename_all = "kebab-case"))]
+    #[cfg_attr(feature = "snake-case-key" ,serde(rename_all = "snake_case"))]
     {
     IgnoreErrors,
     WaitOnError,
