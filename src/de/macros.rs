@@ -13,13 +13,27 @@ macro_rules! parse_value {
             $( ( $register : ident, $value_type:ty), ),+
             $( ref ( $register_r : ident, $value_type_r:ty) ),* $(,)?
         )* }
+        $(, tuple2:{$(( $register_t : ident, ( $value_type_t0:ty,  $value_type_t1:ty)),)*})?
+        $(, tuple3:{$(( $register_3t : ident, ( $value_type_3t0:ty,  $value_type_3t1:ty,  $value_type_3t2:ty)),)*})?
         $(, deprecated:[$($dep:pat,)*])?
-        $([$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => {
+        $(specialize:[$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => {
         match $key {
             $(
                 $( stringify!($register) => parse_value_inner!($app, $map, $target_type, $value_type, $register), )*
                 $( stringify!($register_r) => parse_value_inner!($app, $map, $target_type, ref $value_type_r, $register_r), )*
             )*
+            $($(
+                stringify!($register_t) => {
+                    let (v0, v1) = $map.next_value::<($value_type_t0, $value_type_t1)>()?;
+                    <$target_type>::$register_t($app, v0, v1)
+                }
+            )*)*            
+            $($(
+                stringify!($register_3t) => {
+                    let (v0, v1, v2) = $map.next_value::<($value_type_3t0, $value_type_3t1, $value_type_3t2)>()?;
+                    <$target_type>::$register_3t($app, v0, v1, v2)
+                }
+            )*)*
             $($($sp_pat => {$sp_exp})*)*
             $(depr @ ($($dep )|* ) => {return Err(Error::custom(format_args!("deprecated :{}", depr)))})*
             unknown => return Err(Error::unknown_field(unknown, &[

@@ -34,8 +34,8 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (default_missing_value, &str),
                     ref (default_missing_values, Vec<&str>),
                     (default_value, &str),
-                    // default_value_if
-                    // default_value_ifs
+                    // default_value_if : tuple3
+                    ref (default_value_ifs, Vec<(&str, Option<&str>, Option<&str>)> ),
                     (display_order, usize),
                     // env : specialized
                     (exclusive, bool),
@@ -73,16 +73,16 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (require_delimiter, bool),
                     (require_equals, bool),
                     (required, bool),
-                    // required_if_eq
-                    // required_if_eq_all
-                    // required_if_eq_any
+                    // required_if_eq: tuple2
+                    ref (required_if_eq_all, Vec<(&str, &str)>),
+                    ref (required_if_eq_any, Vec<(&str, &str)>),
                     (required_unless_present, &str),
                     ref (required_unless_present_any, Vec<&str>),
                     ref (required_unless_present_all, Vec<&str>),
                     (requires, &str),
                     ref (requires_all, Vec<&str>),
-                    // requires_if
-                    // requires_ifs
+                    // requires_if: tuple2
+                    ref (requires_ifs, Vec<(&str, &str)>),
                     (short, char),
                     (short_alias, char),
                     ref (short_aliases, Vec<char>),
@@ -98,6 +98,13 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     ref (visible_aliases, Vec<&str>),
                     (visible_short_alias, char),
                     ref (visible_short_aliases, Vec<char>),
+                },
+                tuple2: {
+                    (required_if_eq, (&str, &str)),
+                    (requires_if, (&str, &str)),
+                },                
+                tuple3: {
+                    (default_value_if, (&str, Option<&str>, Option<&str>)),
                 },
                 deprecated:
                 [
@@ -118,7 +125,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "settings",
                     "with_name",
                 ]
-                [
+                specialize:[
                     "env" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }
                         #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}

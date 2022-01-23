@@ -60,7 +60,7 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
                 (bin_name, &str),
                 // color : specialized
                 (display_order, usize),
-                // global_setting : specialized(now)
+                // global_setting : specialized
                 // global_settings : specialized (though the original method is deprecated)
                 // group : not supported single group
                 // groups : specialized
@@ -95,7 +95,7 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
                 "help_message",
                 "version_message",
             ]
-            //specialized behavior
+            specialize:
             [
                 "args" => map.next_value_seed(super::arg::Args(app))?
                 "color" => {
