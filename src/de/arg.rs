@@ -1,4 +1,3 @@
-use super::argsetting::{ArgSettingSeed, ArgSettingsSeed};
 use crate::ArgWrap;
 use clap::{App, Arg};
 use serde::de::{DeserializeSeed, Error, Visitor};
@@ -80,12 +79,12 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "env" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }
                         #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
-                    "setting" => {
-                        arg.setting(map.next_value_seed(ArgSettingSeed)?)
-                    }
-                    "settings" => {
-                        arg.setting(map.next_value_seed(ArgSettingsSeed)?)
-                    }
+                    // "setting" => {
+                    //     arg.setting(map.next_value_seed(ArgSettingSeed)?)
+                    // }
+                    // "settings" => {
+                    //     arg.setting(map.next_value_seed(ArgSettingsSeed)?)
+                    // }
                 ]
             );
         }
