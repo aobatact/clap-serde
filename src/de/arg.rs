@@ -26,60 +26,108 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
         //TODO: handle_vec_or_str
         while let Some(key) = map.next_key::<&str>()? {
             arg = parse_value!(key, arg, map, Arg, {
-                    (short, char),
-                    (long, &str),
+                    (alias, &str),
                     ref (aliases, Vec<&str>),
-                    (help, &str),
-                    (long_help, &str),
-                    (required, bool),
-                    (takes_value, bool),
-                    (index, usize),
+                    (allow_hyphen_values, bool),
+                    (allow_invalid_utf8, bool),
+                    (conflicts_with, &str),
+                    ref (conflicts_with_all, Vec<&str>),
+                    (default_missing_value, &str),
+                    ref (default_missing_values, Vec<&str>),
+                    (default_value, &str),
+                    // default_value_if
+                    // default_value_ifs
+                    (display_order, usize),
+                    // env : specialized
+                    (exclusive, bool),
+                    (forbid_empty_values, bool),
                     (global, bool),
-                    (multiple_values, bool),
-                    (hide, bool),
-                    (next_line_help, bool),
                     (group, &str),
-                    (number_of_values, usize),
+                    ref (groups, Vec<&str>),
+                    (help, &str),
+                    (help_heading, &str),
+                    (hide, bool),
+                    (hide_default_value, bool),
+                    // hide_env : specialized
+                    // hide_env_values : specialized
+                    (hide_long_help, bool),
+                    (hide_possible_values, bool),
+                    (hide_short_help, bool),
+                    (ignore_case, bool),
+                    (index, usize),
+                    (last, bool),
+                    (long, &str),
+                    (long_help, &str),
+                    (max_occurrences, usize),
                     (max_values, usize),
                     (min_values, usize),
-                    (value_name, &str),
-                    (use_delimiter, bool),
-                    (allow_hyphen_values, bool),
-                    (last, bool),
-                    (require_delimiter, bool),
-                    (value_delimiter, char),
-                    (required_unless_present, &str),
-                    (display_order, usize),
-                    (default_value, &str),
-                    ref (value_names, Vec<&str>),
-                    ref (groups, Vec<&str>),
-                    (requires, &str),
-                    (conflicts_with, &str),
+                    (multiple_occurrences, bool),
+                    (multiple_values, bool),
+                    (name, &str),
+                    (next_line_help, bool),
+                    (number_of_values, usize),
                     (overrides_with, &str),
+                    ref (overrides_with_all, Vec<&str>),
+                    (possible_value, &str),
                     (possible_values, Vec<&str>),
-                    (ignore_case, bool),
+                    (raw, bool),
+                    (require_delimiter, bool),
+                    (require_equals, bool),
+                    (required, bool),
+                    // required_if_eq
+                    // required_if_eq_all
+                    // required_if_eq_any
+                    (required_unless_present, &str),
                     ref (required_unless_present_any, Vec<&str>),
                     ref (required_unless_present_all, Vec<&str>),
-                    //     "default_value_if" => todo!(),
-                    //     "default_value_ifs" => todo!(),
-                    //     #[cfg(env)]
-                    //     "env" => parse_value!(arg, map, &str, env),
-                    //     "requires_if" => todo!(), //parse_value!(arg, map, &str, requires_if),
-                    //     "requires_ifs" => todo!(),
+                    (requires, &str),
+                    ref (requires_all, Vec<&str>),
+                    // requires_if
+                    // requires_ifs
+                    (short, char),
+                    (short_alias, char),
+                    ref (short_aliases, Vec<char>),
+                    (takes_value, bool),
+                    (use_delimiter, bool),
+                    // validator_regex
+                    // value_hint
+                    (value_delimiter, char),
+                    (value_name, &str),
+                    ref (value_names, Vec<&str>),
+                    (value_terminator, &str),
+                    (visible_alias, &str),
+                    ref (visible_aliases, Vec<&str>),
+                    (visible_short_alias, char),
+                    ref (visible_short_aliases, Vec<char>),
                 },
                 deprecated:
                 [
-                    "required_if",
+                    "case_insensitive",
+                    "empty_values",
+                    "from_usage",
+                    "hidden",
+                    "hidden_long_help",
+                    "hidden_short_help",
                     "multiple",
+                    "required_if",
+                    "required_ifs",
                     "required_unless",
-                    "required_unless_one",
                     "required_unless_all",
+                    "required_unless_one",
+                    "set",
                     "setting",
                     "settings",
+                    "with_name",
                 ]
                 [
                     "env" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }
+                        #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
+                    "hide_env" => {
+                        #[cfg(env)] { parse_value_inner!(arg, map, Arg, bool, hide_env) }
+                        #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
+                    "hide_env_values" => {
+                        #[cfg(env)] { parse_value_inner!(arg, map, Arg, bool, hide_env_values) }
                         #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
                 ]
             );
