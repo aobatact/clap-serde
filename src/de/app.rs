@@ -62,32 +62,32 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
                 // global_settings : specialized (though the original method is deprecated)
                 // group : not supported single group
                 // groups : specialized
-                // help_heading : todo
+                (Option<&str>, help_heading),
                 (&str, help_template),
                 (&str, long_about),
-                // long_flag : todo
-                // long_flag_alias : todo
-                // long_flag_aliases : todo
+                (&str, long_flag),
+                (&str, long_flag_alias),
+                (ref Vec<&str>, long_flag_aliases),
                 (&str, long_version),
-                // max_term_width : todo
+                (usize, max_term_width),
                 (&str, name),
                 (&str, override_help),
                 (&str, override_usage),
                 // setting : specialized
                 // settings : specialized (though the original method is deprecated)
-                // short_flag : todo
-                // short_flag_alias : todo
-                // short_flag_aliases : todo
+                (char, short_flag),
+                (char, short_flag_alias),
+                (ref Vec<char>, short_flag_aliases),
                 // subcommand : not supported single subcommand(now)
                 // subcommands : specialized
-                // term_width : todo
+                (usize, term_width),
                 (&str, version),
                 (&str, visible_alias),
                 (ref Vec<&str>, visible_aliases),
-                // visible_long_flag_alias : todo
-                // visible_long_flag__aliases :todo
-                // visible_short_flag_alias : todo
-                // visible_short_flag__aliases :todo
+                (&str, visible_long_flag_alias),
+                (ref Vec<&str>, visible_long_flag_aliases),
+                (char, visible_short_flag_alias),
+                (ref Vec<char>, visible_short_flag_aliases),
             },
             deprecated: [
                 "help_message",
