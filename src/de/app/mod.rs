@@ -1,11 +1,14 @@
 use crate::AppWrap;
+use appsettings::*;
 use clap::App;
 use serde::{
     de::{DeserializeSeed, Error, Visitor},
     Deserialize,
 };
 
-use super::appsettings::AppSetting1;
+mod appsettings;
+#[cfg(feature = "color")]
+mod color;
 
 const TMP_APP_NAME: &'static str = "__tmp__deserialize__name__";
 impl<'de> Deserialize<'de> for AppWrap<'de> {
@@ -55,9 +58,8 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
                 (before_help, &str),
                 (before_long_help, &str),
                 (bin_name, &str),
-                // color : todo
+                // color : specialized
                 (display_order, usize),
-                // error : todo
                 // global_setting : specialized(now)
                 // global_settings : specialized (though the original method is deprecated)
                 // group : not supported single group
@@ -96,11 +98,16 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
             //specialized behavior
             [
                 "args" => map.next_value_seed(super::arg::Args(app))?
+                "color" => {
+                    #[cfg(color)] {
+                        app.color(map.next_value_seed(ColorChoiceSeed)?)
+                    }
+                    #[cfg(not(color))] { return Err(Error::custom("color feature disabled"))}}
                 "subcommands" => map.next_value_seed(SubCommands(app))?
                 "groups" => map.next_value_seed(super::group::Groups(app))?
-                "setting" => app.setting(map.next_value_seed(super::appsettings::AppSettingSeed)?)
-                "settings" => app.setting(map.next_value_seed(super::appsettings::AppSettingsSeed)?)
-                "global_setting" => app.global_setting(map.next_value_seed(super::appsettings::AppSettingSeed)?)
+                "setting" => app.setting(map.next_value_seed(AppSettingSeed)?)
+                "settings" => app.setting(map.next_value_seed(AppSettingsSeed)?)
+                "global_setting" => app.global_setting(map.next_value_seed(AppSettingSeed)?)
                 "global_settings" => {
                     let sets = map.next_value::<Vec<AppSetting1>>()?.into_iter().map(|s|s.into());
                     for s in sets{
