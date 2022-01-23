@@ -16,7 +16,7 @@ mod yaml;
 mod tests;
 
 #[cfg(feature = "yaml")]
-pub use yaml::{YamlWrap, yaml_to_app};
+pub use yaml::{yaml_to_app, YamlWrap};
 
 /**
 Deserialize [`App`] from [`Deserializer`].

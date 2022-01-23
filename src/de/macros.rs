@@ -10,8 +10,8 @@ macro_rules! parse_value_inner {
 macro_rules! parse_value {
     ($key : ident, $app : ident, $map : ident, $target_type:ty,
         { $(
-            $( ( $value_type:ty, $register : ident), ),+
-            $( ( ref $value_type_r:ty, $register_r : ident) ),* $(,)?
+            $( ( $register : ident, $value_type:ty), ),+
+            $( ref ( $register_r : ident, $value_type_r:ty) ),* $(,)?
         )* }
         $(, deprecated:[$($dep:pat,)*])?
         $([$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => {

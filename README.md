@@ -82,10 +82,12 @@ assert_eq!(app.get_name(), "app_clap_serde");
 ```
 
 # features
-- env
+## env
 Enables env feature in clap.
-- yaml 
+## yaml 
 Enables to use yaml.
+## color
+Enablse color feature in clap.
 
 ## (settings name letter)
 Settings names format for [`AppSettings`](`clap::AppSettings`) and [`ArgSettings`](`clap::ArgSettings`).
