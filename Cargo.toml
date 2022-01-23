@@ -9,7 +9,7 @@ repository = "https://github.com/aobatact/clap-serde"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = [ "kebab-case-setting", "yaml", "color" ]
+default = [ "kebab-case-setting", "yaml"]
 env = [ "clap/env" ]
 kebab-case-setting = []
 snake-case-setting = []
