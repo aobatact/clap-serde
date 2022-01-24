@@ -260,3 +260,22 @@ fn groups_toml() {
     assert_eq!(app.get_name(), "app_clap_serde");
     assert_eq!(app.get_about(), Some("test-clap-serde"));
 }
+
+
+#[test]
+fn infos_toml_ser() {
+    const CLAP_TOML: &'static str = r#"
+name = "app_clap_serde"
+version = "1.0"
+author = "aobat"
+about = "test-clap-serde"
+"#;
+    let app = toml::from_str::<AppWrap>(CLAP_TOML)
+        .expect("parse failed");
+    assert_eq!(app.get_name(), "app_clap_serde");
+    assert_eq!(app.get_about(), Some("test-clap-serde"));
+    let se = toml::to_string(&app).expect("serialize_failed");
+    let app = toml::from_str::<AppWrap>(&se).expect("serialize_failed");
+    assert_eq!(app.get_name(), "app_clap_serde");
+    assert_eq!(app.get_about(), Some("test-clap-serde"));
+}

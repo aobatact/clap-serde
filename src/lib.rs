@@ -5,7 +5,11 @@ use clap::{App, Arg, ArgGroup};
 use serde::Deserializer;
 use std::ops::Deref;
 
-#[cfg(not(any(feature = "kebab-case-key", feature = "snake-case-key", feature = "pascal-case-key")))]
+#[cfg(not(any(
+    feature = "kebab-case-key",
+    feature = "snake-case-key",
+    feature = "pascal-case-key"
+)))]
 compile_error!("Case setting feature is missing. Either one should be set.");
 
 #[cfg(any(
@@ -15,12 +19,12 @@ compile_error!("Case setting feature is missing. Either one should be set.");
 ))]
 compile_error!("Case setting feature is conflicting. Only one should be set.");
 
-#[macro_use]
 mod de;
-#[cfg(feature = "yaml")]
-mod yaml;
 #[cfg(feature = "docsrs")]
 pub mod documents;
+mod se;
+#[cfg(feature = "yaml")]
+mod yaml;
 
 #[cfg(test)]
 mod tests;

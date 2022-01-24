@@ -45,28 +45,27 @@ macro_rules! parse_value {
 }
 
 #[cfg(feature = "snake-case-key")]
-macro_rules! convert_case{
-    ($key:ident) => {
-        {$key}
-    }
+macro_rules! convert_case {
+    ($key:ident) => {{
+        $key
+    }};
 }
 
 // if const heap is stabilized, should convert the target keys instead.
 
 #[cfg(feature = "kebab-case-key")]
-macro_rules! convert_case{
+macro_rules! convert_case {
     ($key:ident) => {
         (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Kebab)).as_str()
-    }
+    };
 }
 
 #[cfg(feature = "pascal-case-key")]
-macro_rules! convert_case{
+macro_rules! convert_case {
     ($key:ident) => {
         (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Pascal)).as_str()
-    }
+    };
 }
-
 
 macro_rules! enum_de {
     ($basety : ident, $newty :ident, $(#[$derive_meta:meta])* { $( $( #[ $cfg_meta:meta ] )? $var: ident ,)* } ) => {
