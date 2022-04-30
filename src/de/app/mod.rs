@@ -52,20 +52,40 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 (after_long_help, &str),
                 (alias, &str),
                 ref (aliases, Vec<&str>),
+                (allow_external_subcommands, bool),
+                (allow_hyphen_values, bool),
+                (allow_invalid_utf8_for_external_subcommands, bool),
+                (allow_missing_positional, bool),
+                (allow_negative_numbers, bool),
                 //arg : not supported single arg(now)
                 //args : specialized
+                (arg_required_else_help, bool),
+                (args_conflicts_with_subcommands, bool),
+                (args_override_self, bool),
                 (author, &str),
                 (before_help, &str),
                 (before_long_help, &str),
                 (bin_name, &str),
                 // color : specialized
+                (disable_colored_help, bool),
+                (disable_help_flag, bool),
+                (disable_help_subcommand, bool),
+                (disable_version_flag, bool),
                 (display_order, usize),
+                (dont_collapse_args_in_usage, bool),
+                (dont_delimit_trailing_values, bool),
                 // global_setting : specialized
                 // global_settings : specialized (though the original method is deprecated)
                 // group : not supported single group
                 // groups : specialized
-                (help_heading, Option<&str>),
+                // (help_heading, Option<&str>),
+                (help_expected, bool),
                 (help_template, &str),
+                (hide, bool),
+                (hide_possible_values, bool),
+                (ignore_errors, bool),
+                (infer_long_args, bool),
+                (infer_subcommands, bool),
                 (long_about, &str),
                 (long_flag, &str),
                 (long_flag_alias, &str),
@@ -73,8 +93,13 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 (long_version, &str),
                 (max_term_width, usize),
                 (name, &str),
+                (next_display_order, Option<usize>),
+                (next_help_heading, Option<&str>),
+                (next_line_help, bool),
+                (no_binary_name, bool),
                 (override_help, &str),
                 (override_usage, &str),
+                (propagate_version, bool),
                 // setting : specialized
                 // settings : specialized (though the original method is deprecated)
                 (short_flag, char),
@@ -83,6 +108,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 // subcommand : not supported single subcommand(now)
                 // subcommands : specialized
                 (term_width, usize),
+                (trailing_var_arg, bool),
                 (version, &str),
                 (visible_alias, &str),
                 ref (visible_aliases, Vec<&str>),
@@ -94,6 +120,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
             deprecated: [
                 "help_message",
                 "version_message",
+                "help_heading",
             ]
             specialize:
             [
