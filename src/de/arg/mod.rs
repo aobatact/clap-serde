@@ -1,6 +1,6 @@
 use self::value_hint::ValueHintSeed;
 use crate::ArgWrap;
-use clap::{App, Arg};
+use clap::{Command, Arg};
 use serde::de::{DeserializeSeed, Error, Visitor};
 
 mod value_hint;
@@ -170,9 +170,9 @@ impl<'de> DeserializeSeed<'de> for ArgWrap<'de> {
     }
 }
 
-pub(crate) struct Args<'a>(pub(crate) App<'a>);
+pub(crate) struct Args<'a>(pub(crate) Command<'a>);
 impl<'de> DeserializeSeed<'de> for Args<'de> {
-    type Value = App<'de>;
+    type Value = Command<'de>;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -183,7 +183,7 @@ impl<'de> DeserializeSeed<'de> for Args<'de> {
 }
 
 impl<'de> Visitor<'de> for Args<'de> {
-    type Value = App<'de>;
+    type Value = Command<'de>;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("args")

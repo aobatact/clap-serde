@@ -1,5 +1,5 @@
-use crate::AppWrap;
-use clap::App;
+use crate::CommandWrap;
+use clap::Command;
 
 #[cfg(feature = "yaml")]
 #[test]
@@ -74,7 +74,7 @@ global_settings:
 #[test]
 fn name_json() {
     const CLAP_JSON: &'static str = "{ \"name\" : \"app_clap_serde\" }";
-    let app: App = serde_json::from_str::<AppWrap>(CLAP_JSON)
+    let app: Command = serde_json::from_str::<CommandWrap>(CLAP_JSON)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -83,7 +83,7 @@ fn name_json() {
 #[test]
 fn name_toml() {
     const CLAP_TOML: &'static str = "name = \"app_clap_serde\"";
-    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+    let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -92,7 +92,7 @@ fn name_toml() {
 #[test]
 fn infos_json() {
     const NAME_JSON: &'static str = r#"{ "name" : "app_clap_serde", "version" : "1.0" , "author" : "aobat", "about" : "test-clap-serde" }"#;
-    let app: App = serde_json::from_str::<AppWrap>(NAME_JSON)
+    let app: Command = serde_json::from_str::<CommandWrap>(NAME_JSON)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -107,7 +107,7 @@ version = "1.0"
 author = "aobat"
 about = "test-clap-serde"
 "#;
-    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+    let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -125,7 +125,7 @@ fn subcommands_json() {
             "sub1" : {"about" : "subcommand_1"},
             "sub2" : {"about" : "subcommand_2"}
         }}"#;
-    let app: App = serde_json::from_str::<AppWrap>(CLAP_JSON)
+    let app: Command = serde_json::from_str::<CommandWrap>(CLAP_JSON)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -151,7 +151,7 @@ sub1 = { about = "subcommand_1" }
 [subcommands.sub2]
 about = "subcommand_2"
 "#;
-    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+    let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -180,7 +180,7 @@ fn args_json() {
             "banana" : {"short" : "b", "long" : "banana", "aliases" : [ "musa_spp" ]}
         }
         }"#;
-    let app: App = serde_json::from_str::<AppWrap>(NAME_JSON)
+    let app: Command = serde_json::from_str::<CommandWrap>(NAME_JSON)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -216,7 +216,7 @@ fn args_toml() {
         apple = { short = "a" }
         banana = { short = "b", long = "banana", aliases = ["musa_spp"] }
     "#;
-    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+    let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -254,7 +254,7 @@ fn groups_toml() {
         [groups]
         fruit = { args = ["apple", "banana"] }
     "#;
-    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+    let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");

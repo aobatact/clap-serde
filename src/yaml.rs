@@ -37,15 +37,15 @@ let app = clap_serde::yaml_to_app(&yaml).expect("parse failed from yaml");
 assert_eq!(app.get_name(), "app_clap_serde");
 ```
 */
-pub fn yaml_to_app<'a>(yaml: &'a Yaml) -> Result<clap::App<'a>, Error> {
+pub fn yaml_to_app<'a>(yaml: &'a Yaml) -> Result<clap::Command<'a>, Error> {
     let wrap = YamlWrap { yaml };
     use serde::Deserialize;
-    crate::AppWrap::deserialize(wrap).map(|x| x.into())
+    crate::CommandWrap::deserialize(wrap).map(|x| x.into())
 }
 
 /// Wrapper to use [`Yaml`] as [`Deserializer`].
 ///
-/// Currently this implement functions in [`Deserializer`] that is only needed in deserializing into `App`.
+/// Currently this implement functions in [`Deserializer`] that is only needed in deserializing into `Command`.
 /// Recommend to use [`yaml_to_app`] instead.
 pub struct YamlWrap<'a> {
     yaml: &'a yaml_rust::Yaml,

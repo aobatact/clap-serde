@@ -1,6 +1,6 @@
-use crate::AppWrap;
+use crate::CommandWrap;
 use appsettings::*;
-use clap::App;
+use clap::Command;
 use serde::{
     de::{DeserializeSeed, Error, Visitor},
     Deserialize,
@@ -11,13 +11,13 @@ mod appsettings;
 mod color;
 
 const TMP_APP_NAME: &'static str = "__tmp__deserialize__name__";
-impl<'de> Deserialize<'de> for AppWrap<'de> {
+impl<'de> Deserialize<'de> for CommandWrap<'de> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         deserializer
-            .deserialize_map(AppVisitor(App::new(TMP_APP_NAME)))
+            .deserialize_map(CommandVisitor(Command::new(TMP_APP_NAME)))
             //check the name so as not to expose the tmp name.
             .and_then(|r| {
                 if r.app.get_name() != TMP_APP_NAME {
@@ -29,13 +29,13 @@ impl<'de> Deserialize<'de> for AppWrap<'de> {
     }
 }
 
-struct AppVisitor<'a>(App<'a>);
+struct CommandVisitor<'a>(Command<'a>);
 
-impl<'a> Visitor<'a> for AppVisitor<'a> {
-    type Value = AppWrap<'a>;
+impl<'a> Visitor<'a> for CommandVisitor<'a> {
+    type Value = CommandWrap<'a>;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        formatter.write_str("App Map")
+        formatter.write_str("Command Map")
     }
 
     fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
@@ -44,9 +44,9 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
     {
         let mut app = self.0;
         //TODO: check the first key to get name from the input?
-        //currently the name change in `Clap::App::name` doesn't change the `Clap::App::id` so might cause problems?
+        //currently the name change in `Clap::Command::name` doesn't change the `Clap::Command::id` so might cause problems?
         while let Some(key) = map.next_key::<&str>()? {
-            app = parse_value!(key, app, map, App, {
+            app = parse_value!(key, app, map, Command, {
                 (about, &str),
                 (after_help, &str),
                 (after_long_help, &str),
@@ -118,37 +118,37 @@ impl<'a> Visitor<'a> for AppVisitor<'a> {
             ]);
         }
 
-        Ok(AppWrap { app })
+        Ok(CommandWrap { app })
     }
 }
 
 pub struct NameSeed<'a>(&'a str);
 
 impl<'de> DeserializeSeed<'de> for NameSeed<'de> {
-    type Value = AppWrap<'de>;
+    type Value = CommandWrap<'de>;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        deserializer.deserialize_map(AppVisitor(App::new(self.0)))
+        deserializer.deserialize_map(CommandVisitor(Command::new(self.0)))
     }
 }
 
-impl<'de> DeserializeSeed<'de> for AppWrap<'de> {
-    type Value = AppWrap<'de>;
+impl<'de> DeserializeSeed<'de> for CommandWrap<'de> {
+    type Value = CommandWrap<'de>;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        deserializer.deserialize_map(AppVisitor(self.app))
+        deserializer.deserialize_map(CommandVisitor(self.app))
     }
 }
 
-struct SubCommands<'a>(App<'a>);
+struct SubCommands<'a>(Command<'a>);
 impl<'de> DeserializeSeed<'de> for SubCommands<'de> {
-    type Value = App<'de>;
+    type Value = Command<'de>;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -159,7 +159,7 @@ impl<'de> DeserializeSeed<'de> for SubCommands<'de> {
 }
 
 impl<'de> Visitor<'de> for SubCommands<'de> {
-    type Value = App<'de>;
+    type Value = Command<'de>;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("Subcommand")
