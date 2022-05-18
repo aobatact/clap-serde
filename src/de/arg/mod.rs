@@ -1,6 +1,6 @@
 use self::value_hint::ValueHintSeed;
 use crate::ArgWrap;
-use clap::{Command, Arg};
+use clap::{Arg, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
 
 mod value_hint;
@@ -55,6 +55,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (hide_long_help, bool),
                     (hide_possible_values, bool),
                     (hide_short_help, bool),
+                    (id, &str),
                     (ignore_case, bool),
                     (index, usize),
                     (last, bool),
@@ -65,7 +66,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (min_values, usize),
                     (multiple_occurrences, bool),
                     (multiple_values, bool),
-                    (name, &str),
+                    (id, &str),
                     (next_line_help, bool),
                     (number_of_values, usize),
                     (overrides_with, &str),
@@ -73,7 +74,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (possible_value, &str),
                     (possible_values, Vec<&str>),
                     (raw, bool),
-                    (require_delimiter, bool),
+                    (require_value_delimiter, bool),
                     (require_equals, bool),
                     (required, bool),
                     // required_if_eq: tuple2
@@ -90,8 +91,8 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (short_alias, char),
                     ref (short_aliases, Vec<char>),
                     (takes_value, bool),
-                    (use_delimiter, bool),
-                    // validator_regex
+                    (use_value_delimiter, bool),
+                    // validator_regex : todo
                     // value_hint : specialized
                     (value_delimiter, char),
                     (value_name, &str),
@@ -127,7 +128,12 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "setting",
                     "settings",
                     "with_name",
-                ]
+                ]{
+                    //3.1
+                    "name" => "id",
+                    "require_delimiter" => "require_value_delimiter",
+                    "use_delimiter" => "use_value_delimiter",
+                }
                 specialize:[
                     "env" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }

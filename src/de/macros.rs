@@ -15,9 +15,11 @@ macro_rules! parse_value {
         )* }
         $(, tuple2:{$(( $register_t : ident, ( $value_type_t0:ty,  $value_type_t1:ty)),)*})?
         $(, tuple3:{$(( $register_3t : ident, ( $value_type_3t0:ty,  $value_type_3t1:ty,  $value_type_3t2:ty)),)*})?
-        $(, deprecated:[$($dep:pat,)*])?
-        $(specialize:[$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => {
-        match convert_case!($key) {
+        $(, deprecated:$([$($dep:pat ,)*])?$({$($dep_s:pat => $dep_d:expr,)*})?)?
+        $(specialize:[$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => {{
+        let mut key = convert_case!($key);
+        'jmploop: loop {
+        break match key {
             $(
                 $( stringify!($register) => parse_value_inner!($app, $map, $target_type, $value_type, $register), )*
                 $( stringify!($register_r) => parse_value_inner!($app, $map, $target_type, ref $value_type_r, $register_r), )*
@@ -35,38 +37,48 @@ macro_rules! parse_value {
                 }
             )*)*
             $($($sp_pat => {$sp_exp})*)*
-            $(depr @ ($($dep )|* ) => {return Err(Error::custom(format_args!("deprecated :{}", depr)))})*
+            $($(depr @ ($($dep )|* ) => {return Err(Error::custom(format_args!("deprecated key: {}", depr)))})*)*
+            $($($(
+                #[cfg(feature="allow-deprecated")]
+                $dep_s => {
+                    key = $dep_d;
+                    continue 'jmploop;
+                },
+                #[cfg(not(feature="allow-deprecated"))]
+                $dep_s => {
+                    return Err(Error::custom(format_args!("deprecated key: {}, use {} insted", stringify!($depr_s), $dep_d)))
+                },
+            )*)*)*
             unknown => return Err(Error::unknown_field(unknown, &[
                 $( $( stringify!($register),)*
                     $( stringify!($register_r),)*  )*
                 $($(stringify!($sp_pat),)*)* ]))
-        }
+        }}}
     }
 }
 
 #[cfg(feature = "snake-case-key")]
-macro_rules! convert_case{
-    ($key:ident) => {
-        {$key}
-    }
+macro_rules! convert_case {
+    ($key:ident) => {{
+        $key
+    }};
 }
 
 // if const heap is stabilized, should convert the target keys instead.
 
 #[cfg(feature = "kebab-case-key")]
-macro_rules! convert_case{
+macro_rules! convert_case {
     ($key:ident) => {
         (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Kebab)).as_str()
-    }
+    };
 }
 
 #[cfg(feature = "pascal-case-key")]
-macro_rules! convert_case{
+macro_rules! convert_case {
     ($key:ident) => {
         (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Pascal)).as_str()
-    }
+    };
 }
-
 
 macro_rules! enum_de {
     ($basety : ident, $newty :ident, $(#[$derive_meta:meta])* { $( $( #[ $cfg_meta:meta ] )? $var: ident ,)* } ) => {

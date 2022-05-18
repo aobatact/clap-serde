@@ -120,8 +120,9 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
             deprecated: [
                 "help_message",
                 "version_message",
-                "help_heading",
-            ]
+            ]{
+                "help_heading" => "next_help_heading",
+            }
             specialize:
             [
                 "args" => map.next_value_seed(super::arg::Args(app))?

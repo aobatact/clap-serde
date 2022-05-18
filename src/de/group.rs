@@ -1,5 +1,5 @@
 use crate::ArgGroupWrap;
-use clap::{Command, ArgGroup};
+use clap::{ArgGroup, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
 
 struct GroupVisitor<'a>(&'a str);
@@ -22,11 +22,13 @@ impl<'de> Visitor<'de> for GroupVisitor<'de> {
                 ref (args, Vec<&str>),
                 (conflicts_with, &str),
                 ref (conflicts_with_all, Vec<&str>),
+                (id, &str),
                 (multiple, bool),
-                (name, &str),
                 (required, bool),
                 (requires, &str),
                 ref (requires_all, Vec<&str>),
+            }, deprecated:{
+                "name" => "id",
             });
         }
 
