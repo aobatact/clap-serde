@@ -6,7 +6,7 @@ use clap::Command;
 fn name_yaml() {
     use yaml_rust::Yaml;
 
-    const NAME_YAML: &'static str = "name: app_clap_serde\n";
+    const NAME_YAML: &str = "name: app_clap_serde\n";
     let yaml =
         Yaml::Array(yaml_rust::YamlLoader::load_from_str(NAME_YAML).expect("fail to make yaml"));
     let app = crate::load(crate::yaml::YamlWrap::new(&yaml)).expect("parse failed");
@@ -18,7 +18,7 @@ fn name_yaml() {
 fn test_yaml() {
     use yaml_rust::Yaml;
 
-    const NAME_YAML: &'static str = r#"
+    const NAME_YAML: &str = r#"
 name: app_clap_serde
 version : "1.0"
 about : yaml_support!
@@ -73,7 +73,7 @@ global_settings:
 
 #[test]
 fn name_json() {
-    const CLAP_JSON: &'static str = "{ \"name\" : \"app_clap_serde\" }";
+    const CLAP_JSON: &str = "{ \"name\" : \"app_clap_serde\" }";
     let app: Command = serde_json::from_str::<CommandWrap>(CLAP_JSON)
         .expect("parse failed")
         .into();
@@ -82,7 +82,7 @@ fn name_json() {
 
 #[test]
 fn name_toml() {
-    const CLAP_TOML: &'static str = "name = \"app_clap_serde\"";
+    const CLAP_TOML: &str = "name = \"app_clap_serde\"";
     let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
@@ -91,7 +91,7 @@ fn name_toml() {
 
 #[test]
 fn infos_json() {
-    const NAME_JSON: &'static str = r#"{ "name" : "app_clap_serde", "version" : "1.0" , "author" : "aobat", "about" : "test-clap-serde" }"#;
+    const NAME_JSON: &str = r#"{ "name" : "app_clap_serde", "version" : "1.0" , "author" : "aobat", "about" : "test-clap-serde" }"#;
     let app: Command = serde_json::from_str::<CommandWrap>(NAME_JSON)
         .expect("parse failed")
         .into();
@@ -101,7 +101,7 @@ fn infos_json() {
 
 #[test]
 fn infos_toml() {
-    const CLAP_TOML: &'static str = r#"
+    const CLAP_TOML: &str = r#"
 name = "app_clap_serde"
 version = "1.0"
 author = "aobat"
@@ -116,7 +116,7 @@ about = "test-clap-serde"
 
 #[test]
 fn subcommands_json() {
-    const CLAP_JSON: &'static str = r#"{
+    const CLAP_JSON: &str = r#"{
         "name" : "app_clap_serde", 
         "version" : "1.0" , 
         "author" : "aobat", 
@@ -141,7 +141,7 @@ fn subcommands_json() {
 
 #[test]
 fn subcommands_toml() {
-    const CLAP_TOML: &'static str = r#"
+    const CLAP_TOML: &str = r#"
 name = "app_clap_serde"
 version = "1.0"
 author = "aobat"
@@ -167,7 +167,7 @@ about = "subcommand_2"
 
 #[test]
 fn args_json() {
-    const NAME_JSON: &'static str = r#"{
+    const NAME_JSON: &str = r#"{
         "name" : "app_clap_serde", 
         "version" : "1.0" , 
         "author" : "aobat", 
@@ -203,7 +203,7 @@ fn args_json() {
 
 #[test]
 fn args_toml() {
-    const CLAP_TOML: &'static str = r#"
+    const CLAP_TOML: &str = r#"
         name = "app_clap_serde"
         version = "1.0"
         author = "aobat"
@@ -239,7 +239,7 @@ fn args_toml() {
 
 #[test]
 fn groups_toml() {
-    const CLAP_TOML: &'static str = r#"
+    const CLAP_TOML: &str = r#"
         name = "app_clap_serde"
         version = "1.0"
         author = "aobat"

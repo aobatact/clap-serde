@@ -10,7 +10,7 @@ mod appsettings;
 #[cfg(feature = "color")]
 mod color;
 
-const TMP_APP_NAME: &'static str = "__tmp__deserialize__name__";
+const TMP_APP_NAME: &str = "__tmp__deserialize__name__";
 impl<'de> Deserialize<'de> for CommandWrap<'de> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where

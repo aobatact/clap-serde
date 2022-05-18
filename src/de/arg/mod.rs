@@ -133,7 +133,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "name" => "id",
                     "require_delimiter" => "require_value_delimiter",
                     "use_delimiter" => "use_value_delimiter",
-                }, 
+                },
                 specialize:[
                     "env" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }
