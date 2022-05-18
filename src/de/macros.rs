@@ -44,7 +44,7 @@ macro_rules! parse_value {
                     $($($(
                         #[cfg(feature="allow-deprecated")]
                         $dep_s => {
-                            key = $dep_d;
+                            key = convert_case!($dep_d);
                             continue 'jmploop;
                         },
                         #[cfg(not(feature="allow-deprecated"))]
@@ -71,17 +71,10 @@ macro_rules! convert_case {
 
 // if const heap is stabilized, should convert the target keys instead.
 
-#[cfg(feature = "kebab-case-key")]
+#[cfg(not(feature = "snake-case-key"))]
 macro_rules! convert_case {
     ($key:ident) => {
-        (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Kebab)).as_str()
-    };
-}
-
-#[cfg(feature = "pascal-case-key")]
-macro_rules! convert_case {
-    ($key:ident) => {
-        (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Pascal)).as_str()
+        (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Snake)).as_str()
     };
 }
 
