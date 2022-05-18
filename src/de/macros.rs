@@ -16,13 +16,13 @@ macro_rules! parse_value {
         $(, tuple2:{$(( $register_t : ident, ( $value_type_t0:ty,  $value_type_t1:ty)),)*})?
         $(, tuple3:{$(( $register_3t : ident, ( $value_type_3t0:ty,  $value_type_3t1:ty,  $value_type_3t2:ty)),)*})?
         $(, deprecated:$([$($dep:pat ,)*])?$({$($dep_s:pat => $dep_d:expr,)*})?)?
-        $(specialize:[$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => 
+        $(, specialize:[$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => 
         {{
             #[allow(unused_mut)]
             let mut key = convert_case!($key);
             #[allow(unused_labels)]
-            'jmploop: loop {
-                break match key {
+            'parse_value_jmp_loop: loop {
+                break 'parse_value_jmp_loop match key {
                     $(
                         $( stringify!($register) => parse_value_inner!($app, $map, $target_type, $value_type, $register), )*
                         $( stringify!($register_r) => parse_value_inner!($app, $map, $target_type, ref $value_type_r, $register_r), )*
@@ -45,7 +45,7 @@ macro_rules! parse_value {
                         #[cfg(feature="allow-deprecated")]
                         $dep_s => {
                             key = convert_case!($dep_d);
-                            continue 'jmploop;
+                            continue 'parse_value_jmp_loop;
                         },
                         #[cfg(not(feature="allow-deprecated"))]
                         $dep_s => {

@@ -65,8 +65,8 @@ global_settings:
     let args = app.get_arguments().collect::<Vec<_>>();
     assert!(args
         .iter()
-        .any(|x| x.get_name() == "apple" && x.get_short() == Some('a')));
-    assert!(args.iter().any(|x| x.get_name() == "banana"
+        .any(|x| x.get_id() == "apple" && x.get_short() == Some('a')));
+    assert!(args.iter().any(|x| x.get_id() == "banana"
         && x.get_short() == Some('b')
         && x.get_long() == Some("banana")));
 }
@@ -195,8 +195,8 @@ fn args_json() {
     let args = app.get_arguments().collect::<Vec<_>>();
     assert!(args
         .iter()
-        .any(|x| x.get_name() == "apple" && x.get_short() == Some('a')));
-    assert!(args.iter().any(|x| x.get_name() == "banana"
+        .any(|x| x.get_id() == "apple" && x.get_short() == Some('a')));
+    assert!(args.iter().any(|x| x.get_id() == "banana"
         && x.get_short() == Some('b')
         && x.get_long() == Some("banana")));
 }
@@ -231,8 +231,8 @@ fn args_toml() {
     let args = app.get_arguments().collect::<Vec<_>>();
     assert!(args
         .iter()
-        .any(|x| x.get_name() == "apple" && x.get_short() == Some('a')));
-    assert!(args.iter().any(|x| x.get_name() == "banana"
+        .any(|x| x.get_id() == "apple" && x.get_short() == Some('a')));
+    assert!(args.iter().any(|x| x.get_id() == "banana"
         && x.get_short() == Some('b')
         && x.get_long() == Some("banana")));
 }
