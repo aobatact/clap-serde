@@ -26,7 +26,7 @@ pub mod documents;
 #[cfg(feature = "yaml")]
 mod yaml;
 
-#[cfg(test)]
+#[cfg(all(test, feature="snake-case-key"))]
 mod tests;
 
 #[cfg(feature = "yaml")]

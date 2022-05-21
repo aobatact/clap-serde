@@ -11,7 +11,7 @@ repository = "https://github.com/aobatact/clap-serde"
 features = ["docsrs"]
 
 [features]
-default = [ "snake-case-key", "yaml"]
+default = [ "snake-case-key", "yaml", "allow-deprecated"]
 env = [ "clap/env" ]
 pascal-case-key = [ "convert_case" ]
 kebab-case-key = [ "convert_case" ]

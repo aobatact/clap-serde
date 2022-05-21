@@ -18,7 +18,9 @@ macro_rules! parse_value {
         $(, deprecated:$([$($dep:pat ,)*])?$({$($dep_s:pat => $dep_d:expr,)*})?)?
         $(, specialize:[$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => {{
             #[allow(unused_mut)]
-            let mut key = convert_case!($key);
+            let mut key;
+            convert_case_to!($key, key);
+            
             #[allow(unused_labels)]
             'parse_value_jmp_loop: loop {
                 break 'parse_value_jmp_loop match key {
@@ -43,7 +45,8 @@ macro_rules! parse_value {
                     $($($(
                         #[cfg(feature="allow-deprecated")]
                         $dep_s => {
-                            key = convert_case!($dep_d);
+                            const N_KEY : &str = stringify!($dep_d);
+                            convert_case_to!(N_KEY, key);
                             continue 'parse_value_jmp_loop;
                         },
                         #[cfg(not(feature="allow-deprecated"))]
@@ -62,18 +65,19 @@ macro_rules! parse_value {
 }
 
 #[cfg(feature = "snake-case-key")]
-macro_rules! convert_case {
-    ($key:ident) => {{
-        $key
+macro_rules! convert_case_to {
+    ($key:ident, $target: ident) => {{
+        $target = $key;
     }};
 }
 
 // if const heap is stabilized, should convert the target keys instead.
 
 #[cfg(not(feature = "snake-case-key"))]
-macro_rules! convert_case {
-    ($key:ident) => {
-        (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Snake)).as_str()
+macro_rules! convert_case_to {
+    ($key:ident, $target: ident) => {
+        let cc_xk = (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Snake));
+        $target = cc_xk.as_str();
     };
 }
 
