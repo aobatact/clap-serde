@@ -37,15 +37,15 @@ let app = clap_serde::yaml_to_app(&yaml).expect("parse failed from yaml");
 assert_eq!(app.get_name(), "app_clap_serde");
 ```
 */
-pub fn yaml_to_app<'a>(yaml: &'a Yaml) -> Result<clap::App<'a>, Error> {
+pub fn yaml_to_app(yaml: &Yaml) -> Result<clap::Command<'_>, Error> {
     let wrap = YamlWrap { yaml };
     use serde::Deserialize;
-    crate::AppWrap::deserialize(wrap).map(|x| x.into())
+    crate::CommandWrap::deserialize(wrap).map(|x| x.into())
 }
 
 /// Wrapper to use [`Yaml`] as [`Deserializer`].
 ///
-/// Currently this implement functions in [`Deserializer`] that is only needed in deserializing into `App`.
+/// Currently this implement functions in [`Deserializer`] that is only needed in deserializing into `Command`.
 /// Recommend to use [`yaml_to_app`] instead.
 pub struct YamlWrap<'a> {
     yaml: &'a yaml_rust::Yaml,
@@ -97,7 +97,7 @@ fn as_invalid(y: &Yaml, expected: &str) -> Error {
         match y {
             Yaml::Real(r) => r
                 .parse()
-                .map(|r| Unexpected::Float(r))
+                .map(Unexpected::Float)
                 .unwrap_or(Unexpected::Other(r)),
             Yaml::Integer(i) => Unexpected::Signed(*i),
             Yaml::String(s) => Unexpected::Str(s),
@@ -138,7 +138,7 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
             yaml_rust::Yaml::Hash(_) => self.deserialize_map(visitor),
             yaml_rust::Yaml::Alias(_) => todo!(),
             yaml_rust::Yaml::Null => visitor.visit_none(),
-            yaml_rust::Yaml::BadValue => return Err(as_invalid(self.yaml, "any")),
+            yaml_rust::Yaml::BadValue => Err(as_invalid(self.yaml, "any")),
         }
     }
 
@@ -146,7 +146,11 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
     where
         V: serde::de::Visitor<'de>,
     {
-        visitor.visit_bool(self.yaml.as_bool().ok_or(as_invalid(self.yaml, "bool"))?)
+        visitor.visit_bool(
+            self.yaml
+                .as_bool()
+                .ok_or_else(|| as_invalid(self.yaml, "bool"))?,
+        )
     }
 
     de_num!(deserialize_i8, visit_i8);
@@ -162,14 +166,22 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
     where
         V: serde::de::Visitor<'de>,
     {
-        visitor.visit_f32(self.yaml.as_f64().ok_or(as_invalid(self.yaml, "f32"))? as f32)
+        visitor.visit_f32(
+            self.yaml
+                .as_f64()
+                .ok_or_else(|| as_invalid(self.yaml, "f32"))? as f32,
+        )
     }
 
     fn deserialize_f64<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: serde::de::Visitor<'de>,
     {
-        visitor.visit_f64(self.yaml.as_f64().ok_or(as_invalid(self.yaml, "f64"))?)
+        visitor.visit_f64(
+            self.yaml
+                .as_f64()
+                .ok_or_else(|| as_invalid(self.yaml, "f64"))?,
+        )
     }
 
     fn deserialize_char<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -179,10 +191,10 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
         visitor.visit_char(
             self.yaml
                 .as_str()
-                .ok_or(as_invalid(self.yaml, "char"))?
+                .ok_or_else(|| as_invalid(self.yaml, "char"))?
                 .chars()
                 .next()
-                .ok_or(as_invalid(self.yaml, "char"))?,
+                .ok_or_else(|| as_invalid(self.yaml, "char"))?,
         )
     }
 
@@ -201,7 +213,7 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
         visitor.visit_string(
             self.yaml
                 .as_str()
-                .ok_or(as_invalid(self.yaml, "string"))?
+                .ok_or_else(|| as_invalid(self.yaml, "string"))?
                 .to_string(),
         )
     }
@@ -321,8 +333,7 @@ impl<'de> Deserializer<'de> for YamlWrap<'de> {
                     .collect::<Result<Vec<_>, _>>()?;
                 let m = MapDeserializer::new(
                     x.into_iter()
-                        .map(|x| x.iter())
-                        .flatten()
+                        .flat_map(|x| x.iter())
                         .map(|(k, v)| (YamlWrap { yaml: k }, YamlWrap { yaml: v })),
                 );
                 visitor.visit_map(m)

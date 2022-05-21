@@ -1,11 +1,15 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![doc  = include_str!("../README.md")]
 
-use clap::{App, Arg, ArgGroup};
+use clap::{Arg, ArgGroup, Command};
 use serde::Deserializer;
 use std::ops::Deref;
 
-#[cfg(not(any(feature = "kebab-case-key", feature = "snake-case-key", feature = "pascal-case-key")))]
+#[cfg(not(any(
+    feature = "kebab-case-key",
+    feature = "snake-case-key",
+    feature = "pascal-case-key"
+)))]
 compile_error!("Case setting feature is missing. Either one should be set.");
 
 #[cfg(any(
@@ -17,19 +21,19 @@ compile_error!("Case setting feature is conflicting. Only one should be set.");
 
 #[macro_use]
 mod de;
-#[cfg(feature = "yaml")]
-mod yaml;
 #[cfg(feature = "docsrs")]
 pub mod documents;
+#[cfg(feature = "yaml")]
+mod yaml;
 
-#[cfg(test)]
+#[cfg(all(test, feature="snake-case-key"))]
 mod tests;
 
 #[cfg(feature = "yaml")]
 pub use yaml::{yaml_to_app, YamlWrap};
 
 /**
-Deserialize [`App`] from [`Deserializer`].
+Deserialize [`Command`] from [`Deserializer`].
 ```
 const CLAP_TOML: &'static str = r#"
 name = "app_clap_serde"
@@ -43,16 +47,16 @@ assert_eq!(app.get_name(), "app_clap_serde");
 assert_eq!(app.get_about(), Some("test-clap-serde"));
 ```
 */
-pub fn load<'de, D>(de: D) -> Result<App<'de>, D::Error>
+pub fn load<'de, D>(de: D) -> Result<Command<'de>, D::Error>
 where
     D: Deserializer<'de>,
 {
     use serde::Deserialize;
-    AppWrap::deserialize(de).map(|a| a.into())
+    CommandWrap::deserialize(de).map(|a| a.into())
 }
 
 /**
-Wrapper of [`App`] to deserialize.
+Wrapper of [`Command`] to deserialize.
 ```
 const CLAP_TOML: &'static str = r#"
 name = "app_clap_serde"
@@ -60,7 +64,7 @@ version = "1.0"
 author = "tester"
 about = "test-clap-serde"
 "#;
-let app: clap::App = toml::from_str::<clap_serde::AppWrap>(CLAP_TOML)
+let app: clap::Command = toml::from_str::<clap_serde::CommandWrap>(CLAP_TOML)
     .expect("parse failed")
     .into();
 assert_eq!(app.get_name(), "app_clap_serde");
@@ -68,24 +72,27 @@ assert_eq!(app.get_about(), Some("test-clap-serde"));
 ```
 */
 #[derive(Debug, Clone)]
-pub struct AppWrap<'a> {
-    app: App<'a>,
+pub struct CommandWrap<'a> {
+    app: Command<'a>,
 }
 
-impl<'a> From<AppWrap<'a>> for App<'a> {
-    fn from(a: AppWrap<'a>) -> Self {
+#[deprecated]
+pub type AppWrap<'a> = CommandWrap<'a>;
+
+impl<'a> From<CommandWrap<'a>> for Command<'a> {
+    fn from(a: CommandWrap<'a>) -> Self {
         a.app
     }
 }
 
-impl<'a> From<App<'a>> for AppWrap<'a> {
-    fn from(app: App<'a>) -> Self {
-        AppWrap { app }
+impl<'a> From<Command<'a>> for CommandWrap<'a> {
+    fn from(app: Command<'a>) -> Self {
+        CommandWrap { app }
     }
 }
 
-impl<'a> Deref for AppWrap<'a> {
-    type Target = App<'a>;
+impl<'a> Deref for CommandWrap<'a> {
+    type Target = Command<'a>;
 
     fn deref(&self) -> &Self::Target {
         &self.app

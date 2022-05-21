@@ -1,3 +1,4 @@
+#![allow(deprecated)]
 use clap::{AppFlags, AppSettings};
 use serde::{de::DeserializeSeed, Deserialize};
 

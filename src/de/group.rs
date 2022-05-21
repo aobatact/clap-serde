@@ -1,5 +1,5 @@
 use crate::ArgGroupWrap;
-use clap::{App, ArgGroup};
+use clap::{ArgGroup, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
 
 struct GroupVisitor<'a>(&'a str);
@@ -22,11 +22,13 @@ impl<'de> Visitor<'de> for GroupVisitor<'de> {
                 ref (args, Vec<&str>),
                 (conflicts_with, &str),
                 ref (conflicts_with_all, Vec<&str>),
+                (id, &str),
                 (multiple, bool),
-                (name, &str),
                 (required, bool),
                 (requires, &str),
                 ref (requires_all, Vec<&str>),
+            }, deprecated:{
+                "name" => "id",
             });
         }
 
@@ -45,9 +47,9 @@ impl<'de> DeserializeSeed<'de> for GroupVisitor<'de> {
     }
 }
 
-pub(crate) struct Groups<'a>(pub(crate) App<'a>);
+pub(crate) struct Groups<'a>(pub(crate) Command<'a>);
 impl<'de> DeserializeSeed<'de> for Groups<'de> {
-    type Value = App<'de>;
+    type Value = Command<'de>;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -58,7 +60,7 @@ impl<'de> DeserializeSeed<'de> for Groups<'de> {
 }
 
 impl<'de> Visitor<'de> for Groups<'de> {
-    type Value = App<'de>;
+    type Value = Command<'de>;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("arg groups")
