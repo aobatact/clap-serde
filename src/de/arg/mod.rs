@@ -36,11 +36,14 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     ref (conflicts_with_all, Vec<&str>),
                     (default_missing_value, &str),
                     ref (default_missing_values, Vec<&str>),
+                    // (default_missing_value_os, &OsStr), // need Deseriaze to OsStr
+                    // ref (default_missing_values_os, Vec<&OsStr>),
                     (default_value, &str),
                     // default_value_if : tuple3
                     ref (default_value_ifs, Vec<(&str, Option<&str>, Option<&str>)> ),
                     (display_order, usize),
                     // env : specialized
+                    // env_os // not supported yet
                     (exclusive, bool),
                     (forbid_empty_values, bool),
                     (global, bool),

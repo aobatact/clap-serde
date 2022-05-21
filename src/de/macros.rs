@@ -16,8 +16,7 @@ macro_rules! parse_value {
         $(, tuple2:{$(( $register_t : ident, ( $value_type_t0:ty,  $value_type_t1:ty)),)*})?
         $(, tuple3:{$(( $register_3t : ident, ( $value_type_3t0:ty,  $value_type_3t1:ty,  $value_type_3t2:ty)),)*})?
         $(, deprecated:$([$($dep:pat ,)*])?$({$($dep_s:pat => $dep_d:expr,)*})?)?
-        $(, specialize:[$( $sp_pat : pat => $sp_exp : expr )+ ])? ) =>
-        {{
+        $(, specialize:[$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => {{
             #[allow(unused_mut)]
             let mut key = convert_case!($key);
             #[allow(unused_labels)]
