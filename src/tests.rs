@@ -16,9 +16,7 @@ fn name_yaml() {
 #[cfg(feature = "yaml")]
 #[test]
 fn test_yaml() {
-    use yaml_rust::Yaml;
-
-    const NAME_YAML: &str = r#"
+    const TEST_YAML_HASH: &str = r#"
 name: app_clap_serde
 version : "1.0"
 about : yaml_support!
@@ -51,8 +49,34 @@ global_settings:
     - next_line_help
     - propagate_version
 "#;
-    let yaml =
-        Yaml::Array(yaml_rust::YamlLoader::load_from_str(NAME_YAML).expect("fail to make yaml"));
+    const TEST_YAML_ARRAY: &str = r#"
+name: app_clap_serde
+version : "1.0"
+about : yaml_support!
+author : yaml_supporter
+
+args:
+    - apple : 
+        short: a
+    - banana:
+        short: b
+        long: banana
+        aliases :
+            - musa_spp
+
+subcommands:
+    - sub1: 
+        about : subcommand_1
+    - sub2: 
+        about : subcommand_2
+"#;
+    yaml_test_base(TEST_YAML_HASH);
+    yaml_test_base(TEST_YAML_ARRAY);
+}
+
+fn yaml_test_base(s: &str) {
+    use yaml_rust::Yaml;
+    let yaml = Yaml::Array(yaml_rust::YamlLoader::load_from_str(s).expect("fail to make yaml"));
     let app = crate::load(crate::yaml::YamlWrap::new(&yaml)).expect("parse failed");
     assert_eq!(app.get_name(), "app_clap_serde");
     let subs = app.get_subcommands().collect::<Vec<_>>();
