@@ -1,12 +1,12 @@
-use crate::AppWrap;
-use clap::App;
+use crate::CommandWrap;
+use clap::Command;
 
 #[cfg(feature = "yaml")]
 #[test]
 fn name_yaml() {
     use yaml_rust::Yaml;
 
-    const NAME_YAML: &'static str = "name: app_clap_serde\n";
+    const NAME_YAML: &str = "name: app_clap_serde\n";
     let yaml =
         Yaml::Array(yaml_rust::YamlLoader::load_from_str(NAME_YAML).expect("fail to make yaml"));
     let app = crate::load(crate::yaml::YamlWrap::new(&yaml)).expect("parse failed");
@@ -18,7 +18,7 @@ fn name_yaml() {
 fn test_yaml() {
     use yaml_rust::Yaml;
 
-    const NAME_YAML: &'static str = r#"
+    const NAME_YAML: &str = r#"
 name: app_clap_serde
 version : "1.0"
 about : yaml_support!
@@ -65,16 +65,16 @@ global_settings:
     let args = app.get_arguments().collect::<Vec<_>>();
     assert!(args
         .iter()
-        .any(|x| x.get_name() == "apple" && x.get_short() == Some('a')));
-    assert!(args.iter().any(|x| x.get_name() == "banana"
+        .any(|x| x.get_id() == "apple" && x.get_short() == Some('a')));
+    assert!(args.iter().any(|x| x.get_id() == "banana"
         && x.get_short() == Some('b')
         && x.get_long() == Some("banana")));
 }
 
 #[test]
 fn name_json() {
-    const CLAP_JSON: &'static str = "{ \"name\" : \"app_clap_serde\" }";
-    let app: App = serde_json::from_str::<AppWrap>(CLAP_JSON)
+    const CLAP_JSON: &str = "{ \"name\" : \"app_clap_serde\" }";
+    let app: Command = serde_json::from_str::<CommandWrap>(CLAP_JSON)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -82,8 +82,8 @@ fn name_json() {
 
 #[test]
 fn name_toml() {
-    const CLAP_TOML: &'static str = "name = \"app_clap_serde\"";
-    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+    const CLAP_TOML: &str = "name = \"app_clap_serde\"";
+    let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -91,8 +91,8 @@ fn name_toml() {
 
 #[test]
 fn infos_json() {
-    const NAME_JSON: &'static str = r#"{ "name" : "app_clap_serde", "version" : "1.0" , "author" : "aobat", "about" : "test-clap-serde" }"#;
-    let app: App = serde_json::from_str::<AppWrap>(NAME_JSON)
+    const NAME_JSON: &str = r#"{ "name" : "app_clap_serde", "version" : "1.0" , "author" : "aobat", "about" : "test-clap-serde" }"#;
+    let app: Command = serde_json::from_str::<CommandWrap>(NAME_JSON)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -101,13 +101,13 @@ fn infos_json() {
 
 #[test]
 fn infos_toml() {
-    const CLAP_TOML: &'static str = r#"
+    const CLAP_TOML: &str = r#"
 name = "app_clap_serde"
 version = "1.0"
 author = "aobat"
 about = "test-clap-serde"
 "#;
-    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+    let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -116,7 +116,7 @@ about = "test-clap-serde"
 
 #[test]
 fn subcommands_json() {
-    const CLAP_JSON: &'static str = r#"{
+    const CLAP_JSON: &str = r#"{
         "name" : "app_clap_serde", 
         "version" : "1.0" , 
         "author" : "aobat", 
@@ -125,7 +125,7 @@ fn subcommands_json() {
             "sub1" : {"about" : "subcommand_1"},
             "sub2" : {"about" : "subcommand_2"}
         }}"#;
-    let app: App = serde_json::from_str::<AppWrap>(CLAP_JSON)
+    let app: Command = serde_json::from_str::<CommandWrap>(CLAP_JSON)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -141,7 +141,7 @@ fn subcommands_json() {
 
 #[test]
 fn subcommands_toml() {
-    const CLAP_TOML: &'static str = r#"
+    const CLAP_TOML: &str = r#"
 name = "app_clap_serde"
 version = "1.0"
 author = "aobat"
@@ -151,7 +151,7 @@ sub1 = { about = "subcommand_1" }
 [subcommands.sub2]
 about = "subcommand_2"
 "#;
-    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+    let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -167,7 +167,7 @@ about = "subcommand_2"
 
 #[test]
 fn args_json() {
-    const NAME_JSON: &'static str = r#"{
+    const NAME_JSON: &str = r#"{
         "name" : "app_clap_serde", 
         "version" : "1.0" , 
         "author" : "aobat", 
@@ -180,7 +180,7 @@ fn args_json() {
             "banana" : {"short" : "b", "long" : "banana", "aliases" : [ "musa_spp" ]}
         }
         }"#;
-    let app: App = serde_json::from_str::<AppWrap>(NAME_JSON)
+    let app: Command = serde_json::from_str::<CommandWrap>(NAME_JSON)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -195,15 +195,15 @@ fn args_json() {
     let args = app.get_arguments().collect::<Vec<_>>();
     assert!(args
         .iter()
-        .any(|x| x.get_name() == "apple" && x.get_short() == Some('a')));
-    assert!(args.iter().any(|x| x.get_name() == "banana"
+        .any(|x| x.get_id() == "apple" && x.get_short() == Some('a')));
+    assert!(args.iter().any(|x| x.get_id() == "banana"
         && x.get_short() == Some('b')
         && x.get_long() == Some("banana")));
 }
 
 #[test]
 fn args_toml() {
-    const CLAP_TOML: &'static str = r#"
+    const CLAP_TOML: &str = r#"
         name = "app_clap_serde"
         version = "1.0"
         author = "aobat"
@@ -216,7 +216,7 @@ fn args_toml() {
         apple = { short = "a" }
         banana = { short = "b", long = "banana", aliases = ["musa_spp"] }
     "#;
-    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+    let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
@@ -231,15 +231,15 @@ fn args_toml() {
     let args = app.get_arguments().collect::<Vec<_>>();
     assert!(args
         .iter()
-        .any(|x| x.get_name() == "apple" && x.get_short() == Some('a')));
-    assert!(args.iter().any(|x| x.get_name() == "banana"
+        .any(|x| x.get_id() == "apple" && x.get_short() == Some('a')));
+    assert!(args.iter().any(|x| x.get_id() == "banana"
         && x.get_short() == Some('b')
         && x.get_long() == Some("banana")));
 }
 
 #[test]
 fn groups_toml() {
-    const CLAP_TOML: &'static str = r#"
+    const CLAP_TOML: &str = r#"
         name = "app_clap_serde"
         version = "1.0"
         author = "aobat"
@@ -254,7 +254,7 @@ fn groups_toml() {
         [groups]
         fruit = { args = ["apple", "banana"] }
     "#;
-    let app: App = toml::from_str::<AppWrap>(CLAP_TOML)
+    let app: Command = toml::from_str::<CommandWrap>(CLAP_TOML)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
