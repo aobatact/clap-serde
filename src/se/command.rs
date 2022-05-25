@@ -1,8 +1,8 @@
-use crate::AppWrap;
+use crate::CommandWrap;
 use serde::{Serialize, ser::SerializeMap};
 
 
-impl<'se> Serialize for AppWrap<'se> {
+impl<'se> Serialize for CommandWrap<'se> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -14,7 +14,6 @@ impl<'se> Serialize for AppWrap<'se> {
             get_about,
             get_bin_name,
             //get_color
-            get_help_heading,
             get_long_about,
             get_long_flag,
             get_short_flag,
