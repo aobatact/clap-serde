@@ -148,6 +148,28 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
 
         Ok(CommandWrap { app })
     }
+
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'a>,
+    {
+        let mut cmd = self.0;
+        parse_value_array!(cmd, Command, seq, {
+            (about, &'pv str),
+            (after_help, &'pv str),
+            (after_long_help, &'pv str),
+            (alias, &'pv str),
+            ref (aliases, Vec<&'pv str>),
+        });
+
+        Ok(cmd.into())
+    }
+}
+
+
+#[derive(Deserialize)]
+enum KVEnum<'a>{
+    about(&'a str),
 }
 
 pub struct NameSeed<'a>(&'a str);
