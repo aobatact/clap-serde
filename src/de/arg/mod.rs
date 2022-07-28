@@ -2,10 +2,87 @@ use self::value_hint::ValueHintSeed;
 use crate::ArgWrap;
 use clap::{Arg, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
+#[cfg(not(feature = "override-arg"))]
+use std::marker::PhantomData;
 
 mod value_hint;
 
-pub struct ArgVisitor<'a>(Arg<'a>);
+#[cfg(feature = "override-arg")]
+struct ArgKVO<'a>(Command<'a>);
+
+#[cfg(feature = "override-arg")]
+impl<'de> Visitor<'de> for ArgKVO<'de> {
+    type Value = ArgKVO<'de>;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("kv argument")
+    }
+
+    fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        let name: &str = map.next_key()?.ok_or(A::Error::missing_field("argument"))?;
+        let mut error = None;
+        let x = self
+            .0
+            .mut_arg(name, |a| match map.next_value_seed(ArgVisitor(a)) {
+                Ok(a) => a.into(),
+                Err(e) => {
+                    error = Some(e);
+                    Arg::new(name)
+                }
+            });
+        Ok(ArgKVO(x))
+    }
+}
+
+#[cfg(feature = "override-arg")]
+impl<'de> DeserializeSeed<'de> for ArgKVO<'de> {
+    type Value = ArgKVO<'de>;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_map(self)
+    }
+}
+
+#[cfg(not(feature = "override-arg"))]
+#[derive(Clone, Copy)]
+struct ArgKV<'de>(PhantomData<&'de ()>);
+
+#[cfg(not(feature = "override-arg"))]
+impl<'de> Visitor<'de> for ArgKV<'de> {
+    type Value = ArgWrap<'de>;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("kv argument")
+    }
+
+    fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        let name: &str = map.next_key()?.ok_or(A::Error::missing_field("argument"))?;
+        map.next_value_seed(ArgVisitor::new_str(name))
+    }
+}
+
+#[cfg(not(feature = "override-arg"))]
+impl<'de> DeserializeSeed<'de> for ArgKV<'de> {
+    type Value = ArgWrap<'de>;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_map(self)
+    }
+}
+
+struct ArgVisitor<'a>(Arg<'a>);
 
 impl<'a> ArgVisitor<'a> {
     fn new_str(v: &'a str) -> Self {
@@ -187,7 +264,8 @@ impl<'de> DeserializeSeed<'de> for Args<'de> {
     where
         D: serde::Deserializer<'de>,
     {
-        deserializer.deserialize_map(self)
+        //deserializer.deserialize_map(self)
+        deserializer.deserialize_seq(self)
     }
 }
 
@@ -196,6 +274,34 @@ impl<'de> Visitor<'de> for Args<'de> {
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("args")
+    }
+
+    #[cfg(feature = "override-arg")]
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+        const MSG: &'static str = "size hint must be valid for override-arg feature";
+        let f = || A::Error::invalid_length(0, &MSG);
+        let len = seq.size_hint().ok_or_else(|| A::Error::custom(MSG))?;
+        let mut x = ArgKVO(self.0);
+        for _ in 0..len {
+            x = seq.next_element_seed(x)?.ok_or_else(f)?;
+        }
+        Ok(x.0)
+    }
+
+    #[cfg(not(feature = "override-arg"))]
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+        let x = ArgKV(PhantomData);
+        let mut com = self.0;
+        while let Some(a) = seq.next_element_seed(x)? {
+            com = com.arg(a);
+        }
+        Ok(com)
     }
 
     fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>

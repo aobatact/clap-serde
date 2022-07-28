@@ -20,6 +20,7 @@ yaml = [ "yaml-rust"]
 color = ["clap/color"]
 docsrs = ["snake-case-key", "yaml", "env", "color"]
 allow-deprecated = []
+override-arg = []
 
 [dependencies]
 clap = { version = "3.1.12", default-features = false, features = ["std"]}
