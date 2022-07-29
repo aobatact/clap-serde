@@ -111,6 +111,8 @@ kebab-case.
 Override a `Arg` with `DeserializeSeed`.
 
 ```rust
+# #[cfg(feature = "override-arg")]
+# {
 # use clap::{Command, Arg};
 use serde::de::DeserializeSeed;
 
@@ -132,4 +134,5 @@ let apple = wrap2
     .unwrap();
 assert!(apple.get_short() == Some('a'));
 assert!(apple.get_default_values() == ["aaa"]);
+# }
 ```

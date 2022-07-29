@@ -268,28 +268,3 @@ fn groups_toml() {
     assert_eq!(app.get_name(), "app_clap_serde");
     assert_eq!(app.get_about(), Some("test-clap-serde"));
 }
-
-#[cfg(feature = "override-arg")]
-#[test]
-fn arg_override_test() {
-    use serde::de::DeserializeSeed;
-
-    const CLAP_TOML: &str = r#"
-    name = "app_clap_serde"
-    version = "1.0"
-    author = "aobat"
-    about = "test-clap-serde"
-    [args]
-    apple = { short = "a" }
-    "#;
-    let app = Command::new("app").arg(Arg::new("apple").default_value("aaa"));
-    let wrap = CommandWrap::from(app);
-    let mut de = toml::Deserializer::new(CLAP_TOML);
-    let wrap2 = wrap.deserialize(&mut de).unwrap();
-    let apple = wrap2
-        .get_arguments()
-        .find(|a| a.get_id() == "apple")
-        .unwrap();
-    assert!(apple.get_short() == Some('a'));
-    assert!(apple.get_default_values() == ["aaa"]);
-}
