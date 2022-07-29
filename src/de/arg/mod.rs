@@ -2,7 +2,6 @@ use self::value_hint::ValueHintSeed;
 use crate::ArgWrap;
 use clap::{Arg, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
-#[cfg(not(feature = "override-arg"))]
 use std::marker::PhantomData;
 
 mod value_hint;
@@ -49,11 +48,9 @@ impl<'de> DeserializeSeed<'de> for ArgKVO<'de> {
     }
 }
 
-#[cfg(not(feature = "override-arg"))]
 #[derive(Clone, Copy)]
 struct ArgKV<'de>(PhantomData<&'de ()>);
 
-#[cfg(not(feature = "override-arg"))]
 impl<'de> Visitor<'de> for ArgKV<'de> {
     type Value = ArgWrap<'de>;
 
@@ -70,7 +67,6 @@ impl<'de> Visitor<'de> for ArgKV<'de> {
     }
 }
 
-#[cfg(not(feature = "override-arg"))]
 impl<'de> DeserializeSeed<'de> for ArgKV<'de> {
     type Value = ArgWrap<'de>;
 
@@ -256,20 +252,23 @@ impl<'de> DeserializeSeed<'de> for ArgWrap<'de> {
     }
 }
 
-pub(crate) struct Args<'a>(pub(crate) Command<'a>);
-impl<'de> DeserializeSeed<'de> for Args<'de> {
+pub(crate) struct Args<'a, const USE_ARRAY: bool>(pub(crate) Command<'a>);
+impl<'de, const USE_ARRAY: bool> DeserializeSeed<'de> for Args<'de, USE_ARRAY> {
     type Value = Command<'de>;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        //deserializer.deserialize_map(self)
-        deserializer.deserialize_seq(self)
+        if USE_ARRAY {
+            deserializer.deserialize_seq(self)
+        } else {
+            deserializer.deserialize_map(self)
+        }
     }
 }
 
-impl<'de> Visitor<'de> for Args<'de> {
+impl<'de, const USE_ARRAY: bool> Visitor<'de> for Args<'de, USE_ARRAY> {
     type Value = Command<'de>;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -281,14 +280,39 @@ impl<'de> Visitor<'de> for Args<'de> {
     where
         A: serde::de::SeqAccess<'de>,
     {
-        const MSG: &'static str = "size hint must be valid for override-arg feature";
-        let f = || A::Error::invalid_length(0, &MSG);
-        let len = seq.size_hint().ok_or_else(|| A::Error::custom(MSG))?;
-        let mut x = ArgKVO(self.0);
-        for _ in 0..len {
-            x = seq.next_element_seed(x)?.ok_or_else(f)?;
+        use serde::de::IgnoredAny;
+
+        if let Some(len) = seq.size_hint() {
+            let mut x = ArgKVO(self.0);
+            for _ in 0..len {
+                x = seq.next_element_seed(x)?.ok_or_else(|| {
+                    A::Error::invalid_length(0, &"Actual size is shorter then size_hint")
+                })?;
+            }
+            match seq.next_element()? {
+                Some(IgnoredAny) => Err(A::Error::invalid_length(
+                    0,
+                    &"Actual size is longer then size_hint",
+                )),
+                None => Ok(x.0),
+            }
+        } else {
+            let mut com = self.0;
+            while let Some(a) = seq.next_element_seed(ArgKV(PhantomData))? {
+                if com
+                    .get_arguments()
+                    .any(|prv_arg| prv_arg.get_id() == a.get_id())
+                {
+                    com = com.mut_arg(a.get_id(), |mut prv_arg| {
+                        prv_arg.clone_from(&a);
+                        prv_arg
+                    })
+                } else {
+                    com = com.arg(a);
+                }
+            }
+            Ok(com)
         }
-        Ok(x.0)
     }
 
     #[cfg(not(feature = "override-arg"))]
@@ -310,7 +334,21 @@ impl<'de> Visitor<'de> for Args<'de> {
     {
         let mut app = self.0;
         while let Some(name) = map.next_key::<&str>()? {
-            app = app.arg(map.next_value_seed(ArgVisitor::new_str(name))?);
+            #[cfg(feature = "override-arg")]
+            {
+                let mut error = None;
+                app = app.mut_arg(name, |a| match map.next_value_seed(ArgVisitor(a)) {
+                    Ok(a) => a.into(),
+                    Err(e) => {
+                        error = Some(e);
+                        Arg::new(name)
+                    }
+                });
+            }
+            #[cfg(not(feature = "override-arg"))]
+            {
+                app = app.arg(map.next_value_seed(ArgVisitor::new_str(name))?);
+            }
         }
         Ok(app)
     }

@@ -125,7 +125,8 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
             },
             specialize:
             [
-                "args" => map.next_value_seed(super::arg::Args(app))?
+                "args" => map.next_value_seed(super::arg::Args::<true>(app))?
+                "args_map" => map.next_value_seed(super::arg::Args::<false>(app))?
                 "color" => {
                     #[cfg(color)] {
                         app.color(map.next_value_seed(ColorChoiceSeed)?)

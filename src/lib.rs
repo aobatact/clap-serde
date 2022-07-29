@@ -117,6 +117,14 @@ impl<'a> From<Arg<'a>> for ArgWrap<'a> {
     }
 }
 
+impl<'a> Deref for ArgWrap<'a> {
+    type Target = Arg<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.arg
+    }
+}
+
 pub(crate) struct ArgGroupWrap<'a> {
     group: ArgGroup<'a>,
 }
