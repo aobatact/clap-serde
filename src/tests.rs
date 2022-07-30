@@ -35,9 +35,9 @@ args:
 
 subcommands:
     - sub1: 
-        - about : subcommand_1
+        about : subcommand_1
     - sub2: 
-        - about : subcommand_2
+        about : subcommand_2
 
 setting: trailing_var_arg
 
@@ -121,10 +121,10 @@ fn subcommands_json() {
         "version" : "1.0" , 
         "author" : "aobat", 
         "about" : "test-clap-serde", 
-        "subcommands" : {
-            "sub1" : {"about" : "subcommand_1"},
-            "sub2" : {"about" : "subcommand_2"}
-        }}"#;
+        "subcommands" : [
+            {"sub1" : {"about" : "subcommand_1"}},
+            {"sub2" : {"about" : "subcommand_2"}}
+        ]}"#;
     let app: Command = serde_json::from_str::<CommandWrap>(CLAP_JSON)
         .expect("parse failed")
         .into();

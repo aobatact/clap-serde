@@ -39,10 +39,10 @@ const CLAP_JSON: &'static str = r#"{
 "version" : "1.0" , 
 "author" : "json_tester", 
 "about" : "test-clap-serde", 
-"subcommands" : {
-    "sub1" : {"about" : "subcommand_1"},
-    "sub2" : {"about" : "subcommand_2"}
-},
+"subcommands" : [
+    { "sub1" : {"about" : "subcommand_1"}},
+    { "sub2" : {"about" : "subcommand_2"}}
+],
 "args" : [
     { "apple" : {"short" : "a" } },
     { "banana" : {"short" : "b", "long" : "banana", "aliases" : [ "musa_spp" ]} }
@@ -52,7 +52,7 @@ const CLAP_JSON: &'static str = r#"{
 }
 }"#;
 
-let app: clap::App = serde_json::from_str::<clap_serde::AppWrap>(CLAP_JSON)
+let app: clap::App = serde_json::from_str::<clap_serde::CommandWrap>(CLAP_JSON)
     .expect("parse failed")
     .into();
 assert_eq!(app.get_name(), "app_clap_serde");
