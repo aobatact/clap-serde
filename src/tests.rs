@@ -166,32 +166,40 @@ about = "subcommand_2"
 }
 
 #[test]
-fn args_json() {
-    const NAME_JSON: &str = r#"{
+fn args_map_json() {
+    const ARGS_JSON: &str = r#"{
         "name" : "app_clap_serde", 
-        "version" : "1.0" , 
-        "author" : "aobat", 
-        "about" : "test-clap-serde", 
-        "subcommands" : {
-            "sub1" : {"about" : "subcommand_1"},
-            "sub2" : {"about" : "subcommand_2"}},
-        "args" : {
+        "args_map" : {
             "apple" : {"short" : "a" },
             "banana" : {"short" : "b", "long" : "banana", "aliases" : [ "musa_spp" ]}
         }
         }"#;
-    let app: Command = serde_json::from_str::<CommandWrap>(NAME_JSON)
+    let app: Command = serde_json::from_str::<CommandWrap>(ARGS_JSON)
         .expect("parse failed")
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
-    assert_eq!(app.get_about(), Some("test-clap-serde"));
-    let subs = app.get_subcommands().collect::<Vec<_>>();
-    assert!(subs
+    let args = app.get_arguments().collect::<Vec<_>>();
+    assert!(args
         .iter()
-        .any(|x| x.get_name() == "sub1" && x.get_about() == Some("subcommand_1")));
-    assert!(subs
-        .iter()
-        .any(|x| x.get_name() == "sub2" && x.get_about() == Some("subcommand_2")));
+        .any(|x| x.get_id() == "apple" && x.get_short() == Some('a')));
+    assert!(args.iter().any(|x| x.get_id() == "banana"
+        && x.get_short() == Some('b')
+        && x.get_long() == Some("banana")));
+}
+
+#[test]
+fn args_json() {
+    const ARGS_JSON: &str = r#"{
+        "name" : "app_clap_serde", 
+        "args" : [
+            { "apple" : {"short" : "a" } },
+            { "banana" : {"short" : "b", "long" : "banana", "aliases" : [ "musa_spp" ]}}
+        ]
+        }"#;
+    let app: Command = serde_json::from_str::<CommandWrap>(ARGS_JSON)
+        .expect("parse failed")
+        .into();
+    assert_eq!(app.get_name(), "app_clap_serde");
     let args = app.get_arguments().collect::<Vec<_>>();
     assert!(args
         .iter()
@@ -259,4 +267,23 @@ fn groups_toml() {
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
     assert_eq!(app.get_about(), Some("test-clap-serde"));
+}
+
+#[test]
+fn arg_fail() {
+    use clap::{Arg, Command};
+    use serde::de::DeserializeSeed;
+
+    const CLAP_TOML: &str = r#"
+name = "app_clap_serde"
+version = "1.0"
+author = "aobat"
+about = "test-clap-serde"
+[args]
+apple = { short =  }
+"#;
+    let app = Command::new("app").arg(Arg::new("apple").default_value("aaa"));
+    let wrap = CommandWrap::from(app);
+    let mut de = toml::Deserializer::new(CLAP_TOML);
+    assert!(wrap.deserialize(&mut de).is_err());
 }

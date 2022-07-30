@@ -26,7 +26,7 @@ pub mod documents;
 #[cfg(feature = "yaml")]
 mod yaml;
 
-#[cfg(all(test, feature="snake-case-key"))]
+#[cfg(all(test, feature = "snake-case-key"))]
 mod tests;
 
 #[cfg(feature = "yaml")]
@@ -114,6 +114,14 @@ impl<'a> From<ArgWrap<'a>> for Arg<'a> {
 impl<'a> From<Arg<'a>> for ArgWrap<'a> {
     fn from(arg: Arg<'a>) -> Self {
         ArgWrap { arg }
+    }
+}
+
+impl<'a> Deref for ArgWrap<'a> {
+    type Target = Arg<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.arg
     }
 }
 

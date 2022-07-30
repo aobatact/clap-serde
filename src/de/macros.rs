@@ -20,7 +20,7 @@ macro_rules! parse_value {
             #[allow(unused_mut)]
             let mut key;
             convert_case_to!($key, key);
-            
+
             #[allow(unused_labels)]
             'parse_value_jmp_loop: loop {
                 break 'parse_value_jmp_loop match key {
@@ -76,7 +76,8 @@ macro_rules! convert_case_to {
 #[cfg(not(feature = "snake-case-key"))]
 macro_rules! convert_case_to {
     ($key:ident, $target: ident) => {
-        let cc_xk = (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Snake));
+        let cc_xk =
+            (<&str as convert_case::Casing<&str>>::to_case(&$key, convert_case::Case::Snake));
         $target = cc_xk.as_str();
     };
 }

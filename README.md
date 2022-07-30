@@ -8,7 +8,7 @@ Provides a wrapper to deserialize [clap](https://crates.io/crates/clap) app usin
 
 ## toml
 
-```
+```rust
 const CLAP_TOML: &'static str = r#"
 name = "app_clap_serde"
 version = "1.0"
@@ -33,7 +33,7 @@ assert_eq!(app.get_about(), Some("test-clap-serde"));
 ```
 
 ## json
-```
+```rust
 const CLAP_JSON: &'static str = r#"{
 "name" : "app_clap_serde", 
 "version" : "1.0" , 
@@ -41,11 +41,12 @@ const CLAP_JSON: &'static str = r#"{
 "about" : "test-clap-serde", 
 "subcommands" : {
     "sub1" : {"about" : "subcommand_1"},
-    "sub2" : {"about" : "subcommand_2"}},
-"args" : {
-    "apple" : {"short" : "a" },
-    "banana" : {"short" : "b", "long" : "banana", "aliases" : [ "musa_spp" ]}
+    "sub2" : {"about" : "subcommand_2"}
 },
+"args" : [
+    { "apple" : {"short" : "a" } },
+    { "banana" : {"short" : "b", "long" : "banana", "aliases" : [ "musa_spp" ]} }
+],
 "groups" : {
     "fruit" : { "args" : ["apple", "banana"] }
 }
@@ -60,7 +61,7 @@ assert_eq!(app.get_about(), Some("test-clap-serde"));
 
 ## yaml
 `clap-serde` provides a Deserializer for yaml. This requires `yaml` feature.
-```
+```rust
 const CLAP_YAML: &'static str = r#"
 name: app_clap_serde
 version : "1.0"
@@ -104,3 +105,34 @@ snake_case. Enabled by default.
 PascalCase. Same as variants name in enum at `AppSettings`.
 #### kebab-case-key 
 kebab-case.
+
+## override-args
+
+Override a `Arg` with `DeserializeSeed`.
+
+```rust
+# #[cfg(feature = "override-arg")]
+# {
+# use clap::{Command, Arg};
+use serde::de::DeserializeSeed;
+
+const CLAP_TOML: &str = r#"
+name = "app_clap_serde"
+version = "1.0"
+author = "aobat"
+about = "test-clap-serde"
+[args]
+apple = { short = "a" }
+"#;
+let app = Command::new("app").arg(Arg::new("apple").default_value("aaa"));
+let wrap = clap_serde::CommandWrap::from(app);
+let mut de = toml::Deserializer::new(CLAP_TOML);
+let wrap2 = wrap.deserialize(&mut de).unwrap();
+let apple = wrap2
+    .get_arguments()
+    .find(|a| a.get_id() == "apple")
+    .unwrap();
+assert!(apple.get_short() == Some('a'));
+assert!(apple.get_default_values() == ["aaa"]);
+# }
+```
