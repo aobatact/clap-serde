@@ -24,6 +24,7 @@ mod de;
 #[cfg(feature = "docsrs")]
 pub mod documents;
 #[cfg(feature = "yaml")]
+#[deprecated(since = "0.4", note = "use serde-yaml instead")]
 mod yaml;
 
 #[cfg(all(test, feature = "snake-case-key"))]
