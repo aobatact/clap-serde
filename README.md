@@ -60,7 +60,6 @@ assert_eq!(app.get_about(), Some("test-clap-serde"));
 ```
 
 ## yaml
-`clap-serde` provides a Deserializer for yaml. This requires `yaml` feature.
 ```rust
 const CLAP_YAML: &'static str = r#"
 name: app_clap_serde
@@ -70,30 +69,29 @@ author : yaml_supporter
 
 args:
     - apple : 
-        - short: a
+        short: a
     - banana:
-        - short: b
-        - long: banana
-        - aliases :
+        short: b
+        long: banana
+        aliases :
             - musa_spp
 
 subcommands:
     - sub1: 
-        - about : subcommand_1
+        about : subcommand_1
     - sub2: 
-        - about : subcommand_2
+        about : subcommand_2
 
 "#;
-let yaml = yaml_rust::Yaml::Array(yaml_rust::YamlLoader::load_from_str(CLAP_YAML).expect("not a yaml"));
-let app = clap_serde::yaml_to_app(&yaml).expect("parse failed from yaml");
+let app: clap_serde::CommandWrap = serde_yaml::from_str(CLAP_YAML).expect("fail to make yaml");
 assert_eq!(app.get_name(), "app_clap_serde");
 ```
 
 # features
 ## env
 Enables env feature in clap.
-## yaml
-Enables to use yaml. Enabled by default.
+## yaml (deprecated, use serde-yaml instead)
+Enables to use yaml.
 ## color
 Enablse color feature in clap.
 
