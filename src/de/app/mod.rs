@@ -132,7 +132,8 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                         app.color(map.next_value_seed(ColorChoiceSeed)?)
                     }
                     #[cfg(not(color))] { return Err(Error::custom("color feature disabled"))}}
-                "subcommands" => map.next_value_seed(SubCommands(app))?
+                "subcommands" => map.next_value_seed(SubCommands::<true>(app))?
+                "subcommands_map" => map.next_value_seed(SubCommands::<false>(app))?
                 "groups" => map.next_value_seed(super::group::Groups(app))?
                 "setting" => app.setting(map.next_value_seed(AppSettingSeed)?)
                 "settings" => app.setting(map.next_value_seed(AppSettingsSeed)?)
@@ -175,19 +176,23 @@ impl<'de> DeserializeSeed<'de> for CommandWrap<'de> {
     }
 }
 
-struct SubCommands<'a>(Command<'a>);
-impl<'de> DeserializeSeed<'de> for SubCommands<'de> {
+struct SubCommands<'a, const KV_ARRAY: bool>(Command<'a>);
+impl<'de, const KV_ARRAY: bool> DeserializeSeed<'de> for SubCommands<'de, KV_ARRAY> {
     type Value = Command<'de>;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        deserializer.deserialize_map(self)
+        if KV_ARRAY {
+            deserializer.deserialize_seq(self)
+        } else {
+            deserializer.deserialize_map(self)
+        }
     }
 }
 
-impl<'de> Visitor<'de> for SubCommands<'de> {
+impl<'de, const KV_ARRAY: bool> Visitor<'de> for SubCommands<'de, KV_ARRAY> {
     type Value = Command<'de>;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -204,5 +209,47 @@ impl<'de> Visitor<'de> for SubCommands<'de> {
             app = app.subcommand(sub);
         }
         Ok(app)
+    }
+
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+        let mut app = self.0;
+        while let Some(sub) = seq.next_element_seed(InnerSubCommand)? {
+            app = app.subcommand(sub)
+        }
+        Ok(app)
+    }
+}
+
+pub struct InnerSubCommand;
+impl<'de> Visitor<'de> for InnerSubCommand {
+    type Value = Command<'de>;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("Subcommand Inner")
+    }
+
+    fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        let k = map
+            .next_key()?
+            .ok_or_else(|| A::Error::invalid_length(0, &"missing command in subcommand"))?;
+        let com = map.next_value_seed(NameSeed(k))?;
+        Ok(com.into())
+    }
+}
+
+impl<'de> DeserializeSeed<'de> for InnerSubCommand {
+    type Value = Command<'de>;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_map(self)
     }
 }
