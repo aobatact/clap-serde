@@ -344,6 +344,9 @@ impl<'de, const USE_ARRAY: bool> Visitor<'de> for Args<'de, USE_ARRAY> {
                         Arg::new(name)
                     }
                 });
+                if let Some(error) = error {
+                    return Err(error);
+                }
             }
             #[cfg(not(feature = "override-arg"))]
             {

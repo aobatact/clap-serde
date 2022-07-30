@@ -1,5 +1,5 @@
 use crate::CommandWrap;
-use clap::{Arg, Command};
+use clap::Command;
 
 #[cfg(feature = "yaml")]
 #[test]
@@ -267,4 +267,23 @@ fn groups_toml() {
         .into();
     assert_eq!(app.get_name(), "app_clap_serde");
     assert_eq!(app.get_about(), Some("test-clap-serde"));
+}
+
+#[test]
+fn arg_fail() {
+    use clap::{Arg, Command};
+    use serde::de::DeserializeSeed;
+
+    const CLAP_TOML: &str = r#"
+name = "app_clap_serde"
+version = "1.0"
+author = "aobat"
+about = "test-clap-serde"
+[args]
+apple = { short =  }
+"#;
+    let app = Command::new("app").arg(Arg::new("apple").default_value("aaa"));
+    let wrap = CommandWrap::from(app);
+    let mut de = toml::Deserializer::new(CLAP_TOML);
+    assert!(wrap.deserialize(&mut de).is_err());
 }
