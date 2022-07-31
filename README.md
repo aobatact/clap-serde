@@ -104,6 +104,9 @@ PascalCase. Same as variants name in enum at `AppSettings`.
 #### kebab-case-key 
 kebab-case.
 
+## allow-deprecated
+Allow deprecated keys, settings. Enabled by default.
+
 ## override-args
 
 Override a `Arg` with `DeserializeSeed`.
