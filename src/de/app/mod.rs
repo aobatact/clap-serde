@@ -123,6 +123,10 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
             ]{
                 "help_heading" => "next_help_heading",
             },
+            not_supported: {
+                "arg" => "Use args instead",
+                "group" => "Use groups instead",
+            },
             specialize:
             [
                 "args" => map.next_value_seed(super::arg::Args::<true>(app))?

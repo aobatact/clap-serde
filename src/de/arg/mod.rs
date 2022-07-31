@@ -210,6 +210,9 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "require_delimiter" => "require_value_delimiter",
                     "use_delimiter" => "use_value_delimiter",
                 },
+                not_supported: {
+                    "validator_regex" => "Not implemented now",
+                },
                 specialize:[
                     "env" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }
