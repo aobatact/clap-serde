@@ -16,6 +16,7 @@ macro_rules! parse_value {
         $(, tuple2:{$(( $register_t : ident, ( $value_type_t0:ty,  $value_type_t1:ty)),)*})?
         $(, tuple3:{$(( $register_3t : ident, ( $value_type_3t0:ty,  $value_type_3t1:ty,  $value_type_3t2:ty)),)*})?
         $(, deprecated:$([$($dep:pat ,)*])?$({$($dep_s:pat => $dep_d:expr,)*})?)?
+        $(, not_supported:{$($ns:pat => $ns_r:stmt ,)*})?
         $(, specialize:[$( $sp_pat : pat => $sp_exp : expr )+ ])? ) => {{
             #[allow(unused_mut)]
             let mut key;
@@ -54,6 +55,11 @@ macro_rules! parse_value {
                             return Err(Error::custom(format_args!("deprecated key: {}, use {} insted", stringify!($depr_s), $dep_d)))
                         },
                     )*)*)*
+                    $($(
+                        $ns => {
+                            return Err(Error::custom(format_args!("not supported key : {}, {} ", stringify!($ns), stringify!($ns_r))))
+                        }
+                    )*)*
                     unknown => return Err(Error::unknown_field(unknown, &[
                         $( $( stringify!($register),)*
                             $( stringify!($register_r),)*  )*
