@@ -4,7 +4,7 @@ Provides a wrapper to deserialize [clap](https://crates.io/crates/clap) app usin
 [![Crates.io](https://img.shields.io/crates/v/clap-serde?style=flat-square)](https://crates.io/crates/clap-serde)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)](https://github.com/aobatact/clap-serde/blob/main/LICENSE-APACHE)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/aobatact/clap-serde/blob/main/LICENSE-MIT)
-[API Reference](https://docs.rs/clap-serde)
+[![API Reference](https://img.shields.io/docsrs/clap-serde?style=flat-square)](https://docs.rs/clap-serde)
 
 ## toml
 
