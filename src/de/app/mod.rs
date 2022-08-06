@@ -71,6 +71,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 (disable_help_flag, bool),
                 (disable_help_subcommand, bool),
                 (disable_version_flag, bool),
+                (display_name, &str),
                 (display_order, usize),
                 (dont_collapse_args_in_usage, bool),
                 (dont_delimit_trailing_values, bool),
@@ -78,7 +79,6 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 // global_settings : specialized (though the original method is deprecated)
                 // group : not supported single group
                 // groups : specialized
-                // (help_heading, Option<&str>),
                 (help_expected, bool),
                 (help_template, &str),
                 (hide, bool),
@@ -92,6 +92,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 ref (long_flag_aliases, Vec<&str>),
                 (long_version, &str),
                 (max_term_width, usize),
+                (multicall, bool),
                 (name, &str),
                 (next_display_order, Option<usize>),
                 (next_help_heading, Option<&str>),
@@ -107,6 +108,11 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 ref (short_flag_aliases, Vec<char>),
                 // subcommand : not supported single subcommand(now)
                 // subcommands : specialized
+                (subcommand_help_heading, &str),
+                (subcommand_negates_reqs, bool),
+                (subcommand_required, bool),
+                (subcommand_value_name, &str),
+                (propagate_version, bool),
                 (term_width, usize),
                 (trailing_var_arg, bool),
                 (version, &str),

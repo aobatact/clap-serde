@@ -173,6 +173,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (value_delimiter, char),
                     (value_name, &str),
                     ref (value_names, Vec<&str>),
+                    // value_parser
                     (value_terminator, &str),
                     (visible_alias, &str),
                     ref (visible_aliases, Vec<&str>),
@@ -203,6 +204,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "set",
                     "setting",
                     "settings",
+                    "validator_regex",
                     "with_name",
                 ]{
                     //3.1
@@ -211,7 +213,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "use_delimiter" => "use_value_delimiter",
                 },
                 not_supported: {
-                    "validator_regex" => "Not implemented now",
+                    "value_parser" => "Not implemented now",
                 },
                 specialize:[
                     "env" => {
