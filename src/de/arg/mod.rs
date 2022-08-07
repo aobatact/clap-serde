@@ -5,6 +5,7 @@ use serde::de::{DeserializeSeed, Error, Visitor};
 use std::marker::PhantomData;
 
 mod value_hint;
+mod value_parser;
 
 #[cfg(feature = "override-arg")]
 struct ArgKVO<'a>(Command<'a>);
