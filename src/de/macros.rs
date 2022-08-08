@@ -89,10 +89,26 @@ macro_rules! convert_case_to {
 }
 
 macro_rules! enum_de {
-    ($basety : ident, $newty :ident, $(#[$derive_meta:meta])* { $( $( #[ $cfg_meta:meta ] )? $var: ident ,)* } ) => {
+    ($basety : ident, $newty :ident,
+        $(#[$derive_meta:meta])* {
+            $(
+                $( #[ $cfg_meta:meta ] )?
+                $var: ident
+            ,)*
+        }
+        $({
+            $( $(
+                #[ $cfg_meta_ex:meta ] )?
+                $var_ex: ident $( ( $( $vx: ident : $vt: ty ),* ) )?
+                    => $to_ex: expr
+            ,)*
+        } )?
+    ) => {
+
         $(#[$derive_meta])*
         pub(crate) enum $newty {
             $(  $(#[$cfg_meta])* $var , )*
+            $($(  $(#[$cfg_meta_ex])* $var_ex $( ( $( $vt ,)* ) )* , )*)*
         }
 
         impl From<$newty> for $basety {
@@ -102,6 +118,10 @@ macro_rules! enum_de {
                         $(#[$cfg_meta])*
                         $newty::$var => $basety::$var,
                     )*
+                    $($(
+                        $(#[$cfg_meta_ex])*
+                        $newty::$var_ex$(($( $vx ,)*))* => { $to_ex },
+                    )*)*
                 }
             }
         }
