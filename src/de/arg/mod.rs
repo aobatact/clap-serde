@@ -1,5 +1,5 @@
 use self::value_hint::ValueHintSeed;
-use crate::ArgWrap;
+use crate::{de::arg::value_parser::ValueParser1, ArgWrap};
 use clap::{Arg, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
 use std::marker::PhantomData;
@@ -213,9 +213,8 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "require_delimiter" => "require_value_delimiter",
                     "use_delimiter" => "use_value_delimiter",
                 },
-                not_supported: {
-                    "value_parser" => "Not implemented now",
-                },
+                // not_supported: {
+                // },
                 specialize:[
                     "env" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }
@@ -228,6 +227,9 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                         #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
                     "value_hint" => {
                         arg.value_hint(map.next_value_seed(ValueHintSeed)?)
+                    }
+                    "value_parser" => {
+                        arg.value_parser(map.next_value::<ValueParser1>()?)
                     }
                 ]
             );
