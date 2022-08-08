@@ -1,5 +1,10 @@
 # Change Log
 
+# 0.5.0
+
+## Features
+- Bump Clap version to 3.2 .
+
 # 0.4.0
 
 ## Breaking Changes
