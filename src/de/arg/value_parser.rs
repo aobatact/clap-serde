@@ -28,13 +28,17 @@ macro_rules! enum_de_value {
                     #[serde(skip_serializing_if = "Option::is_none")]
                     min: Option<$pty>, 
                     #[serde(skip_serializing_if = "Option::is_none")]
-                    max: Option<$pty>
+                    max: Option<$pty>,
+                    #[serde(default)]
+                    max_inclusive: bool
                 } => {
-                    match (min, max) {
-                        (Some(s), Some(e)) => clap::value_parser!($pty).range((s $(as $ty_as)*) ..(e $(as $ty_as)*)).into(),
-                        (Some(s), None) => clap::value_parser!($pty).range((s $(as $ty_as)*)..).into(),
-                        (None, Some(e)) => clap::value_parser!($pty).range(..(e $(as $ty_as)*)).into(),
-                        (None, None) => clap::value_parser!($pty).into(),
+                    match (min, max, max_inclusive) {
+                        (Some(s), Some(e), false) => clap::value_parser!($pty).range((s $(as $ty_as)*) ..(e $(as $ty_as)*)).into(),
+                        (Some(s), Some(e), true) => clap::value_parser!($pty).range((s $(as $ty_as)*) ..=(e $(as $ty_as)*)).into(),
+                        (Some(s), None, _) => clap::value_parser!($pty).range((s $(as $ty_as)*)..).into(),
+                        (None, Some(e), false) => clap::value_parser!($pty).range(..(e $(as $ty_as)*)).into(),
+                        (None, Some(e), true) => clap::value_parser!($pty).range(..=(e $(as $ty_as)*)).into(),
+                        (None, None, _) => clap::value_parser!($pty).into(),
                     }
                 },)*
             }
