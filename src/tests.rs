@@ -71,6 +71,7 @@ args:
     - banana:
         short: b
         long: banana
+        value_parser: non_empty_string
 "#;
 
     let app: CommandWrap = serde_yaml::from_str(CLAP_YAML).expect("fail to make yaml");

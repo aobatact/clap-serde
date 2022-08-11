@@ -1,4 +1,4 @@
-use self::{arg_action::ArgAction1, value_hint::ValueHintSeed, value_parser::ValueParser1};
+use self::{arg_action::ArgAction, value_hint::ValueHint, value_parser::ValueParser};
 use crate::ArgWrap;
 use clap::{Arg, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
@@ -219,7 +219,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                 // },
                 specialize:[
                     "arg_action" => {
-                        arg.action(map.next_value::<ArgAction1>()?.into())
+                        arg.action(map.next_value::<ArgAction>()?.into())
                     }
                     "env" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }
@@ -231,10 +231,10 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, bool, hide_env_values) }
                         #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
                     "value_hint" => {
-                        arg.value_hint(map.next_value_seed(ValueHintSeed)?)
+                        arg.value_hint(map.next_value::<ValueHint>()?.into())
                     }
                     "value_parser" => {
-                        arg.value_parser(map.next_value::<ValueParser1>()?)
+                        arg.value_parser(map.next_value::<ValueParser>()?)
                     }
                 ]
             );
