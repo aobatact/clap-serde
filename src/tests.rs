@@ -66,7 +66,8 @@ author : yaml_supporter
 args:
     - apple : 
         short: a
-        value_parser: non_empty_string
+        value_parser: 
+            type: non_empty_string
     - banana:
         short: b
         long: banana
