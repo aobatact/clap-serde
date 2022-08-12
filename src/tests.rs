@@ -67,7 +67,10 @@ args:
     - apple : 
         short: a
         value_parser: 
-            type: non_empty_string
+            type: i64
+            min: -100
+            max: 100
+            max_inclusive: true
     - banana:
         short: b
         long: banana
@@ -78,13 +81,14 @@ args:
     assert_eq!(app.get_name(), "app_clap_serde");
 
     let args = app.get_arguments().collect::<Vec<_>>();
-    let vp: ValueParser = clap::builder::NonEmptyStringValueParser::default().into();
+    let vp_i: ValueParser = clap::value_parser!(i64).into();
+    let vp_s: ValueParser = clap::builder::NonEmptyStringValueParser::default().into();
     assert!(args.iter().any(|x| x.get_id() == "apple"
         && x.get_short() == Some('a')
-        && x.get_value_parser().type_id() == vp.type_id()));
+        && x.get_value_parser().type_id() == vp_i.type_id()));
     assert!(args.iter().any(|x| x.get_id() == "banana"
         && x.get_short() == Some('b')
-        && x.get_long() == Some("banana")));
+        && x.get_value_parser().type_id() == vp_s.type_id()));
 }
 
 #[test]
