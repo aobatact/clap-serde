@@ -29,7 +29,7 @@ macro_rules! enum_de_value {
                     min: Option<$pty>,
                     #[serde(skip_serializing_if = "Option::is_none")]
                     max: Option<$pty>,
-                    #[serde(default)]
+                    #[serde(default = "get_true")]
                     max_inclusive: bool
                 } => {
                     match (min, max, max_inclusive) {
@@ -45,6 +45,8 @@ macro_rules! enum_de_value {
         );
     };
 }
+
+const fn get_true() -> bool {true}
 
 enum_de_value!(VP, ValueParser1,
     #[derive(Deserialize, Clone, Copy)]
