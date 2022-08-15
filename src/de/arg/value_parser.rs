@@ -46,7 +46,9 @@ macro_rules! enum_de_value {
     };
 }
 
-const fn get_true() -> bool {true}
+const fn get_true() -> bool {
+    true
+}
 
 enum_de_value!(VP, ValueParser1,
     #[derive(Deserialize, Clone, Copy)]

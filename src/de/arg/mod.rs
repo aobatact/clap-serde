@@ -64,7 +64,9 @@ impl<'de> Visitor<'de> for ArgKV<'de> {
     where
         A: serde::de::MapAccess<'de>,
     {
-        let name: &str = map.next_key()?.ok_or(A::Error::missing_field("argument"))?;
+        let name: &str = map
+            .next_key()?
+            .ok_or_else(|| A::Error::missing_field("argument"))?;
         map.next_value_seed(ArgVisitor::new_str(name))
     }
 }
