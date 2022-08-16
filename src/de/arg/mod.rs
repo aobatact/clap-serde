@@ -1,9 +1,10 @@
-use self::value_hint::ValueHintSeed;
-use crate::{de::arg::value_parser::ValueParser1, ArgWrap};
+use self::{arg_action::ArgAction, value_hint::ValueHint, value_parser::ValueParser};
+use crate::ArgWrap;
 use clap::{Arg, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
 use std::marker::PhantomData;
 
+mod arg_action;
 mod value_hint;
 mod value_parser;
 
@@ -63,7 +64,9 @@ impl<'de> Visitor<'de> for ArgKV<'de> {
     where
         A: serde::de::MapAccess<'de>,
     {
-        let name: &str = map.next_key()?.ok_or(A::Error::missing_field("argument"))?;
+        let name: &str = map
+            .next_key()?
+            .ok_or_else(|| A::Error::missing_field("argument"))?;
         map.next_value_seed(ArgVisitor::new_str(name))
     }
 }
@@ -102,6 +105,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
 
         while let Some(key) = map.next_key::<&str>()? {
             arg = parse_value!(key, arg, map, Arg, {
+                    // action : specailized
                     (alias, &str),
                     ref (aliases, Vec<&str>),
                     (allow_hyphen_values, bool),
@@ -174,7 +178,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (value_delimiter, char),
                     (value_name, &str),
                     ref (value_names, Vec<&str>),
-                    // value_parser
+                    // value_parser : specialized
                     (value_terminator, &str),
                     (visible_alias, &str),
                     ref (visible_aliases, Vec<&str>),
@@ -216,6 +220,9 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                 // not_supported: {
                 // },
                 specialize:[
+                    "arg_action" => {
+                        arg.action(map.next_value::<ArgAction>()?.into())
+                    }
                     "env" => {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }
                         #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
@@ -226,10 +233,10 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                         #[cfg(env)] { parse_value_inner!(arg, map, Arg, bool, hide_env_values) }
                         #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
                     "value_hint" => {
-                        arg.value_hint(map.next_value_seed(ValueHintSeed)?)
+                        arg.value_hint(map.next_value::<ValueHint>()?.into())
                     }
                     "value_parser" => {
-                        arg.value_parser(map.next_value::<ValueParser1>()?)
+                        arg.value_parser(map.next_value::<ValueParser>()?)
                     }
                 ]
             );

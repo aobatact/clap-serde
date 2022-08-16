@@ -99,7 +99,7 @@ macro_rules! enum_de {
         $({
             $( $(
                 #[ $cfg_meta_ex:meta ] )?
-                $var_ex: ident $( ( $( $vx: ident : $vt: ty ),* ) )?
+                $var_ex: ident $( { $( $(#[$cfg_v:meta])* $vx: ident : $vt: ty ),* } )?
                     => $to_ex: expr
             ,)*
         } )?
@@ -108,7 +108,7 @@ macro_rules! enum_de {
         $(#[$derive_meta])*
         pub(crate) enum $newty {
             $(  $(#[$cfg_meta])* $var , )*
-            $($(  $(#[$cfg_meta_ex])* $var_ex $( ( $( $vt ,)* ) )* , )*)*
+            $($(  $(#[$cfg_meta_ex])* $var_ex $( { $( $( #[$cfg_v] )* $vx :  $vt ,)* } )* , )*)*
         }
 
         impl From<$newty> for $basety {
@@ -120,7 +120,7 @@ macro_rules! enum_de {
                     )*
                     $($(
                         $(#[$cfg_meta_ex])*
-                        $newty::$var_ex$(($( $vx ,)*))* => { $to_ex },
+                        $newty::$var_ex$({$( $vx ,)*})* => { $to_ex },
                     )*)*
                 }
             }

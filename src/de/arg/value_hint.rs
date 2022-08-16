@@ -1,7 +1,7 @@
-use clap::ValueHint;
-use serde::{de::DeserializeSeed, Deserialize};
+use clap::ValueHint as VH;
+use serde::Deserialize;
 
-enum_de!(ValueHint,ValueHint1,
+enum_de!(VH,ValueHint,
     #[derive(Deserialize, Clone, Copy)]
     #[cfg_attr(feature = "kebab-case-key" ,serde(rename_all = "kebab-case"))]
     #[cfg_attr(feature = "snake-case-key" ,serde(rename_all = "snake_case"))]
@@ -20,16 +20,3 @@ enum_de!(ValueHint,ValueHint1,
     Url,
     EmailAddress,
 });
-
-pub struct ValueHintSeed;
-
-impl<'de> DeserializeSeed<'de> for ValueHintSeed {
-    type Value = ValueHint;
-
-    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        ValueHint1::deserialize(deserializer).map(|v| v.into())
-    }
-}
