@@ -1,5 +1,10 @@
 # Change Log
 
+# 0.5.1
+
+## Fixes
+- Relax requirement of deserizaler for `override-arg`.
+
 # 0.5.0
 
 ## Features
