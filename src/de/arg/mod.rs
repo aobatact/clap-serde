@@ -48,8 +48,7 @@ impl<'de> DeserializeSeed<'de> for &mut ArgKVO<'de> {
     where
         D: serde::Deserializer<'de>,
     {
-        deserializer.deserialize_map(self)?;
-        Ok(())
+        deserializer.deserialize_map(self)
     }
 }
 
