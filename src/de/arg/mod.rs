@@ -9,11 +9,11 @@ mod value_hint;
 mod value_parser;
 
 #[cfg(feature = "override-arg")]
-struct ArgKVO<'a>(Command<'a>);
+struct ArgKVO<'a>(Option<Command<'a>>);
 
 #[cfg(feature = "override-arg")]
-impl<'de> Visitor<'de> for ArgKVO<'de> {
-    type Value = ArgKVO<'de>;
+impl<'de> Visitor<'de> for &mut ArgKVO<'de> {
+    type Value = ();
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("kv argument")
@@ -23,24 +23,26 @@ impl<'de> Visitor<'de> for ArgKVO<'de> {
     where
         A: serde::de::MapAccess<'de>,
     {
-        let name: &str = map.next_key()?.ok_or(A::Error::missing_field("argument"))?;
-        let mut error = None;
-        let x = self
-            .0
-            .mut_arg(name, |a| match map.next_value_seed(ArgVisitor(a)) {
-                Ok(a) => a.into(),
-                Err(e) => {
-                    error = Some(e);
-                    Arg::new(name)
-                }
-            });
-        Ok(ArgKVO(x))
+        let name: &str = map
+            .next_key()?
+            .ok_or_else(|| A::Error::missing_field("argument"))?;
+        let mut status = Ok(());
+        let app = unsafe { self.0.take().unwrap_unchecked() };
+        let next = app.mut_arg(name, |a| match map.next_value_seed(ArgVisitor(a)) {
+            Ok(a) => a.into(),
+            Err(e) => {
+                status = Err(e);
+                Arg::new(name)
+            }
+        });
+        self.0.replace(next);
+        status
     }
 }
 
 #[cfg(feature = "override-arg")]
-impl<'de> DeserializeSeed<'de> for ArgKVO<'de> {
-    type Value = ArgKVO<'de>;
+impl<'de> DeserializeSeed<'de> for &mut ArgKVO<'de> {
+    type Value = ();
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -295,39 +297,10 @@ impl<'de, const USE_ARRAY: bool> Visitor<'de> for Args<'de, USE_ARRAY> {
     where
         A: serde::de::SeqAccess<'de>,
     {
-        use serde::de::IgnoredAny;
+        let mut argkvo = ArgKVO(Some(self.0));
 
-        if let Some(len) = seq.size_hint() {
-            let mut x = ArgKVO(self.0);
-            for _ in 0..len {
-                x = seq.next_element_seed(x)?.ok_or_else(|| {
-                    A::Error::invalid_length(0, &"Actual size is shorter then size_hint")
-                })?;
-            }
-            match seq.next_element()? {
-                Some(IgnoredAny) => Err(A::Error::invalid_length(
-                    0,
-                    &"Actual size is longer then size_hint",
-                )),
-                None => Ok(x.0),
-            }
-        } else {
-            let mut com = self.0;
-            while let Some(a) = seq.next_element_seed(ArgKV(PhantomData))? {
-                if com
-                    .get_arguments()
-                    .any(|prv_arg| prv_arg.get_id() == a.get_id())
-                {
-                    com = com.mut_arg(a.get_id(), |mut prv_arg| {
-                        prv_arg.clone_from(&a);
-                        prv_arg
-                    })
-                } else {
-                    com = com.arg(a);
-                }
-            }
-            Ok(com)
-        }
+        while (seq.next_element_seed(&mut argkvo)?).is_some() {}
+        Ok(unsafe { argkvo.0.unwrap_unchecked() })
     }
 
     #[cfg(not(feature = "override-arg"))]
