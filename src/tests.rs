@@ -307,3 +307,11 @@ apple = { short =  }
     let mut de = toml::Deserializer::new(CLAP_TOML);
     assert!(wrap.deserialize(&mut de).is_err());
 }
+
+#[test]
+fn serialize(){
+    let command : CommandWrap = Command::new("ser_test").about("testing _ser").into();
+    let json = serde_json::to_string(&command).unwrap();
+    let command2 : CommandWrap = serde_json::from_str(&json).unwrap();
+    assert_eq!(command.get_name(), command2.get_name());
+}

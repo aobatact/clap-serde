@@ -110,6 +110,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 // subcommands : specialized
                 (subcommand_help_heading, &str),
                 (subcommand_negates_reqs, bool),
+                (subcommand_precedence_over_arg, bool),
                 (subcommand_required, bool),
                 (subcommand_value_name, &str),
                 (propagate_version, bool),
