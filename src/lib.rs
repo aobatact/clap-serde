@@ -28,6 +28,7 @@ pub mod documents;
 mod yaml;
 
 mod ser;
+pub use ser::app::NoSkip;
 
 #[cfg(all(test, feature = "snake-case-key"))]
 mod tests;
@@ -59,7 +60,7 @@ where
 }
 
 /**
-Wrapper of [`Command`] to deserialize.
+Wrapper of [`Command`] to serialize and deserialize.
 ```
 const CLAP_TOML: &'static str = r#"
 name = "app_clap_serde"
@@ -75,22 +76,45 @@ assert_eq!(app.get_about(), Some("test-clap-serde"));
 ```
 */
 #[derive(Debug, Clone)]
-pub struct CommandWrap<'a> {
+pub struct CommandWrap<'a, S = ()> {
     app: Command<'a>,
+    ser_setting: S,
+}
+
+impl<'a> CommandWrap<'a> {
+    /// Create a wrapper for [`Command`].
+    pub fn new(app: Command<'a>) -> Self {
+        Self {
+            app,
+            ser_setting: (),
+        }
+    }
+
+    /// Add a setting for serializeing.
+    /// See [`NoSkip`] for details.
+    pub fn with_setting<S>(self, ser_setting: S) -> CommandWrap<'a, S> {
+        CommandWrap {
+            app: self.app,
+            ser_setting,
+        }
+    }
 }
 
 #[deprecated]
 pub type AppWrap<'a> = CommandWrap<'a>;
 
-impl<'a> From<CommandWrap<'a>> for Command<'a> {
-    fn from(a: CommandWrap<'a>) -> Self {
+impl<'a, S> From<CommandWrap<'a, S>> for Command<'a> {
+    fn from(a: CommandWrap<'a, S>) -> Self {
         a.app
     }
 }
 
 impl<'a> From<Command<'a>> for CommandWrap<'a> {
     fn from(app: Command<'a>) -> Self {
-        CommandWrap { app }
+        CommandWrap {
+            app,
+            ser_setting: (),
+        }
     }
 }
 

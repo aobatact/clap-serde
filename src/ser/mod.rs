@@ -1,4 +1,4 @@
 #[macro_use]
 mod macros;
 
-mod app;
+pub(crate) mod app;

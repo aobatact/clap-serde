@@ -159,7 +159,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
             ]);
         }
 
-        Ok(CommandWrap { app })
+        Ok(app.into())
     }
 }
 

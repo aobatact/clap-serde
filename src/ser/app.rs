@@ -2,17 +2,18 @@ use crate::CommandWrap;
 use serde::ser::SerializeMap;
 use serde::Serialize;
 
-impl<'de> Serialize for CommandWrap<'de> {
+impl<'de, Setting: SerializeSetting> Serialize for CommandWrap<'de, Setting> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
         let command = &self.app;
-        let r = ser_value!(command, serializer, [
+        let setting = self.ser_setting.serialize_all();
+        let r = ser_value!(command, serializer, setting, [
             (name, get_name),
-            ref [
-                #[cfg(feature = "color")]
-                {crate::de::app::color::to_ser} (color, get_color),
+            #[cfg(feature = "color")]
+            [&] {crate::de::app::color::to_ser} (color, get_color),
+            is [
                 (no_binary_name, is_no_binary_name_set),
                 (dont_delimit_trailing_values,is_dont_delimit_trailing_values_set),
                 (disable_version_flag,is_disable_version_flag_set),
@@ -35,7 +36,7 @@ impl<'de> Serialize for CommandWrap<'de> {
                 (subcommand_negates_reqs,is_subcommand_negates_reqs_set),
                 (multicall,is_multicall_set)
             ],
-            opt [ 
+            opt [
                 (display_name, get_display_name),
                 (bin_name, get_bin_name),
                 (version, get_version),
@@ -60,5 +61,34 @@ impl<'de> Serialize for CommandWrap<'de> {
 
         ]);
         r
+    }
+}
+
+pub trait SerializeSetting {
+    fn serialize_all(&self) -> bool;
+}
+
+impl SerializeSetting for () {
+    #[inline]
+    fn serialize_all(&self) -> bool {
+        false
+    }
+}
+
+/// Serialize all the fields in Command.
+/// If not set, the flags (begin with `is_`) with `false`
+/// and values (begin with `get_`) with `None` will be skipped.
+/// ```
+/// # use clap::Command;
+/// # use clap_serde::*;
+/// # let command = Command::default();
+/// let wrap = CommandWrap::new(command).with_setting(NoSkip);
+/// ```
+#[derive(Debug, Clone, Copy)]
+pub struct NoSkip;
+impl SerializeSetting for NoSkip {
+    #[inline]
+    fn serialize_all(&self) -> bool {
+        true
     }
 }

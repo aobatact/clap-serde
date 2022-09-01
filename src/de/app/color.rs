@@ -11,7 +11,7 @@ enum_de!(ColorChoice,ColorChoice1,
     Never,
 });
 
-pub(crate) fn to_ser(cc : ColorChoice) -> ColorChoice1 {
+pub(crate) fn to_ser(cc: ColorChoice) -> ColorChoice1 {
     match cc {
         ColorChoice::Auto => ColorChoice1::Auto,
         ColorChoice::Always => ColorChoice1::Always,
