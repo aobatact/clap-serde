@@ -27,6 +27,8 @@ pub mod documents;
 #[deprecated(since = "0.4", note = "use serde-yaml instead")]
 mod yaml;
 
+mod ser;
+
 #[cfg(all(test, feature = "snake-case-key"))]
 mod tests;
 

@@ -8,7 +8,7 @@ use serde::{
 
 mod appsettings;
 #[cfg(feature = "color")]
-mod color;
+pub(crate) mod color;
 
 const TMP_APP_NAME: &str = "__tmp__deserialize__name__";
 impl<'de> Deserialize<'de> for CommandWrap<'de> {
