@@ -243,7 +243,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                 ]
             );
         }
-        Ok(ArgWrap { arg })
+        Ok(ArgWrap::new(arg))
     }
 }
 

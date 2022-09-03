@@ -2,3 +2,4 @@
 mod macros;
 
 pub(crate) mod app;
+mod arg;

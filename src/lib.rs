@@ -128,8 +128,18 @@ impl<'a> Deref for CommandWrap<'a> {
 
 /// Wrapper of [`Arg`] to deserialize with [`DeserializeSeed`](`serde::de::DeserializeSeed`).
 #[derive(Debug, Clone)]
-pub struct ArgWrap<'a> {
+pub struct ArgWrap<'a, S = ()> {
     arg: Arg<'a>,
+    pub(crate) ser_setting: S,
+}
+
+impl<'a> ArgWrap<'a> {
+    pub fn new(arg: Arg<'a>) -> Self {
+        Self {
+            arg,
+            ser_setting: (),
+        }
+    }
 }
 
 impl<'a> From<ArgWrap<'a>> for Arg<'a> {
@@ -140,7 +150,10 @@ impl<'a> From<ArgWrap<'a>> for Arg<'a> {
 
 impl<'a> From<Arg<'a>> for ArgWrap<'a> {
     fn from(arg: Arg<'a>) -> Self {
-        ArgWrap { arg }
+        ArgWrap {
+            arg,
+            ser_setting: (),
+        }
     }
 }
 

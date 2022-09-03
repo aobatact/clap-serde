@@ -76,8 +76,8 @@ impl SerializeSetting for () {
 }
 
 /// Serialize all the fields in Command.
-/// If not set, the flags (begin with `is_`) with `false`
-/// and values (begin with `get_`) with `None` will be skipped.
+/// If not set, the flags (getter begin with `is_`) with `false`
+/// and values (getter begin with `get_`) with `None` will be skipped.
 /// ```
 /// # use clap::Command;
 /// # use clap_serde::*;
