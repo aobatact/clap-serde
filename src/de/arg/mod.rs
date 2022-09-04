@@ -1,12 +1,43 @@
 use self::{arg_action::ArgAction, value_hint::ValueHint, value_parser::ValueParser};
-use crate::ArgWrap;
 use clap::{Arg, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ops::Deref};
 
 mod arg_action;
 mod value_hint;
 mod value_parser;
+
+/// Wrapper of [`Arg`] to deserialize with [`DeserializeSeed`](`serde::de::DeserializeSeed`).
+#[derive(Debug, Clone)]
+pub struct ArgWrap<'a> {
+    arg: Arg<'a>,
+}
+
+impl<'a> ArgWrap<'a> {
+    pub fn new(arg: Arg<'a>) -> Self {
+        Self { arg }
+    }
+}
+
+impl<'a> From<ArgWrap<'a>> for Arg<'a> {
+    fn from(arg: ArgWrap<'a>) -> Self {
+        arg.arg
+    }
+}
+
+impl<'a> From<Arg<'a>> for ArgWrap<'a> {
+    fn from(arg: Arg<'a>) -> Self {
+        ArgWrap { arg }
+    }
+}
+
+impl<'a> Deref for ArgWrap<'a> {
+    type Target = Arg<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.arg
+    }
+}
 
 #[cfg(feature = "override-arg")]
 struct ArgKVO<'a>(Option<Command<'a>>);

@@ -1,8 +1,56 @@
-use crate::CommandWrap;
+use clap::Command;
 use serde::ser::SerializeMap;
 use serde::Serialize;
+use std::ops::Deref;
 
-impl<'de, Setting: SerializeSetting> Serialize for CommandWrap<'de, Setting> {
+#[derive(Debug, Clone)]
+pub struct CommandWrapRef<'a, 'b, S = ()> {
+    app: &'b Command<'a>,
+    ser_setting: S,
+}
+impl<'a, 'b> CommandWrapRef<'a, 'b> {
+    /// Create a wrapper for [`Command`].
+    pub fn new(app: &'b Command<'a>) -> Self {
+        Self {
+            app,
+            ser_setting: (),
+        }
+    }
+
+    /// Add a setting for serializeing.
+    /// See [`NoSkip`] for details.
+    pub fn with_setting<S>(self, ser_setting: S) -> CommandWrapRef<'a, 'b, S> {
+        CommandWrapRef {
+            app: self.app,
+            ser_setting,
+        }
+    }
+}
+
+impl<'a, 'b> Deref for CommandWrapRef<'a, 'b> {
+    type Target = Command<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.app
+    }
+}
+
+impl<'a, 'b, S> From<CommandWrapRef<'a, 'b, S>> for &'b Command<'a> {
+    fn from(a: CommandWrapRef<'a, 'b, S>) -> Self {
+        a.app
+    }
+}
+
+impl<'a, 'b> From<&'b Command<'a>> for CommandWrapRef<'a, 'b> {
+    fn from(app: &'b Command<'a>) -> Self {
+        CommandWrapRef {
+            app,
+            ser_setting: (),
+        }
+    }
+}
+
+impl<'de, 'de2, Setting: SerializeSetting> Serialize for CommandWrapRef<'de, 'de2, Setting> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,

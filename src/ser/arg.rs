@@ -88,20 +88,23 @@ impl<'se, 'wrap, Setting: SerializeSetting> Serialize for ArgWrapMaps<'se, 'wrap
     }
 }
 
-pub(crate) struct  ArgsWrap<'a,'b, S>{
-    command : &'b Command<'a>,
-    setting: S
+pub(crate) struct ArgsWrap<'a, 'b, S> {
+    command: &'b Command<'a>,
+    setting: S,
 }
 
 impl<'a, 'b, S> ArgsWrap<'a, 'b, S> {
-    pub(crate) fn new(command: &'b Command<'a>, setting: S) -> Self { Self { command, setting } }
+    pub(crate) fn new(command: &'b Command<'a>, setting: S) -> Self {
+        Self { command, setting }
+    }
 }
 
 impl<'a, 'b, Se: SerializeSetting> Serialize for ArgsWrap<'a, 'b, Se> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: Serializer {
-            ser_args(serializer, self.command.get_arguments(), &self.setting)
+        S: Serializer,
+    {
+        ser_args(serializer, self.command.get_arguments(), &self.setting)
     }
 }
 

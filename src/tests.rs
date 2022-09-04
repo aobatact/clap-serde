@@ -1,4 +1,4 @@
-use crate::CommandWrap;
+use crate::{ser::app::CommandWrapRef, CommandWrap};
 use clap::{builder::ValueParser, Command};
 
 #[test]
@@ -310,7 +310,8 @@ apple = { short =  }
 
 #[test]
 fn serialize() {
-    let command: CommandWrap = Command::new("ser_test").about("testing _ser").into();
+    let c = Command::new("ser_test").about("testing _ser");
+    let command: CommandWrapRef = (&c).into();
     let json = serde_json::to_string(&command).unwrap();
     let command2: CommandWrap = serde_json::from_str(&json).unwrap();
     assert_eq!(command.get_name(), command2.get_name());
@@ -318,7 +319,8 @@ fn serialize() {
 
 #[test]
 fn serialize_all() {
-    let command: CommandWrap = Command::new("ser_test").about("testing _ser").into();
+    let c = Command::new("ser_test").about("testing _ser");
+    let command: CommandWrapRef = (&c).into();
     let json = serde_json::to_string(&command).unwrap();
     let command2: CommandWrap = serde_json::from_str(&json).unwrap();
     assert_eq!(command.get_name(), command2.get_name());
