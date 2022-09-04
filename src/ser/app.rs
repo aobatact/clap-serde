@@ -1,28 +1,32 @@
+use crate::CommandWrap;
 use clap::Command;
 use serde::ser::SerializeMap;
 use serde::Serialize;
 use std::ops::Deref;
 
+use super::SerializeConfig;
+
 #[derive(Debug, Clone)]
-pub struct CommandWrapRef<'a, 'b, S = ()> {
-    app: &'b Command<'a>,
-    ser_setting: S,
+pub struct CommandWrapRef<'command, 'wrap, C = ()> {
+    command: &'wrap Command<'command>,
+    config: C,
 }
+
 impl<'a, 'b> CommandWrapRef<'a, 'b> {
     /// Create a wrapper for [`Command`].
     pub fn new(app: &'b Command<'a>) -> Self {
         Self {
-            app,
-            ser_setting: (),
+            command: app,
+            config: (),
         }
     }
 
     /// Add a setting for serializeing.
     /// See [`NoSkip`] for details.
-    pub fn with_setting<S>(self, ser_setting: S) -> CommandWrapRef<'a, 'b, S> {
+    pub fn with_setting<C: SerializeConfig>(self, config: C) -> CommandWrapRef<'a, 'b, C> {
         CommandWrapRef {
-            app: self.app,
-            ser_setting,
+            command: self.command,
+            config,
         }
     }
 }
@@ -31,32 +35,51 @@ impl<'a, 'b> Deref for CommandWrapRef<'a, 'b> {
     type Target = Command<'a>;
 
     fn deref(&self) -> &Self::Target {
-        &self.app
+        &self.command
     }
 }
 
 impl<'a, 'b, S> From<CommandWrapRef<'a, 'b, S>> for &'b Command<'a> {
     fn from(a: CommandWrapRef<'a, 'b, S>) -> Self {
-        a.app
+        a.command
     }
 }
 
 impl<'a, 'b> From<&'b Command<'a>> for CommandWrapRef<'a, 'b> {
-    fn from(app: &'b Command<'a>) -> Self {
+    fn from(command: &'b Command<'a>) -> Self {
         CommandWrapRef {
-            app,
-            ser_setting: (),
+            command,
+            config: (),
         }
     }
 }
 
-impl<'de, 'de2, Setting: SerializeSetting> Serialize for CommandWrapRef<'de, 'de2, Setting> {
+impl<'a, 'b> From<&'b CommandWrap<'a>> for CommandWrapRef<'a, 'b> {
+    fn from(app: &'b CommandWrap<'a>) -> Self {
+        CommandWrapRef {
+            command: &app.app,
+            config: (),
+        }
+    }
+}
+
+impl<'a> Serialize for CommandWrap<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        let command = &self.app;
-        let setting = self.ser_setting.serialize_all();
+        let wrap_refe = CommandWrapRef::from(self);
+        wrap_refe.serialize(serializer)
+    }
+}
+
+impl<'a, 'b, C: SerializeConfig> Serialize for CommandWrapRef<'a, 'b, C> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let command = &self.command;
+        let setting = self.config.serialize_all();
         let r = ser_value!(command, serializer, setting, [
             (name, get_name),
             #[cfg(feature = "color")]
@@ -105,46 +128,10 @@ impl<'de, 'de2, Setting: SerializeSetting> Serialize for CommandWrapRef<'de, 'de
                 (after_long_help, get_after_long_help),
             ]
             //groups
-            //args
             speciallize [
-                (args, |s| {super::arg::ArgsWrap::new(s,&self.ser_setting)})
+                (args, |s| {super::arg::ArgsWrap::new(s, &self.config)})
             ]
         ]);
         r
-    }
-}
-
-pub trait SerializeSetting {
-    fn serialize_all(&self) -> bool;
-}
-
-impl SerializeSetting for () {
-    #[inline]
-    fn serialize_all(&self) -> bool {
-        false
-    }
-}
-
-impl<S: SerializeSetting> SerializeSetting for &S {
-    fn serialize_all(&self) -> bool {
-        (*self).serialize_all()
-    }
-}
-
-/// Serialize all the fields in Command.
-/// If not set, the flags (getter begin with `is_`) with `false`
-/// and values (getter begin with `get_`) with `None` will be skipped.
-/// ```
-/// # use clap::Command;
-/// # use clap_serde::*;
-/// # let command = Command::default();
-/// let wrap = CommandWrap::new(command).with_setting(NoSkip);
-/// ```
-#[derive(Debug, Clone, Copy)]
-pub struct NoSkip;
-impl SerializeSetting for NoSkip {
-    #[inline]
-    fn serialize_all(&self) -> bool {
-        true
     }
 }

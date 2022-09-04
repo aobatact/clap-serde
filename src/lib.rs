@@ -15,8 +15,9 @@ compile_error!("Case setting feature is missing. Either one should be set.");
 ))]
 compile_error!("Case setting feature is conflicting. Only one should be set.");
 
-#[macro_use]
 mod de;
+mod ser;
+
 #[cfg(feature = "docsrs")]
 pub mod documents;
 
@@ -26,12 +27,11 @@ mod yaml;
 #[cfg(feature = "yaml")]
 pub use yaml::{yaml_to_app, YamlWrap};
 
-mod ser;
 pub use de::app::CommandWrap;
 pub use de::arg::ArgWrap;
-pub use ser::app::NoSkip;
 pub use ser::app::CommandWrapRef;
 pub use ser::arg::ArgWrapRef;
+pub use ser::NoSkip;
 
 #[deprecated(note = "use CommandWrap instead")]
 pub type AppWrap<'a> = CommandWrap<'a>;

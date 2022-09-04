@@ -1,16 +1,34 @@
-use super::app::SerializeSetting;
+use super::SerializeConfig;
 use clap::{Arg, Command};
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
 
-/// Wrapper of [`Arg`] to deserialize with [`DeserializeSeed`](`serde::de::DeserializeSeed`).
+/// Wrapper of `&[Arg]` to serialize.
 #[derive(Debug, Clone)]
-pub struct ArgWrapRef<'a, 'b, S = ()> {
+pub struct ArgWrapRef<'a, 'b, C = ()> {
     arg: &'b Arg<'a>,
-    pub(crate) ser_setting: S,
+    pub(crate) config: C,
 }
 
-impl<'se, 'b, Setting: SerializeSetting> Serialize for ArgWrapRef<'se, 'b, Setting> {
+impl<'a, 'b> ArgWrapRef<'a, 'b> {
+    pub fn new(arg: &'b Arg<'a>) -> Self {
+        Self { arg, config: () }
+    }
+    pub fn with_config<C>(self, config: C) -> ArgWrapRef<'a, 'b, C> {
+        ArgWrapRef {
+            arg: self.arg,
+            config,
+        }
+    }
+}
+
+impl<'a, 'b> From<&'b Arg<'a>> for ArgWrapRef<'a, 'b> {
+    fn from(arg: &'b Arg<'a>) -> Self {
+        Self { arg, config: () }
+    }
+}
+
+impl<'se, 'b, C: SerializeConfig> Serialize for ArgWrapRef<'se, 'b, C> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -29,13 +47,13 @@ impl<'se, 'wrap, S> ArgWrapMaps<'se, 'wrap, S> {
     }
 }
 
-impl<'se, 'wrap, Setting: SerializeSetting> Serialize for ArgWrapMaps<'se, 'wrap, Setting> {
+impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
         let arg = &self.wrap.arg;
-        let setting = self.wrap.ser_setting.serialize_all();
+        let setting = self.wrap.config.serialize_all();
         let r = ser_value!(arg, serializer, setting, [
             // (id, get_id),
             // (default_value, get_default_values),
@@ -88,23 +106,23 @@ impl<'se, 'wrap, Setting: SerializeSetting> Serialize for ArgWrapMaps<'se, 'wrap
     }
 }
 
-pub(crate) struct ArgsWrap<'a, 'b, S> {
+pub(crate) struct ArgsWrap<'a, 'b, C> {
     command: &'b Command<'a>,
-    setting: S,
+    config: C,
 }
 
-impl<'a, 'b, S> ArgsWrap<'a, 'b, S> {
-    pub(crate) fn new(command: &'b Command<'a>, setting: S) -> Self {
-        Self { command, setting }
+impl<'a, 'b, C> ArgsWrap<'a, 'b, C> {
+    pub fn new(command: &'b Command<'a>, config: C) -> Self {
+        Self { command, config }
     }
 }
 
-impl<'a, 'b, Se: SerializeSetting> Serialize for ArgsWrap<'a, 'b, Se> {
+impl<'a, 'b, C: SerializeConfig> Serialize for ArgsWrap<'a, 'b, C> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        ser_args(serializer, self.command.get_arguments(), &self.setting)
+        ser_args(serializer, self.command.get_arguments(), &self.config)
     }
 }
 
@@ -113,14 +131,14 @@ pub(crate) fn ser_args<
     'b,
     Ser: Serializer,
     I: Iterator<Item = &'b Arg<'a>>,
-    S: SerializeSetting,
+    C: SerializeConfig,
 >(
     serializer: Ser,
     args: I,
-    setting: S,
+    setting: C,
 ) -> Result<Ser::Ok, Ser::Error> {
     serializer.collect_seq(args.map(|arg| ArgWrapRef {
         arg,
-        ser_setting: &setting,
+        config: &setting,
     }))
 }

@@ -10,7 +10,7 @@ mod appsettings;
 #[cfg(feature = "color")]
 pub(crate) mod color;
 
-/// Wrapper of [`Command`] to deserialize.
+/// Wrapper of [`Command`] to serialzie and deserialize.
 /// ```
 /// const CLAP_TOML: &'static str = r#"
 /// name = "app_clap_serde"
@@ -26,7 +26,7 @@ pub(crate) mod color;
 /// ```
 #[derive(Debug, Clone)]
 pub struct CommandWrap<'a> {
-    app: Command<'a>,
+    pub(crate) app: Command<'a>,
 }
 
 impl<'a> CommandWrap<'a> {
