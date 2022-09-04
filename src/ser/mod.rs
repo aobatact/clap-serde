@@ -4,7 +4,8 @@ mod macros;
 pub(crate) mod app;
 pub(crate) mod arg;
 
-pub trait SerializeConfig {
+/// Config to serialzie [`Command`](`clap::Command`) and [`Arg`](`clap::Arg`).
+pub trait SerializeConfig : Clone {
     /// Serialize all the fields in [`Command`] and [`Arg`](`clap::Arg`).
     /// If this returns false, the flags (getter begin with `is_`) with `false`
     /// and values (getter begin with `get_`) with `None` will be skipped.
@@ -24,7 +25,7 @@ impl<S: SerializeConfig> SerializeConfig for &S {
     }
 }
 
-/// Serialize all the fields in [`Command`] and [`Arg`](`clap::Arg`).
+/// Serialize all the fields in [`Command`](`clap::Command`) and [`Arg`](`clap::Arg`).
 /// If not set, the flags (getter begin with `is_`) with `false`
 /// and values (getter begin with `get_`) with `None` will be skipped.
 /// ```

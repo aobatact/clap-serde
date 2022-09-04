@@ -3,7 +3,7 @@ use clap::{Arg, Command};
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
 
-/// Wrapper of `&[Arg]` to serialize.
+/// Wrapper of `&`[`Arg`] to serialize.
 #[derive(Debug, Clone)]
 pub struct ArgWrapRef<'a, 'b, C = ()> {
     arg: &'b Arg<'a>,
@@ -14,7 +14,7 @@ impl<'a, 'b> ArgWrapRef<'a, 'b> {
     pub fn new(arg: &'b Arg<'a>) -> Self {
         Self { arg, config: () }
     }
-    pub fn with_config<C>(self, config: C) -> ArgWrapRef<'a, 'b, C> {
+    pub fn with_config<C: SerializeConfig>(self, config: C) -> ArgWrapRef<'a, 'b, C> {
         ArgWrapRef {
             arg: self.arg,
             config,
@@ -53,8 +53,8 @@ impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
         S: serde::Serializer,
     {
         let arg = &self.wrap.arg;
-        let setting = self.wrap.config.serialize_all();
-        let r = ser_value!(arg, serializer, setting, [
+        let config = self.wrap.config.serialize_all();
+        let r = ser_value!(arg, serializer, config, [
             // (id, get_id),
             // (default_value, get_default_values),
             is [
@@ -122,23 +122,11 @@ impl<'a, 'b, C: SerializeConfig> Serialize for ArgsWrap<'a, 'b, C> {
     where
         S: Serializer,
     {
-        ser_args(serializer, self.command.get_arguments(), &self.config)
+        let args = self.command.get_arguments();
+        let setting = &self.config;
+        serializer.collect_seq(args.map(|arg| ArgWrapRef {
+            arg,
+            config: setting.clone(),
+        }))
     }
-}
-
-pub(crate) fn ser_args<
-    'a: 'b,
-    'b,
-    Ser: Serializer,
-    I: Iterator<Item = &'b Arg<'a>>,
-    C: SerializeConfig,
->(
-    serializer: Ser,
-    args: I,
-    setting: C,
-) -> Result<Ser::Ok, Ser::Error> {
-    serializer.collect_seq(args.map(|arg| ArgWrapRef {
-        arg,
-        config: &setting,
-    }))
 }

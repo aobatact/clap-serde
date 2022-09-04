@@ -6,6 +6,7 @@ use std::ops::Deref;
 
 use super::SerializeConfig;
 
+/// Wrapper of `&`[`Command`] to serialize.
 #[derive(Debug, Clone)]
 pub struct CommandWrapRef<'command, 'wrap, C = ()> {
     command: &'wrap Command<'command>,
@@ -22,7 +23,7 @@ impl<'a, 'b> CommandWrapRef<'a, 'b> {
     }
 
     /// Add a setting for serializeing.
-    /// See [`NoSkip`] for details.
+    /// See [`NoSkip`](`crate::NoSkip`) for details.
     pub fn with_setting<C: SerializeConfig>(self, config: C) -> CommandWrapRef<'a, 'b, C> {
         CommandWrapRef {
             command: self.command,
@@ -68,8 +69,8 @@ impl<'a> Serialize for CommandWrap<'a> {
     where
         S: serde::Serializer,
     {
-        let wrap_refe = CommandWrapRef::from(self);
-        wrap_refe.serialize(serializer)
+        let wrap_ref = CommandWrapRef::from(self);
+        wrap_ref.serialize(serializer)
     }
 }
 
@@ -78,9 +79,9 @@ impl<'a, 'b, C: SerializeConfig> Serialize for CommandWrapRef<'a, 'b, C> {
     where
         S: serde::Serializer,
     {
-        let command = &self.command;
-        let setting = self.config.serialize_all();
-        let r = ser_value!(command, serializer, setting, [
+        let command = self.command;
+        let config = self.config.serialize_all();
+        let r = ser_value!(command, serializer, config, [
             (name, get_name),
             #[cfg(feature = "color")]
             [&] {crate::de::app::color::to_ser} (color, get_color),
@@ -129,9 +130,38 @@ impl<'a, 'b, C: SerializeConfig> Serialize for CommandWrapRef<'a, 'b, C> {
             ]
             //groups
             speciallize [
-                (args, |s| {super::arg::ArgsWrap::new(s, &self.config)})
+                (args, |s| {super::arg::ArgsWrap::new(s, &self.config)}),
+                (subcommands, |s| {SubCommandsWrap(s, self.config.clone())})
             ]
         ]);
         r
+    }
+}
+
+struct SubCommandsWrap<'a, 'b, C>(&'b Command<'a>, C);
+
+impl<'a, 'b, C: SerializeConfig> Serialize for SubCommandsWrap<'a, 'b, C> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.collect_seq(self.0.get_subcommands().map(|s| SubcommandWrap(s, self.1.clone())))
+    }
+}
+
+struct SubcommandWrap<'a, 'b, C>(&'b Command<'a>, C);
+
+impl<'a, 'b, C: SerializeConfig> Serialize for SubcommandWrap<'a, 'b, C> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.collect_map(Some((
+            self.0.get_name(),
+            CommandWrapRef {
+                command: self.0,
+                config: self.1.clone(),
+            },
+        )))
     }
 }
