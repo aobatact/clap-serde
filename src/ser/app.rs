@@ -58,7 +58,9 @@ impl<'de, Setting: SerializeSetting> Serialize for CommandWrap<'de, Setting> {
             ]
             //groups
             //args
-
+            speciallize [
+                (args, |s| {super::arg::ArgsWrap::new(s,&self.ser_setting)})
+            ]
         ]);
         r
     }
@@ -72,6 +74,12 @@ impl SerializeSetting for () {
     #[inline]
     fn serialize_all(&self) -> bool {
         false
+    }
+}
+
+impl<S: SerializeSetting> SerializeSetting for &S {
+    fn serialize_all(&self) -> bool {
+        (*self).serialize_all()
     }
 }
 

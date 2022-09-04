@@ -1,19 +1,44 @@
-use crate::ArgWrap;
-use serde::ser::SerializeMap;
-use serde::Serialize;
-
 use super::app::SerializeSetting;
+use clap::{Arg, Command};
+use serde::ser::SerializeMap;
+use serde::{Serialize, Serializer};
 
-impl<'de, Setting: SerializeSetting> Serialize for ArgWrap<'de, Setting> {
+/// Wrapper of [`Arg`] to deserialize with [`DeserializeSeed`](`serde::de::DeserializeSeed`).
+#[derive(Debug, Clone)]
+pub struct ArgWrapRef<'a, 'b, S = ()> {
+    arg: &'b Arg<'a>,
+    pub(crate) ser_setting: S,
+}
+
+impl<'se, 'b, Setting: SerializeSetting> Serialize for ArgWrapRef<'se, 'b, Setting> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        let arg = &self.arg;
-        let setting = self.ser_setting.serialize_all();
+        serializer.collect_map(Some((self.arg.get_id(), ArgWrapMaps::new(self))))
+    }
+}
+
+pub struct ArgWrapMaps<'se, 'wrap, S> {
+    wrap: &'wrap ArgWrapRef<'se, 'wrap, S>,
+}
+
+impl<'se, 'wrap, S> ArgWrapMaps<'se, 'wrap, S> {
+    pub fn new(wrap: &'wrap ArgWrapRef<'se, 'wrap, S>) -> Self {
+        Self { wrap }
+    }
+}
+
+impl<'se, 'wrap, Setting: SerializeSetting> Serialize for ArgWrapMaps<'se, 'wrap, Setting> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let arg = &self.wrap.arg;
+        let setting = self.wrap.ser_setting.serialize_all();
         let r = ser_value!(arg, serializer, setting, [
-            (id, get_id),
-            (get_default_values, get_default_values),
+            // (id, get_id),
+            // (default_value, get_default_values),
             is [
                 (positional, is_positional),
                 (required,is_required_set),
@@ -54,11 +79,45 @@ impl<'de, Setting: SerializeSetting> Serialize for ArgWrap<'de, Setting> {
                 [&] (index,get_index),
                 //value_hint
                 #[cfg(feature = "env")]
-                (get_env, get_env),
+                (env, get_env),
                 //get_action
             ]
         ]);
 
         r
     }
+}
+
+pub(crate) struct  ArgsWrap<'a,'b, S>{
+    command : &'b Command<'a>,
+    setting: S
+}
+
+impl<'a, 'b, S> ArgsWrap<'a, 'b, S> {
+    pub(crate) fn new(command: &'b Command<'a>, setting: S) -> Self { Self { command, setting } }
+}
+
+impl<'a, 'b, Se: SerializeSetting> Serialize for ArgsWrap<'a, 'b, Se> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer {
+            ser_args(serializer, self.command.get_arguments(), &self.setting)
+    }
+}
+
+pub(crate) fn ser_args<
+    'a: 'b,
+    'b,
+    Ser: Serializer,
+    I: Iterator<Item = &'b Arg<'a>>,
+    S: SerializeSetting,
+>(
+    serializer: Ser,
+    args: I,
+    setting: S,
+) -> Result<Ser::Ok, Ser::Error> {
+    serializer.collect_seq(args.map(|arg| ArgWrapRef {
+        arg,
+        ser_setting: &setting,
+    }))
 }
