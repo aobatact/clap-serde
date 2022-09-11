@@ -1,12 +1,13 @@
 #[macro_use]
 mod macros;
+pub(crate) use macros::IterSer;
 
 pub(crate) mod app;
 pub(crate) mod arg;
 
 /// Config to serialzie [`Command`](`clap::Command`) and [`Arg`](`clap::Arg`).
-pub trait SerializeConfig : Clone {
-    /// Serialize all the fields in [`Command`] and [`Arg`](`clap::Arg`).
+pub trait SerializeConfig: Clone {
+    /// Serialize all the fields in [`Command`](`clap::Command`) and [`Arg`](`clap::Arg`).
     /// If this returns false, the flags (getter begin with `is_`) with `false`
     /// and values (getter begin with `get_`) with `None` will be skipped.
     fn serialize_all(&self) -> bool;

@@ -10,7 +10,7 @@ mod value_parser;
 /// Wrapper of [`Arg`] to deserialize with [`DeserializeSeed`](`serde::de::DeserializeSeed`).
 #[derive(Debug, Clone)]
 pub struct ArgWrap<'a> {
-    arg: Arg<'a>,
+    pub(crate) arg: Arg<'a>,
 }
 
 impl<'a> ArgWrap<'a> {

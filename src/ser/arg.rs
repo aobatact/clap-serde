@@ -1,4 +1,5 @@
 use super::SerializeConfig;
+use crate::ArgWrap;
 use clap::{Arg, Command};
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
@@ -28,6 +29,24 @@ impl<'a, 'b> From<&'b Arg<'a>> for ArgWrapRef<'a, 'b> {
     }
 }
 
+impl<'a, 'b> From<&'b ArgWrap<'a>> for ArgWrapRef<'a, 'b> {
+    fn from(arg: &'b ArgWrap<'a>) -> Self {
+        Self {
+            arg: &arg.arg,
+            config: (),
+        }
+    }
+}
+
+impl<'se> Serialize for ArgWrap<'se> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        ArgWrapRef::from(self).serialize(serializer)
+    }
+}
+
 impl<'se, 'b, C: SerializeConfig> Serialize for ArgWrapRef<'se, 'b, C> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -53,7 +72,7 @@ impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
         S: serde::Serializer,
     {
         let arg = &self.wrap.arg;
-        let config = self.wrap.config.serialize_all();
+        let config = &self.wrap.config;
         let r = ser_value!(arg, serializer, config, [
             // (id, get_id),
             // (default_value, get_default_values),

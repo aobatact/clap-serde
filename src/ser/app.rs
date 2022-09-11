@@ -3,7 +3,7 @@ use clap::Command;
 use serde::ser::SerializeMap;
 use serde::Serialize;
 use std::ops::Deref;
-
+use super::IterSer;
 use super::SerializeConfig;
 
 /// Wrapper of `&`[`Command`] to serialize.
@@ -36,7 +36,7 @@ impl<'a, 'b> Deref for CommandWrapRef<'a, 'b> {
     type Target = Command<'a>;
 
     fn deref(&self) -> &Self::Target {
-        &self.command
+        self.command
     }
 }
 
@@ -64,12 +64,12 @@ impl<'a, 'b> From<&'b CommandWrap<'a>> for CommandWrapRef<'a, 'b> {
     }
 }
 
-impl<'a> Serialize for CommandWrap<'a> {
+impl<'a, 'b> Serialize for &'b CommandWrap<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        let wrap_ref = CommandWrapRef::from(self);
+        let wrap_ref = CommandWrapRef::from(*self);
         wrap_ref.serialize(serializer)
     }
 }
@@ -80,7 +80,7 @@ impl<'a, 'b, C: SerializeConfig> Serialize for CommandWrapRef<'a, 'b, C> {
         S: serde::Serializer,
     {
         let command = self.command;
-        let config = self.config.serialize_all();
+        let config = &self.config;
         let r = ser_value!(command, serializer, config, [
             (name, get_name),
             #[cfg(feature = "color")]
@@ -119,14 +119,18 @@ impl<'a, 'b, C: SerializeConfig> Serialize for CommandWrapRef<'a, 'b, C> {
                 (about, get_about),
                 (long_about, get_long_about),
                 (next_help_heading, get_next_help_heading),
-                // visible alias
-                // subcommands
                 (subcommand_help_heading, get_subcommand_help_heading),
                 (subcommand_value_name, get_subcommand_value_name),
                 (before_help, get_before_help),
                 (before_long_help, get_before_long_help),
                 (after_help, get_after_help),
                 (after_long_help, get_after_long_help),
+            ]
+            iter [
+                (visible_aliases, Command::get_visible_aliases),
+                (visible_short_flag_aliaes, Command::get_visible_short_flag_aliases),
+                (visible_long_flag_aliaes, Command::get_visible_long_flag_aliases)
+                //missing get_hidden_aliases in Command
             ]
             //groups
             speciallize [
@@ -145,7 +149,11 @@ impl<'a, 'b, C: SerializeConfig> Serialize for SubCommandsWrap<'a, 'b, C> {
     where
         S: serde::Serializer,
     {
-        serializer.collect_seq(self.0.get_subcommands().map(|s| SubcommandWrap(s, self.1.clone())))
+        serializer.collect_seq(
+            self.0
+                .get_subcommands()
+                .map(|s| SubcommandWrap(s, self.1.clone())),
+        )
     }
 }
 
