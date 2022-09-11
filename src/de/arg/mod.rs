@@ -271,6 +271,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "value_parser" => {
                         arg.value_parser(map.next_value::<ValueParser>()?)
                     }
+                    "positional" => {map.next_value::<bool>()?;/* noop */ arg}
                 ]
             );
         }

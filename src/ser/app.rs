@@ -32,7 +32,7 @@ impl<'a, 'b> CommandWrapRef<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Deref for CommandWrapRef<'a, 'b> {
+impl<'a, 'b, C> Deref for CommandWrapRef<'a, 'b, C> {
     type Target = Command<'a>;
 
     fn deref(&self) -> &Self::Target {
@@ -46,11 +46,11 @@ impl<'a, 'b, S> From<CommandWrapRef<'a, 'b, S>> for &'b Command<'a> {
     }
 }
 
-impl<'a, 'b> From<&'b Command<'a>> for CommandWrapRef<'a, 'b> {
+impl<'a, 'b, S : Default> From<&'b Command<'a>> for CommandWrapRef<'a, 'b, S> {
     fn from(command: &'b Command<'a>) -> Self {
         CommandWrapRef {
             command,
-            config: (),
+            config: S::default(),
         }
     }
 }
@@ -128,8 +128,8 @@ impl<'a, 'b, C: SerializeConfig> Serialize for CommandWrapRef<'a, 'b, C> {
             ]
             iter [
                 (visible_aliases, Command::get_visible_aliases),
-                (visible_short_flag_aliaes, Command::get_visible_short_flag_aliases),
-                (visible_long_flag_aliaes, Command::get_visible_long_flag_aliases)
+                (visible_short_flag_aliases, Command::get_visible_short_flag_aliases),
+                (visible_long_flag_aliases, Command::get_visible_long_flag_aliases)
                 //missing get_hidden_aliases in Command
             ]
             //groups

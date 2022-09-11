@@ -111,7 +111,7 @@ impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
                 (long,get_long),
                 // (get_possible_values,get_possible_values),
                 (value_names,get_value_names),
-                [&] (num_vals,get_num_vals),
+                [&] (number_of_values, get_num_vals),
                 [&] (value_delimiter, get_value_delimiter),
                 [&] (index,get_index),
                 //value_hint

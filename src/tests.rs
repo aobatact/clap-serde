@@ -1,4 +1,4 @@
-use crate::{ser::app::CommandWrapRef, CommandWrap};
+use crate::{ser::app::CommandWrapRef, CommandWrap, NoSkip};
 use clap::{builder::ValueParser, Command};
 
 #[test]
@@ -320,7 +320,7 @@ fn serialize() {
 #[test]
 fn serialize_all() {
     let c = Command::new("ser_test").about("testing _ser");
-    let command: CommandWrapRef = (&c).into();
+    let command: CommandWrapRef<NoSkip> = (&c).into();
     let json = serde_json::to_string(&command).unwrap();
     let command2: CommandWrap = serde_json::from_str(&json).unwrap();
     assert_eq!(command.get_name(), command2.get_name());

@@ -35,7 +35,7 @@ impl<S: SerializeConfig> SerializeConfig for &S {
 /// # let command = Command::default();
 /// let wrap = CommandWrapRef::new(&command).with_setting(NoSkip);
 /// ```
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct NoSkip;
 impl SerializeConfig for NoSkip {
     #[inline]

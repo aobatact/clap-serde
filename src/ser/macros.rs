@@ -29,7 +29,7 @@ macro_rules! ser_value {
             {
                 if serialize_all
                 {
-                    map.serialize_entry( stringify!($field_opt), &($command.$getter_opt())$(.map(|v|$($ex_r)*(v)))*)?;
+                    map.serialize_entry( stringify!($field_opt), &($command.$getter_opt())$(.map(|v|$($ex_r)*(v)))*.unwrap_or_default())?;
                 }
                 else {
                     if let Some(value) = $command.$getter_opt()
