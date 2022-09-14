@@ -4,7 +4,7 @@ use serde::de::{DeserializeSeed, Error, Visitor};
 use std::{marker::PhantomData, ops::Deref};
 
 mod arg_action;
-mod value_hint;
+pub(crate) mod value_hint;
 mod value_parser;
 
 /// Wrapper of [`Arg`] to deserialize with [`DeserializeSeed`](`serde::de::DeserializeSeed`).

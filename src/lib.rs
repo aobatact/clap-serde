@@ -15,7 +15,7 @@ compile_error!("Case setting feature is missing. Either one should be set.");
 ))]
 compile_error!("Case setting feature is conflicting. Only one should be set.");
 
-mod de;
+pub(crate) mod de;
 mod ser;
 
 #[cfg(feature = "docsrs")]

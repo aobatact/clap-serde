@@ -109,12 +109,10 @@ impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
                 [&] (visible_short_aliases,get_visible_short_aliases),
                 //aliases
                 (long,get_long),
-                // (get_possible_values,get_possible_values),
                 (value_names,get_value_names),
                 [&] (number_of_values, get_num_vals),
                 [&] (value_delimiter, get_value_delimiter),
                 [&] (index,get_index),
-                //value_hint
                 #[cfg(feature = "env")]
                 (env, get_env),
                 //get_action
@@ -122,7 +120,8 @@ impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
                 [&] (visible_short_aliases, get_visible_short_aliases),
             ]
             specialize  [
-                (default_values, Arg::get_default_values, |x : &[&std::ffi::OsStr]| { x.len() > 0 } )
+                (default_values, Arg::get_default_values, |x : &[&std::ffi::OsStr]| { x.len() > 0 } ),
+                (value_hint, |s| { crate::de::arg::value_hint::ValueHint::from_vh(Arg::get_value_hint(s)) })
             ]
         ]);
 
