@@ -1,10 +1,10 @@
+use super::IterSer;
+use super::SerializeConfig;
 use crate::CommandWrap;
 use clap::Command;
 use serde::ser::SerializeMap;
 use serde::Serialize;
 use std::ops::Deref;
-use super::IterSer;
-use super::SerializeConfig;
 
 /// Wrapper of `&`[`Command`] to serialize.
 #[derive(Debug, Clone)]
@@ -40,26 +40,26 @@ impl<'a, 'b, C> Deref for CommandWrapRef<'a, 'b, C> {
     }
 }
 
-impl<'a, 'b, S> From<CommandWrapRef<'a, 'b, S>> for &'b Command<'a> {
-    fn from(a: CommandWrapRef<'a, 'b, S>) -> Self {
+impl<'a, 'b, C> From<CommandWrapRef<'a, 'b, C>> for &'b Command<'a> {
+    fn from(a: CommandWrapRef<'a, 'b, C>) -> Self {
         a.command
     }
 }
 
-impl<'a, 'b, S : Default> From<&'b Command<'a>> for CommandWrapRef<'a, 'b, S> {
+impl<'a, 'b, C: Default> From<&'b Command<'a>> for CommandWrapRef<'a, 'b, C> {
     fn from(command: &'b Command<'a>) -> Self {
         CommandWrapRef {
             command,
-            config: S::default(),
+            config: C::default(),
         }
     }
 }
 
-impl<'a, 'b> From<&'b CommandWrap<'a>> for CommandWrapRef<'a, 'b> {
+impl<'a, 'b, C: Default> From<&'b CommandWrap<'a>> for CommandWrapRef<'a, 'b, C> {
     fn from(app: &'b CommandWrap<'a>) -> Self {
         CommandWrapRef {
             command: &app.app,
-            config: (),
+            config: C::default(),
         }
     }
 }
@@ -69,7 +69,7 @@ impl<'a, 'b> Serialize for &'b CommandWrap<'a> {
     where
         S: serde::Serializer,
     {
-        let wrap_ref = CommandWrapRef::from(*self);
+        let wrap_ref = CommandWrapRef::<()>::from(*self);
         wrap_ref.serialize(serializer)
     }
 }
@@ -133,7 +133,7 @@ impl<'a, 'b, C: SerializeConfig> Serialize for CommandWrapRef<'a, 'b, C> {
                 //missing get_hidden_aliases in Command
             ]
             //groups
-            speciallize [
+            specialize [
                 (args, |s| {super::arg::ArgsWrap::new(s, &self.config)}),
                 (subcommands, |s| {SubCommandsWrap(s, self.config.clone())})
             ]

@@ -1,5 +1,5 @@
-use std::cell::RefCell;
 use serde::Serialize;
+use std::cell::RefCell;
 
 macro_rules! ser_value {
     ( $command: ident, $ser: ident, $config: ident, [
@@ -7,8 +7,8 @@ macro_rules! ser_value {
             is [ $($(#[$m_ref:meta])? ($field_ref: ident, $getter_ref: ident)),+ $(,)? ],
             opt [ $( $(#[$m_opt:meta])? $([$r_opt:tt]$({$ex_r:expr})?)?($field_opt: ident, $getter_opt: ident)),+ $(,)? ]
             $(iter [ $(($field_iter: ident, $expr_iter:expr )),+ ])?
-            $( speciallize [ $(($field_sp: ident, $expr_sp: expr)),* ])?
-        ]) => {{ 
+            $( specialize [ $(($field_sp: ident, $expr_sp: expr $(, $expr_sp_check: expr)?)),* ])?
+        ]) => {{
         let mut map = $ser.serialize_map(None)?;
         let serialize_all = $config.serialize_all();
         $(
@@ -53,7 +53,15 @@ macro_rules! ser_value {
             }
         )*)*
         $($(
-            map.serialize_entry(stringify!($field_sp), &$expr_sp($command))?;
+            let value = $expr_sp($command);
+            if serialize_all || {
+                #[allow(unused_mut, unused_assignments)]
+                let mut check = true;
+                $( check = $expr_sp_check(&value); )*
+                check
+            } {
+                map.serialize_entry(stringify!($field_sp), &value)?;
+            }
         )*)*
 
         map.end() }
@@ -63,17 +71,27 @@ macro_rules! ser_value {
 pub struct IterSer<I>(RefCell<Option<I>>);
 
 impl<I> IterSer<I> {
-    pub fn new(iter: I) -> Self { Self (RefCell::new(Some(iter))) }
+    pub fn new(iter: I) -> Self {
+        Self(RefCell::new(Some(iter)))
+    }
 }
 
-
-impl<I > Serialize for IterSer<I> where I: IntoIterator, <I as IntoIterator>::Item: Serialize {
+impl<I> Serialize for IterSer<I>
+where
+    I: IntoIterator,
+    <I as IntoIterator>::Item: Serialize,
+{
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer {
+        S: serde::Serializer,
+    {
         use serde::ser::Error;
         // should be unreachable unchecked?
-        let iter = self.0.borrow_mut().take().ok_or_else(|| S::Error::custom("logic error in IterSer"))?;
+        let iter = self
+            .0
+            .borrow_mut()
+            .take()
+            .ok_or_else(|| S::Error::custom("logic error in IterSer"))?;
         serializer.collect_seq(iter)
     }
 }

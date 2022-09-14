@@ -152,6 +152,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (default_value, &str),
                     // default_value_if : tuple3
                     ref (default_value_ifs, Vec<(&str, Option<&str>, Option<&str>)> ),
+                    ref (default_values, Vec<&str> ),
                     (display_order, usize),
                     // env : specialized
                     // env_os // not supported yet

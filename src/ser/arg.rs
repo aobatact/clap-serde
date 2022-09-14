@@ -118,6 +118,11 @@ impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
                 #[cfg(feature = "env")]
                 (env, get_env),
                 //get_action
+                [&] (visible_aliases, get_visible_aliases),
+                [&] (visible_short_aliases, get_visible_short_aliases),
+            ]
+            specialize  [
+                (default_values, Arg::get_default_values, |x : &[&std::ffi::OsStr]| { x.len() > 0 } )
             ]
         ]);
 
