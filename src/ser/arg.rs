@@ -74,8 +74,7 @@ impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
         let arg = &self.wrap.arg;
         let config = &self.wrap.config;
         let r = ser_value!(arg, serializer, config, [
-            // (id, get_id),
-            // (default_value, get_default_values),
+            // (id, get_id), not seriazed here.
             is [
                 (positional, is_positional),
                 (required,is_required_set),
@@ -107,7 +106,7 @@ impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
                 (help_heading, get_help_heading),
                 [&] (short,get_short),
                 [&] (visible_short_aliases,get_visible_short_aliases),
-                //aliases
+                // no hidden aliases because clap dosen't expose 
                 (long,get_long),
                 (value_names,get_value_names),
                 [&] (number_of_values, get_num_vals),
@@ -115,7 +114,6 @@ impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
                 [&] (index,get_index),
                 #[cfg(feature = "env")]
                 (env, get_env),
-                //get_action
                 [&] (visible_aliases, get_visible_aliases),
                 [&] (visible_short_aliases, get_visible_short_aliases),
             ]
