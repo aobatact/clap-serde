@@ -84,7 +84,7 @@ impl<'a, 'b, C: SerializeConfig> Serialize for CommandWrapRef<'a, 'b, C> {
         let r = ser_value!(command, serializer, config, [
             (name, get_name),
             #[cfg(feature = "color")]
-            [&] {crate::de::app::color::to_ser} (color, get_color),
+            [&] {crate::de::app::color::from_clap_type} (color, get_color),
             is [
                 (no_binary_name, is_no_binary_name_set),
                 (dont_delimit_trailing_values,is_dont_delimit_trailing_values_set),

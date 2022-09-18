@@ -121,7 +121,8 @@ impl<'se, 'wrap, C: SerializeConfig> Serialize for ArgWrapMaps<'se, 'wrap, C> {
             ]
             specialize  [
                 (default_values, Arg::get_default_values, |x : &[&std::ffi::OsStr]| { x.len() > 0 } ),
-                (value_hint, |s| { crate::de::arg::value_hint::ValueHint::from_vh(Arg::get_value_hint(s)) })
+                (value_hint, |s| { crate::de::arg::value_hint::ValueHint::from_clap_type(Arg::get_value_hint(s)) }),
+                (arg_action, |s| { crate::de::arg::arg_action::ArgAction::from_clap_type(Arg::get_action(s).clone()) })
             ]
         ]);
 

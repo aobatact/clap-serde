@@ -3,7 +3,7 @@ use clap::{Arg, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
 use std::{marker::PhantomData, ops::Deref};
 
-mod arg_action;
+pub(crate) mod arg_action;
 pub(crate) mod value_hint;
 mod value_parser;
 
