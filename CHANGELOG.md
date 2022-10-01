@@ -4,6 +4,7 @@
 
 ## Fixes
 - Relax requirement of deserizaler for `override-arg`.
+- Fix env feature flag.
 
 # 0.5.0
 
