@@ -1,12 +1,43 @@
 use self::{arg_action::ArgAction, value_hint::ValueHint, value_parser::ValueParser};
-use crate::ArgWrap;
 use clap::{Arg, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ops::Deref};
 
-mod arg_action;
-mod value_hint;
+pub(crate) mod arg_action;
+pub(crate) mod value_hint;
 mod value_parser;
+
+/// Wrapper of [`Arg`] to deserialize with [`DeserializeSeed`](`serde::de::DeserializeSeed`).
+#[derive(Debug, Clone)]
+pub struct ArgWrap<'a> {
+    pub(crate) arg: Arg<'a>,
+}
+
+impl<'a> ArgWrap<'a> {
+    pub fn new(arg: Arg<'a>) -> Self {
+        Self { arg }
+    }
+}
+
+impl<'a> From<ArgWrap<'a>> for Arg<'a> {
+    fn from(arg: ArgWrap<'a>) -> Self {
+        arg.arg
+    }
+}
+
+impl<'a> From<Arg<'a>> for ArgWrap<'a> {
+    fn from(arg: Arg<'a>) -> Self {
+        ArgWrap { arg }
+    }
+}
+
+impl<'a> Deref for ArgWrap<'a> {
+    type Target = Arg<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.arg
+    }
+}
 
 #[cfg(feature = "override-arg")]
 struct ArgKVO<'a>(Option<Command<'a>>);
@@ -121,6 +152,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (default_value, &str),
                     // default_value_if : tuple3
                     ref (default_value_ifs, Vec<(&str, Option<&str>, Option<&str>)> ),
+                    ref (default_values, Vec<&str> ),
                     (display_order, usize),
                     // env : specialized
                     // env_os // not supported yet
@@ -240,10 +272,11 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "value_parser" => {
                         arg.value_parser(map.next_value::<ValueParser>()?)
                     }
+                    "positional" => {map.next_value::<bool>()?;/* noop */ arg}
                 ]
             );
         }
-        Ok(ArgWrap { arg })
+        Ok(ArgWrap::new(arg))
     }
 }
 

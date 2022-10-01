@@ -1,4 +1,4 @@
-use crate::CommandWrap;
+use crate::{ser::app::CommandWrapRef, CommandWrap, NoSkip};
 use clap::{builder::ValueParser, Command};
 
 #[test]
@@ -306,4 +306,22 @@ apple = { short =  }
     let wrap = CommandWrap::from(app);
     let mut de = toml::Deserializer::new(CLAP_TOML);
     assert!(wrap.deserialize(&mut de).is_err());
+}
+
+#[test]
+fn serialize() {
+    let c = Command::new("ser_test").about("testing _ser");
+    let command: CommandWrapRef = (&c).into();
+    let json = serde_json::to_string(&command).unwrap();
+    let command2: CommandWrap = serde_json::from_str(&json).unwrap();
+    assert_eq!(command.get_name(), command2.get_name());
+}
+
+#[test]
+fn serialize_all() {
+    let c = Command::new("ser_test").about("testing _ser");
+    let command: CommandWrapRef<NoSkip> = (&c).into();
+    let json = serde_json::to_string(&command).unwrap();
+    let command2: CommandWrap = serde_json::from_str(&json).unwrap();
+    assert_eq!(command.get_name(), command2.get_name());
 }
