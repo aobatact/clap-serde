@@ -1,6 +1,6 @@
 [package]
 name = "clap-serde"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Provides a wrapper to deserialize clap app using serde."
@@ -26,7 +26,7 @@ override-arg = []
 clap = { version = "3.2.16", default-features = false, features = ["std"]}
 serde = { version = "1", features = ["derive"]}
 yaml-rust = { version = "0.4.5", default-features = false, optional = true }
-convert_case = { version = "0.5.0", optional = true }
+convert_case = { version = "0.6.0", optional = true }
 
 [dev-dependencies]
 serde_json = { version = "1.0.75" }
