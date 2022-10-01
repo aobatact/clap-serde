@@ -226,14 +226,14 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                         arg.action(map.next_value::<ArgAction>()?.into())
                     }
                     "env" => {
-                        #[cfg(env)] { parse_value_inner!(arg, map, Arg, &str, env) }
-                        #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
+                        #[cfg(feature = "env")] { parse_value_inner!(arg, map, Arg, &str, env) }
+                        #[cfg(not(feature = "env"))] { return Err(Error::custom("env feature disabled"))}}
                     "hide_env" => {
-                        #[cfg(env)] { parse_value_inner!(arg, map, Arg, bool, hide_env) }
-                        #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
+                        #[cfg(feature = "env")] { parse_value_inner!(arg, map, Arg, bool, hide_env) }
+                        #[cfg(not(feature = "env"))] { return Err(Error::custom("env feature disabled"))}}
                     "hide_env_values" => {
-                        #[cfg(env)] { parse_value_inner!(arg, map, Arg, bool, hide_env_values) }
-                        #[cfg(not(env))] { return Err(Error::custom("env feature disabled"))}}
+                        #[cfg(feature = "env")] { parse_value_inner!(arg, map, Arg, bool, hide_env_values) }
+                        #[cfg(not(feature = "env"))] { return Err(Error::custom("env feature disabled"))}}
                     "value_hint" => {
                         arg.value_hint(map.next_value::<ValueHint>()?.into())
                     }
