@@ -1,17 +1,15 @@
 use crate::CommandWrap;
-use appsettings::*;
 use clap::Command;
 use serde::{
     de::{DeserializeSeed, Error, Visitor},
     Deserialize,
 };
 
-mod appsettings;
 #[cfg(feature = "color")]
 mod color;
 
 const TMP_APP_NAME: &str = "__tmp__deserialize__name__";
-impl<'de> Deserialize<'de> for CommandWrap<'de> {
+impl<'de> Deserialize<'de> for CommandWrap {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -29,10 +27,10 @@ impl<'de> Deserialize<'de> for CommandWrap<'de> {
     }
 }
 
-struct CommandVisitor<'a>(Command<'a>);
+struct CommandVisitor(Command);
 
-impl<'a> Visitor<'a> for CommandVisitor<'a> {
-    type Value = CommandWrap<'a>;
+impl<'de> Visitor<'de> for CommandVisitor {
+    type Value = CommandWrap;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("Command Map")
@@ -40,7 +38,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
 
     fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
     where
-        A: serde::de::MapAccess<'a>,
+        A: serde::de::MapAccess<'de>,
     {
         let mut app = self.0;
         //TODO: check the first key to get name from the input?
@@ -54,7 +52,6 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 ref (aliases, Vec<&str>),
                 (allow_external_subcommands, bool),
                 (allow_hyphen_values, bool),
-                (allow_invalid_utf8_for_external_subcommands, bool),
                 (allow_missing_positional, bool),
                 (allow_negative_numbers, bool),
                 //arg : not supported single arg(now)
@@ -80,7 +77,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 // group : not supported single group
                 // groups : specialized
                 (help_expected, bool),
-                (help_template, &str),
+                //
                 (hide, bool),
                 (hide_possible_values, bool),
                 (ignore_errors, bool),
@@ -105,7 +102,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 // settings : specialized (though the original method is deprecated)
                 (short_flag, char),
                 (short_flag_alias, char),
-                ref (short_flag_aliases, Vec<char>),
+                (short_flag_aliases, Vec<char>),
                 // subcommand : not supported single subcommand(now)
                 // subcommands : specialized
                 (subcommand_help_heading, &str),
@@ -121,11 +118,17 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 (visible_long_flag_alias, &str),
                 ref (visible_long_flag_aliases, Vec<&str>),
                 (visible_short_flag_alias, char),
-                ref (visible_short_flag_aliases, Vec<char>),
+                (visible_short_flag_aliases, Vec<char>),
             },
             deprecated: [
                 "help_message",
                 "version_message",
+                "setting",
+                "settings",
+                "global_setting",
+                "global_settings",
+                "help_template",
+                "allow_invalid_utf8_for_external_subcommands",
             ]{
                 "help_heading" => "next_help_heading",
             },
@@ -145,16 +148,6 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 "subcommands" => map.next_value_seed(SubCommands::<true>(app))?
                 "subcommands_map" => map.next_value_seed(SubCommands::<false>(app))?
                 "groups" => map.next_value_seed(super::group::Groups(app))?
-                "setting" => app.setting(map.next_value_seed(AppSettingSeed)?)
-                "settings" => app.setting(map.next_value_seed(AppSettingsSeed)?)
-                "global_setting" => app.global_setting(map.next_value_seed(AppSettingSeed)?)
-                "global_settings" => {
-                    let sets = map.next_value::<Vec<AppSetting1>>()?.into_iter().map(|s|s.into());
-                    for s in sets{
-                        app = app.global_setting(s);
-                    }
-                    app
-                }
             ]);
         }
 
@@ -162,21 +155,21 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
     }
 }
 
-pub struct NameSeed<'a>(&'a str);
+pub struct NameSeed<'de>(&'de str);
 
 impl<'de> DeserializeSeed<'de> for NameSeed<'de> {
-    type Value = CommandWrap<'de>;
+    type Value = CommandWrap;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        deserializer.deserialize_map(CommandVisitor(Command::new(self.0)))
+        deserializer.deserialize_map(CommandVisitor(Command::new(self.0.to_owned())))
     }
 }
 
-impl<'de> DeserializeSeed<'de> for CommandWrap<'de> {
-    type Value = CommandWrap<'de>;
+impl<'de> DeserializeSeed<'de> for CommandWrap {
+    type Value = CommandWrap;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -186,9 +179,9 @@ impl<'de> DeserializeSeed<'de> for CommandWrap<'de> {
     }
 }
 
-struct SubCommands<'a, const KV_ARRAY: bool>(Command<'a>);
-impl<'de, const KV_ARRAY: bool> DeserializeSeed<'de> for SubCommands<'de, KV_ARRAY> {
-    type Value = Command<'de>;
+struct SubCommands<const KV_ARRAY: bool>(Command);
+impl<'de, const KV_ARRAY: bool> DeserializeSeed<'de> for SubCommands<KV_ARRAY> {
+    type Value = Command;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -202,8 +195,8 @@ impl<'de, const KV_ARRAY: bool> DeserializeSeed<'de> for SubCommands<'de, KV_ARR
     }
 }
 
-impl<'de, const KV_ARRAY: bool> Visitor<'de> for SubCommands<'de, KV_ARRAY> {
-    type Value = Command<'de>;
+impl<'de, const KV_ARRAY: bool> Visitor<'de> for SubCommands<KV_ARRAY> {
+    type Value = Command;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("Subcommand")
@@ -235,7 +228,7 @@ impl<'de, const KV_ARRAY: bool> Visitor<'de> for SubCommands<'de, KV_ARRAY> {
 
 pub struct InnerSubCommand;
 impl<'de> Visitor<'de> for InnerSubCommand {
-    type Value = Command<'de>;
+    type Value = Command;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("Subcommand Inner")
@@ -254,7 +247,7 @@ impl<'de> Visitor<'de> for InnerSubCommand {
 }
 
 impl<'de> DeserializeSeed<'de> for InnerSubCommand {
-    type Value = Command<'de>;
+    type Value = Command;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where

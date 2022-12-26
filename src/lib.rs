@@ -4,6 +4,7 @@
 use clap::{Arg, ArgGroup, Command};
 use serde::Deserializer;
 use std::ops::Deref;
+mod x;
 
 #[cfg(not(any(
     feature = "kebab-case-key",
@@ -48,7 +49,7 @@ assert_eq!(app.get_name(), "app_clap_serde");
 assert_eq!(app.get_about(), Some("test-clap-serde"));
 ```
 */
-pub fn load<'de, D>(de: D) -> Result<Command<'de>, D::Error>
+pub fn load<'de, D>(de: D) -> Result<Command, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -73,27 +74,27 @@ assert_eq!(app.get_about(), Some("test-clap-serde"));
 ```
 */
 #[derive(Debug, Clone)]
-pub struct CommandWrap<'a> {
-    app: Command<'a>,
+pub struct CommandWrap {
+    app: Command,
 }
 
 #[deprecated]
-pub type AppWrap<'a> = CommandWrap<'a>;
+pub type AppWrap = CommandWrap;
 
-impl<'a> From<CommandWrap<'a>> for Command<'a> {
-    fn from(a: CommandWrap<'a>) -> Self {
+impl From<CommandWrap> for Command {
+    fn from(a: CommandWrap) -> Self {
         a.app
     }
 }
 
-impl<'a> From<Command<'a>> for CommandWrap<'a> {
-    fn from(app: Command<'a>) -> Self {
+impl From<Command> for CommandWrap {
+    fn from(app: Command) -> Self {
         CommandWrap { app }
     }
 }
 
-impl<'a> Deref for CommandWrap<'a> {
-    type Target = Command<'a>;
+impl Deref for CommandWrap {
+    type Target = Command;
 
     fn deref(&self) -> &Self::Target {
         &self.app
@@ -102,42 +103,42 @@ impl<'a> Deref for CommandWrap<'a> {
 
 /// Wrapper of [`Arg`] to deserialize with [`DeserializeSeed`](`serde::de::DeserializeSeed`).
 #[derive(Debug, Clone)]
-pub struct ArgWrap<'a> {
-    arg: Arg<'a>,
+pub struct ArgWrap {
+    arg: Arg,
 }
 
-impl<'a> From<ArgWrap<'a>> for Arg<'a> {
-    fn from(arg: ArgWrap<'a>) -> Self {
+impl From<ArgWrap> for Arg {
+    fn from(arg: ArgWrap) -> Self {
         arg.arg
     }
 }
 
-impl<'a> From<Arg<'a>> for ArgWrap<'a> {
-    fn from(arg: Arg<'a>) -> Self {
+impl From<Arg> for ArgWrap {
+    fn from(arg: Arg) -> Self {
         ArgWrap { arg }
     }
 }
 
-impl<'a> Deref for ArgWrap<'a> {
-    type Target = Arg<'a>;
+impl Deref for ArgWrap {
+    type Target = Arg;
 
     fn deref(&self) -> &Self::Target {
         &self.arg
     }
 }
 
-pub(crate) struct ArgGroupWrap<'a> {
-    group: ArgGroup<'a>,
+pub(crate) struct ArgGroupWrap {
+    group: ArgGroup,
 }
 
-impl<'a> From<ArgGroupWrap<'a>> for ArgGroup<'a> {
-    fn from(group: ArgGroupWrap<'a>) -> Self {
+impl From<ArgGroupWrap> for ArgGroup {
+    fn from(group: ArgGroupWrap) -> Self {
         group.group
     }
 }
 
-impl<'a> From<ArgGroup<'a>> for ArgGroupWrap<'a> {
-    fn from(group: ArgGroup<'a>) -> Self {
+impl From<ArgGroup> for ArgGroupWrap {
+    fn from(group: ArgGroup) -> Self {
         ArgGroupWrap { group }
     }
 }
