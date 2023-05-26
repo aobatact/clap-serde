@@ -2,10 +2,10 @@ use crate::ArgGroupWrap;
 use clap::{ArgGroup, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
 
-struct GroupVisitor<'a>(&'a str);
+struct GroupVisitor(String);
 
-impl<'de> Visitor<'de> for GroupVisitor<'de> {
-    type Value = ArgGroupWrap<'de>;
+impl<'de> Visitor<'de> for GroupVisitor {
+    type Value = ArgGroupWrap;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("arg group map")
@@ -18,15 +18,15 @@ impl<'de> Visitor<'de> for GroupVisitor<'de> {
         let mut group = ArgGroup::new(self.0);
         while let Some(key) = map.next_key::<&str>()? {
             group = parse_value!(key, group, map, ArgGroup, {
-                (arg, &str),
-                ref (args, Vec<&str>),
-                (conflicts_with, &str),
-                ref (conflicts_with_all, Vec<&str>),
-                (id, &str),
+                (arg, String),
+                ref (args, Vec<String>),
+                (conflicts_with, String),
+                ref (conflicts_with_all, Vec<String>),
+                (id, String),
                 (multiple, bool),
                 (required, bool),
-                (requires, &str),
-                ref (requires_all, Vec<&str>),
+                (requires, String),
+                ref (requires_all, Vec<String>),
             }, deprecated:{
                 "name" => "id",
             });
@@ -36,8 +36,8 @@ impl<'de> Visitor<'de> for GroupVisitor<'de> {
     }
 }
 
-impl<'de> DeserializeSeed<'de> for GroupVisitor<'de> {
-    type Value = ArgGroupWrap<'de>;
+impl<'de> DeserializeSeed<'de> for GroupVisitor {
+    type Value = ArgGroupWrap;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -47,9 +47,9 @@ impl<'de> DeserializeSeed<'de> for GroupVisitor<'de> {
     }
 }
 
-pub(crate) struct Groups<'a>(pub(crate) Command<'a>);
-impl<'de> DeserializeSeed<'de> for Groups<'de> {
-    type Value = Command<'de>;
+pub(crate) struct Groups(pub(crate) Command);
+impl<'de> DeserializeSeed<'de> for Groups {
+    type Value = Command;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -59,8 +59,8 @@ impl<'de> DeserializeSeed<'de> for Groups<'de> {
     }
 }
 
-impl<'de> Visitor<'de> for Groups<'de> {
-    type Value = Command<'de>;
+impl<'de> Visitor<'de> for Groups {
+    type Value = Command;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("arg groups")
@@ -71,7 +71,7 @@ impl<'de> Visitor<'de> for Groups<'de> {
         A: serde::de::MapAccess<'de>,
     {
         let mut app = self.0;
-        while let Some(name) = map.next_key::<&str>()? {
+        while let Some(name) = map.next_key::<String>()? {
             app = app.group(map.next_value_seed(GroupVisitor(name))?);
         }
         Ok(app)

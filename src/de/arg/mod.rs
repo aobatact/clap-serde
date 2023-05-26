@@ -2,14 +2,13 @@ use self::{arg_action::ArgAction, value_hint::ValueHint, value_parser::ValuePars
 use crate::ArgWrap;
 use clap::{Arg, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
-use std::marker::PhantomData;
 
 mod arg_action;
 mod value_hint;
 mod value_parser;
 
 #[cfg(feature = "override-arg")]
-struct ArgKVO<'a>(Option<Command<'a>>);
+struct ArgKVO(Option<Command>);
 
 #[cfg(feature = "override-arg")]
 impl<'de> Visitor<'de> for &mut ArgKVO<'de> {
@@ -53,10 +52,10 @@ impl<'de> DeserializeSeed<'de> for &mut ArgKVO<'de> {
 }
 
 #[derive(Clone, Copy)]
-struct ArgKV<'de>(PhantomData<&'de ()>);
+struct ArgKV;
 
-impl<'de> Visitor<'de> for ArgKV<'de> {
-    type Value = ArgWrap<'de>;
+impl<'de> Visitor<'de> for ArgKV {
+    type Value = ArgWrap;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("kv argument")
@@ -73,8 +72,8 @@ impl<'de> Visitor<'de> for ArgKV<'de> {
     }
 }
 
-impl<'de> DeserializeSeed<'de> for ArgKV<'de> {
-    type Value = ArgWrap<'de>;
+impl<'de> DeserializeSeed<'de> for ArgKV {
+    type Value = ArgWrap;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -84,16 +83,16 @@ impl<'de> DeserializeSeed<'de> for ArgKV<'de> {
     }
 }
 
-struct ArgVisitor<'a>(Arg<'a>);
+struct ArgVisitor(Arg);
 
-impl<'a> ArgVisitor<'a> {
-    fn new_str(v: &'a str) -> Self {
-        Self(Arg::new(v))
+impl ArgVisitor {
+    fn new_str(v: &str) -> Self {
+        Self(Arg::new(v.to_owned()))
     }
 }
 
-impl<'a> Visitor<'a> for ArgVisitor<'a> {
-    type Value = ArgWrap<'a>;
+impl<'de> Visitor<'de> for ArgVisitor {
+    type Value = ArgWrap;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("Arg Map")
@@ -101,36 +100,32 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
 
     fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
     where
-        A: serde::de::MapAccess<'a>,
+        A: serde::de::MapAccess<'de>,
     {
         let mut arg = self.0;
 
         while let Some(key) = map.next_key::<&str>()? {
             arg = parse_value!(key, arg, map, Arg, {
                     // action : specailized
-                    (alias, &str),
-                    ref (aliases, Vec<&str>),
+                    (alias, String),
+                    ref (aliases, Vec<String>),
                     (allow_hyphen_values, bool),
-                    (allow_invalid_utf8, bool),
-                    (conflicts_with, &str),
-                    ref (conflicts_with_all, Vec<&str>),
-                    (default_missing_value, &str),
-                    ref (default_missing_values, Vec<&str>),
-                    // (default_missing_value_os, &OsStr), // need Deseriaze to OsStr
-                    // ref (default_missing_values_os, Vec<&OsStr>),
-                    (default_value, &str),
+                    (conflicts_with, String),
+                    ref (conflicts_with_all, Vec<String>),
+                    (default_missing_value, String),
+                    ref (default_missing_values, Vec<String>),
+                    (default_value, String),
                     // default_value_if : tuple3
-                    ref (default_value_ifs, Vec<(&str, Option<&str>, Option<&str>)> ),
+                    (default_value_ifs, Vec<(String, String, String)> ),
                     (display_order, usize),
                     // env : specialized
                     // env_os // not supported yet
                     (exclusive, bool),
-                    (forbid_empty_values, bool),
                     (global, bool),
-                    (group, &str),
-                    ref (groups, Vec<&str>),
-                    (help, &str),
-                    (help_heading, &str),
+                    (group, String),
+                    ref (groups, Vec<String>),
+                    (help, String),
+                    (help_heading, String),
                     (hide, bool),
                     (hide_default_value, bool),
                     // hide_env : specialized
@@ -138,61 +133,52 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     (hide_long_help, bool),
                     (hide_possible_values, bool),
                     (hide_short_help, bool),
-                    (id, &str),
+                    (id, String),
                     (ignore_case, bool),
                     (index, usize),
                     (last, bool),
-                    (long, &str),
-                    (long_help, &str),
-                    (max_occurrences, usize),
-                    (max_values, usize),
-                    (min_values, usize),
-                    (multiple_occurrences, bool),
-                    (multiple_values, bool),
-                    (id, &str),
+                    (long, String),
+                    (long_help, String),
+                    (id, String),
                     (next_line_help, bool),
                     (number_of_values, usize),
-                    (overrides_with, &str),
-                    ref (overrides_with_all, Vec<&str>),
-                    (possible_value, &str),
-                    (possible_values, Vec<&str>),
-                    (raw, bool),
-                    (require_value_delimiter, bool),
+                    (overrides_with, String),
+                    ref (overrides_with_all, Vec<String>),
                     (require_equals, bool),
+                    (raw, bool),
                     (required, bool),
                     // required_if_eq: tuple2
-                    ref (required_if_eq_all, Vec<(&str, &str)>),
-                    ref (required_if_eq_any, Vec<(&str, &str)>),
-                    (required_unless_present, &str),
-                    ref (required_unless_present_any, Vec<&str>),
-                    ref (required_unless_present_all, Vec<&str>),
-                    (requires, &str),
-                    ref (requires_all, Vec<&str>),
+                    (required_if_eq_all, Vec<(String, String)>),
+                    (required_if_eq_any, Vec<(String, String)>),
+                    (required_unless_present, String),
+                    ref (required_unless_present_any, Vec<String>),
+                    ref (required_unless_present_all, Vec<String>),
+                    (requires, String),
+                    ref (requires_all, Vec<String>),
                     // requires_if: tuple2
-                    ref (requires_ifs, Vec<(&str, &str)>),
+                    (requires_ifs, Vec<(String, String)>),
                     (short, char),
                     (short_alias, char),
-                    ref (short_aliases, Vec<char>),
-                    (takes_value, bool),
+                    (short_aliases, Vec<char>),
                     (use_value_delimiter, bool),
                     // validator_regex : todo
                     // value_hint : specialized
                     (value_delimiter, char),
-                    (value_name, &str),
-                    ref (value_names, Vec<&str>),
+                    (value_name, String),
+                    ref (value_names, Vec<String>),
                     // value_parser : specialized
-                    (value_terminator, &str),
-                    (visible_alias, &str),
-                    ref (visible_aliases, Vec<&str>),
+                    (value_terminator, String),
+                    (visible_alias, String),
+                    ref (visible_aliases, Vec<String>),
                     (visible_short_alias, char),
-                    ref (visible_short_aliases, Vec<char>),
+                    (visible_short_aliases, Vec<char>),
                 },
                 tuple2: {
-                    (required_if_eq, (&str, &str)),
-                    (requires_if, (&str, &str)),
+                    (required_if_eq, (String, String)),
+                    (requires_if, (String, String)),
                 },
                 tuple3: {
-                    (default_value_if, (&str, Option<&str>, Option<&str>)),
+                    (default_value_if, (String, String, String)),
                 },
                 deprecated:
                 [
@@ -213,6 +199,17 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                     "settings",
                     "validator_regex",
                     "with_name",
+                    "allow_invalid_utf8",
+                    "forbid_empty_values",
+                    "max_occurrences",
+                    "max_values",
+                    "min_values",
+                    "multiple_occurrences",
+                    "multiple_values",
+                    "possible_value",
+                    "possible_values",
+                    "require_value_delimiter",
+                    "takes_value",
                 ]{
                     //3.1
                     "name" => "id",
@@ -223,7 +220,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                 // },
                 specialize:[
                     "arg_action" => {
-                        arg.action(map.next_value::<ArgAction>()?.into())
+                        arg.action(clap::ArgAction::from( map.next_value::<ArgAction>()?))
                     }
                     "env" => {
                         #[cfg(feature = "env")] { parse_value_inner!(arg, map, Arg, &str, env) }
@@ -235,7 +232,7 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
                         #[cfg(feature = "env")] { parse_value_inner!(arg, map, Arg, bool, hide_env_values) }
                         #[cfg(not(feature = "env"))] { return Err(Error::custom("env feature disabled"))}}
                     "value_hint" => {
-                        arg.value_hint(map.next_value::<ValueHint>()?.into())
+                        arg.value_hint(clap::ValueHint::from(map.next_value::<ValueHint>()?))
                     }
                     "value_parser" => {
                         arg.value_parser(map.next_value::<ValueParser>()?)
@@ -247,8 +244,8 @@ impl<'a> Visitor<'a> for ArgVisitor<'a> {
     }
 }
 
-impl<'de> DeserializeSeed<'de> for ArgVisitor<'de> {
-    type Value = ArgWrap<'de>;
+impl<'de> DeserializeSeed<'de> for ArgVisitor {
+    type Value = ArgWrap;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -258,8 +255,8 @@ impl<'de> DeserializeSeed<'de> for ArgVisitor<'de> {
     }
 }
 
-impl<'de> DeserializeSeed<'de> for ArgWrap<'de> {
-    type Value = ArgWrap<'de>;
+impl<'de> DeserializeSeed<'de> for ArgWrap {
+    type Value = ArgWrap;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -269,9 +266,9 @@ impl<'de> DeserializeSeed<'de> for ArgWrap<'de> {
     }
 }
 
-pub(crate) struct Args<'a, const USE_ARRAY: bool>(pub(crate) Command<'a>);
-impl<'de, const USE_ARRAY: bool> DeserializeSeed<'de> for Args<'de, USE_ARRAY> {
-    type Value = Command<'de>;
+pub(crate) struct Args<const USE_ARRAY: bool>(pub(crate) Command);
+impl<'de, const USE_ARRAY: bool> DeserializeSeed<'de> for Args<USE_ARRAY> {
+    type Value = Command;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -285,8 +282,8 @@ impl<'de, const USE_ARRAY: bool> DeserializeSeed<'de> for Args<'de, USE_ARRAY> {
     }
 }
 
-impl<'de, const USE_ARRAY: bool> Visitor<'de> for Args<'de, USE_ARRAY> {
-    type Value = Command<'de>;
+impl<'de, const USE_ARRAY: bool> Visitor<'de> for Args<USE_ARRAY> {
+    type Value = Command;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("args")
@@ -308,7 +305,7 @@ impl<'de, const USE_ARRAY: bool> Visitor<'de> for Args<'de, USE_ARRAY> {
     where
         A: serde::de::SeqAccess<'de>,
     {
-        let x = ArgKV(PhantomData);
+        let x = ArgKV;
         let mut com = self.0;
         while let Some(a) = seq.next_element_seed(x)? {
             com = com.arg(a);

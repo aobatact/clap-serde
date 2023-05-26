@@ -47,11 +47,11 @@ pub fn yaml_to_app(yaml: &Yaml) -> Result<clap::Command<'_>, Error> {
 ///
 /// Currently this implement functions in [`Deserializer`] that is only needed in deserializing into `Command`.
 /// Recommend to use [`yaml_to_app`] instead.
-pub struct YamlWrap<'a> {
+pub struct YamlWrap {
     yaml: &'a yaml_rust::Yaml,
 }
 
-impl<'a> YamlWrap<'a> {
+impl YamlWrap {
     pub fn new(yaml: &'a yaml_rust::Yaml) -> Self {
         Self { yaml }
     }

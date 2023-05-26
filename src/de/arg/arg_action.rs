@@ -8,8 +8,6 @@ enum_de!(AA, ArgAction,
     {
         Set,
         Append,
-        StoreValue,
-        IncOccurrence,
         SetTrue,
         SetFalse,
         Count,
