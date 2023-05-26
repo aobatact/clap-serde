@@ -5,6 +5,11 @@ macro_rules! parse_value_inner {
     ( $app : ident, $map : ident, $target_type:ty, ref $value_type:ty, $register : ident) => {
         <$target_type>::$register($app, &$map.next_value::<$value_type>()?)
     };
+    ( $app : ident, $map : ident, $target_type:ty, Option<$value_type:ty>, $register : ident) => {
+        if let Some(v) = $map.next_value::<$value_type>()? {
+            <$target_type>::$register($app, v)
+        }
+    };
 }
 
 macro_rules! parse_value {
@@ -24,7 +29,7 @@ macro_rules! parse_value {
 
             #[allow(unused_labels)]
             'parse_value_jmp_loop: loop {
-                break 'parse_value_jmp_loop match key {
+                break 'parse_value_jmp_loop match key.as_ref() {
                     $(
                         $( stringify!($register) => parse_value_inner!($app, $map, $target_type, $value_type, $register), )*
                         $( stringify!($register_r) => parse_value_inner!($app, $map, $target_type, ref $value_type_r, $register_r), )*
@@ -73,7 +78,7 @@ macro_rules! parse_value {
 #[cfg(feature = "snake-case-key")]
 macro_rules! convert_case_to {
     ($key:ident, $target: ident) => {{
-        $target = $key;
+        $target = $key.to_owned();
     }};
 }
 
