@@ -1,8 +1,8 @@
 use clap::ArgAction as AA;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 enum_de!(AA, ArgAction,
-    #[derive(Deserialize, Clone, Copy)]
+    #[derive(Serialize, Deserialize, Clone, Copy)]
     #[cfg_attr(feature = "kebab-case-key" ,serde(rename_all = "kebab-case"))]
     #[cfg_attr(feature = "snake-case-key" ,serde(rename_all = "snake_case"))]
     {

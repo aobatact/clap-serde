@@ -1,14 +1,60 @@
-use crate::CommandWrap;
 use appsettings::*;
 use clap::Command;
 use serde::{
     de::{DeserializeSeed, Error, Visitor},
     Deserialize,
 };
+use std::ops::Deref;
 
 mod appsettings;
 #[cfg(feature = "color")]
-mod color;
+pub(crate) mod color;
+
+/// Wrapper of [`Command`] to serialzie and deserialize.
+/// ```
+/// const CLAP_TOML: &'static str = r#"
+/// name = "app_clap_serde"
+/// version = "1.0"
+/// author = "tester"
+/// about = "test-clap-serde"
+/// "#;
+/// let app: clap::Command = toml::from_str::<clap_serde::CommandWrap>(CLAP_TOML)
+///     .expect("parse failed")
+///     .into();
+/// assert_eq!(app.get_name(), "app_clap_serde");
+/// assert_eq!(app.get_about(), Some("test-clap-serde"));
+/// ```
+#[derive(Debug, Clone)]
+pub struct CommandWrap<'a> {
+    pub(crate) app: Command<'a>,
+}
+
+impl<'a> CommandWrap<'a> {
+    /// Create a wrapper for [`Command`].
+    pub fn new(app: Command<'a>) -> Self {
+        Self { app }
+    }
+}
+
+impl<'a> From<CommandWrap<'a>> for Command<'a> {
+    fn from(a: CommandWrap<'a>) -> Self {
+        a.app
+    }
+}
+
+impl<'a> From<Command<'a>> for CommandWrap<'a> {
+    fn from(app: Command<'a>) -> Self {
+        CommandWrap { app }
+    }
+}
+
+impl<'a> Deref for CommandWrap<'a> {
+    type Target = Command<'a>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.app
+    }
+}
 
 const TMP_APP_NAME: &str = "__tmp__deserialize__name__";
 impl<'de> Deserialize<'de> for CommandWrap<'de> {
@@ -110,6 +156,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
                 // subcommands : specialized
                 (subcommand_help_heading, &str),
                 (subcommand_negates_reqs, bool),
+                (subcommand_precedence_over_arg, bool),
                 (subcommand_required, bool),
                 (subcommand_value_name, &str),
                 (propagate_version, bool),
@@ -158,7 +205,7 @@ impl<'a> Visitor<'a> for CommandVisitor<'a> {
             ]);
         }
 
-        Ok(CommandWrap { app })
+        Ok(app.into())
     }
 }
 

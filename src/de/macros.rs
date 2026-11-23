@@ -125,5 +125,18 @@ macro_rules! enum_de {
                 }
             }
         }
+
+        impl $newty {
+            #[allow(dead_code)]
+            pub fn from_clap_type(c : $basety) -> Self {
+                match c {
+                    $(
+                        $(#[$cfg_meta])*
+                        $basety::$var => $newty::$var,
+                    )*
+                    _ => unimplemented!(),
+                }
+            }
+        }
     };
 }

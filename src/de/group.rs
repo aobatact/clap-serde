@@ -1,6 +1,21 @@
-use crate::ArgGroupWrap;
 use clap::{ArgGroup, Command};
 use serde::de::{DeserializeSeed, Error, Visitor};
+
+pub(crate) struct ArgGroupWrap<'a> {
+    group: ArgGroup<'a>,
+}
+
+impl<'a> From<ArgGroupWrap<'a>> for ArgGroup<'a> {
+    fn from(group: ArgGroupWrap<'a>) -> Self {
+        group.group
+    }
+}
+
+impl<'a> From<ArgGroup<'a>> for ArgGroupWrap<'a> {
+    fn from(group: ArgGroup<'a>) -> Self {
+        ArgGroupWrap { group }
+    }
+}
 
 struct GroupVisitor<'a>(&'a str);
 
