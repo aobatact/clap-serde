@@ -1,102 +1,97 @@
-#![allow(deprecated)]
-use clap::{AppFlags, AppSettings};
-use serde::{de::DeserializeSeed, Deserialize};
+//! Compatibility layer for `setting` / `settings` keys.
+//!
+//! clap 4 removed `AppSettings`; each former setting is now a builder method taking `bool`.
+//! The keys are mapped to these methods so that configurations written for clap 3 keep working.
+use clap::Command;
+use serde::{de::Visitor, Deserialize};
 
-enum_de!(AppSettings,AppSetting1,
-    #[derive(Deserialize, Clone, Copy)]
-    #[cfg_attr(feature = "kebab-case-key" ,serde(rename_all = "kebab-case"))]
-    #[cfg_attr(feature = "snake-case-key" ,serde(rename_all = "snake_case"))]
-    {
-    #[cfg(feature="allow-deprecated")]
-    IgnoreErrors,
-    #[cfg(feature="allow-deprecated")]
-    WaitOnError,
-    #[cfg(feature="allow-deprecated")]
-    AllowHyphenValues,
-    #[cfg(feature="allow-deprecated")]
-    AllowNegativeNumbers,
-    #[cfg(feature="allow-deprecated")]
-    AllArgsOverrideSelf,
-    #[cfg(feature="allow-deprecated")]
-    AllowMissingPositional,
-    #[cfg(feature="allow-deprecated")]
-    TrailingVarArg,
-    #[cfg(feature="allow-deprecated")]
-    DontDelimitTrailingValues,
-    #[cfg(feature="allow-deprecated")]
-    InferLongArgs,
-    #[cfg(feature="allow-deprecated")]
-    InferSubcommands,
-    #[cfg(feature="allow-deprecated")]
-    SubcommandRequired,
-    #[cfg(feature="allow-deprecated")]
-    SubcommandRequiredElseHelp,
-    #[cfg(feature="allow-deprecated")]
-    AllowExternalSubcommands,
-    #[cfg(all(feature = "unstable-multicall", feature="allow-depreacted"))]
-    Multicall,
-    #[cfg(feature="allow-deprecated")]
-    AllowInvalidUtf8ForExternalSubcommands,
-    #[cfg(feature="allow-deprecated")]
-    UseLongFormatForHelpSubcommand,
-    #[cfg(feature="allow-deprecated")]
-    SubcommandsNegateReqs,
-    #[cfg(feature="allow-deprecated")]
-    ArgsNegateSubcommands,
-    #[cfg(feature="allow-deprecated")]
-    SubcommandPrecedenceOverArg,
-    #[cfg(feature="allow-deprecated")]
-    ArgRequiredElseHelp,
-    DeriveDisplayOrder,
-    #[cfg(feature="allow-deprecated")]
-    DontCollapseArgsInUsage,
-    #[cfg(feature="allow-deprecated")]
-    NextLineHelp,
-    #[cfg(feature="allow-deprecated")]
-    DisableColoredHelp,
-    #[cfg(feature="allow-deprecated")]
-    DisableHelpFlag,
-    #[cfg(feature="allow-deprecated")]
-    DisableHelpSubcommand,
-    #[cfg(feature="allow-deprecated")]
-    DisableVersionFlag,
-    #[cfg(feature="allow-deprecated")]
-    PropagateVersion,
-    #[cfg(feature="allow-deprecated")]
-    Hidden,
-    #[cfg(feature="allow-deprecated")]
-    HidePossibleValues,
-    #[cfg(feature="allow-deprecated")]
-    HelpExpected,
-    #[cfg(feature="allow-deprecated")]
-    NoBinaryName,
-    NoAutoHelp,
-    NoAutoVersion,}
+macro_rules! app_settings {
+    ($($name:ident),* $(,)?) => {
+        /// Names of the settings which can be used in `setting` / `settings`.
+        pub(crate) const SETTING_NAMES: &[&str] = &[$(stringify!($name)),*];
+
+        /// Apply the setting named `name` (already converted to snake_case).
+        pub(crate) fn apply_setting(app: Command, name: &str) -> Option<Command> {
+            Some(match name {
+                $(stringify!($name) => app.$name(true),)*
+                _ => return None,
+            })
+        }
+    };
+}
+
+app_settings!(
+    ignore_errors,
+    allow_hyphen_values,
+    allow_negative_numbers,
+    args_override_self,
+    allow_missing_positional,
+    trailing_var_arg,
+    dont_delimit_trailing_values,
+    infer_long_args,
+    infer_subcommands,
+    subcommand_required,
+    allow_external_subcommands,
+    multicall,
+    subcommand_negates_reqs,
+    args_conflicts_with_subcommands,
+    subcommand_precedence_over_arg,
+    arg_required_else_help,
+    dont_collapse_args_in_usage,
+    next_line_help,
+    disable_colored_help,
+    disable_help_flag,
+    disable_help_subcommand,
+    disable_version_flag,
+    propagate_version,
+    hide,
+    hide_possible_values,
+    help_expected,
+    no_binary_name,
 );
 
-pub(crate) struct AppSettingSeed;
-impl<'de> DeserializeSeed<'de> for AppSettingSeed {
-    type Value = AppSettings;
+/// One or more setting names.
+pub(crate) struct SettingNames(pub(crate) Vec<String>);
 
-    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+impl<'de> Deserialize<'de> for SettingNames {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        AppSetting1::deserialize(deserializer).map(|s| s.into())
+        struct V;
+        impl<'de> Visitor<'de> for V {
+            type Value = SettingNames;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("setting name or array of setting names")
+            }
+
+            fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+                Ok(SettingNames(vec![v.to_owned()]))
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let mut v = Vec::new();
+                while let Some(s) = seq.next_element::<String>()? {
+                    v.push(s);
+                }
+                Ok(SettingNames(v))
+            }
+        }
+        deserializer.deserialize_any(V)
     }
 }
 
-pub(crate) struct AppSettingsSeed;
-impl<'de> DeserializeSeed<'de> for AppSettingsSeed {
-    type Value = AppFlags;
-
-    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Vec::<AppSetting1>::deserialize(deserializer).map(|s| {
-            s.into_iter()
-                .fold(AppFlags::default(), |a, b| a | AppSettings::from(b))
-        })
+pub(crate) fn apply_settings<E: serde::de::Error>(
+    mut app: Command,
+    names: SettingNames,
+) -> Result<Command, E> {
+    for name in names.0 {
+        let key: String = convert_case_to!(name);
+        app = apply_setting(app, &key).ok_or_else(|| E::unknown_variant(&name, SETTING_NAMES))?;
     }
+    Ok(app)
 }

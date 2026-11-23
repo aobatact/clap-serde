@@ -1,5 +1,26 @@
 # Change Log
 
+# 0.6.0
+
+## Breaking Changes
+- Bump clap to 4.6. `CommandWrap` and `ArgWrap` no longer have lifetime parameters.
+- Removed keys which are removed in clap 4 (`takes_value`, `multiple_values`, `min_values`, `max_values`, etc.).
+  Use `num_args`, `action`, `value_parser` and `possible_values` instead.
+- `setting(s)` / `global_setting(s)` are mapped to the methods of `Command` (only with `allow-deprecated`),
+  since `AppSettings` is removed in clap 4.
+- The key for `ArgAction` is `action` (`arg_action` is accepted with `allow-deprecated`).
+- `null` values are ignored on deserialization.
+
+## Features
+- Serialize `Command` with `CommandWrapRef` (and `CommandWrap`, `ArgWrapRef`, `ArgWrap`).
+  Use `NoSkip` config to serialize all the fields.
+- New keys: `num_args`, `possible_values`, `flatten_help`, `trailing_var_arg` and `allow_negative_numbers` for `Arg`,
+  `help_template` (with the new `help` feature).
+- `override-arg` adds the arg if it does not exist.
+
+## Fixes
+- `color` key was always disabled.
+
 # 0.5.1
 
 ## Fixes

@@ -22,19 +22,20 @@ mod ser;
 pub mod documents;
 
 #[cfg(feature = "yaml")]
-#[deprecated(since = "0.4", note = "use serde-yaml instead")]
+#[deprecated(since = "0.4.0", note = "use serde-yaml instead")]
 mod yaml;
 #[cfg(feature = "yaml")]
+#[allow(deprecated)]
 pub use yaml::{yaml_to_app, YamlWrap};
 
 pub use de::app::CommandWrap;
 pub use de::arg::ArgWrap;
 pub use ser::app::CommandWrapRef;
 pub use ser::arg::ArgWrapRef;
-pub use ser::NoSkip;
+pub use ser::{NoSkip, SerializeConfig};
 
 #[deprecated(note = "use CommandWrap instead")]
-pub type AppWrap<'a> = CommandWrap<'a>;
+pub type AppWrap = CommandWrap;
 
 #[cfg(all(test, feature = "snake-case-key"))]
 mod tests;

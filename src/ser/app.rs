@@ -1,53 +1,75 @@
-use super::IterSer;
-use super::SerializeConfig;
+use super::{DisplayStr, Entries, SerializeConfig};
 use crate::CommandWrap;
 use clap::Command;
-use serde::ser::SerializeMap;
-use serde::Serialize;
+use serde::{Serialize, Serializer};
 use std::ops::Deref;
 
 /// Wrapper of `&`[`Command`] to serialize.
+///
+/// The output can be deserialized with [`CommandWrap`].
+/// ```
+/// # use clap::{Arg, Command};
+/// # use clap_serde::{CommandWrap, CommandWrapRef};
+/// let command = Command::new("app")
+///     .about("an app")
+///     .arg(Arg::new("verbose").short('v'));
+/// let json = serde_json::to_string(&CommandWrapRef::new(&command)).unwrap();
+/// let deserialized: CommandWrap = serde_json::from_str(&json).unwrap();
+/// assert_eq!(deserialized.get_name(), "app");
+/// ```
+///
+/// Some properties cannot be serialized because clap does not expose getters for them
+/// (e.g. `requires`, `conflicts_with`, the ranges of the numeric `value_parser`
+/// and custom value parsers).
 #[derive(Debug, Clone)]
-pub struct CommandWrapRef<'command, 'wrap, C = ()> {
-    command: &'wrap Command<'command>,
+pub struct CommandWrapRef<'a, C = ()> {
+    command: &'a Command,
     config: C,
 }
 
-impl<'a, 'b> CommandWrapRef<'a, 'b> {
+impl<'a> CommandWrapRef<'a> {
     /// Create a wrapper for [`Command`].
-    pub fn new(app: &'b Command<'a>) -> Self {
+    pub fn new(command: &'a Command) -> Self {
         Self {
-            command: app,
+            command,
             config: (),
         }
     }
+}
 
-    /// Add a setting for serializeing.
+impl<'a, C> CommandWrapRef<'a, C> {
+    /// Set the config for serializing.
     /// See [`NoSkip`](`crate::NoSkip`) for details.
-    pub fn with_setting<C: SerializeConfig>(self, config: C) -> CommandWrapRef<'a, 'b, C> {
+    pub fn with_config<C2: SerializeConfig>(self, config: C2) -> CommandWrapRef<'a, C2> {
         CommandWrapRef {
             command: self.command,
             config,
         }
     }
+
+    /// Set the config for serializing.
+    #[deprecated(since = "0.6.0", note = "use `with_config` instead")]
+    pub fn with_setting<C2: SerializeConfig>(self, config: C2) -> CommandWrapRef<'a, C2> {
+        self.with_config(config)
+    }
 }
 
-impl<'a, 'b, C> Deref for CommandWrapRef<'a, 'b, C> {
-    type Target = Command<'a>;
+impl<C> Deref for CommandWrapRef<'_, C> {
+    type Target = Command;
 
     fn deref(&self) -> &Self::Target {
         self.command
     }
 }
 
-impl<'a, 'b, C> From<CommandWrapRef<'a, 'b, C>> for &'b Command<'a> {
-    fn from(a: CommandWrapRef<'a, 'b, C>) -> Self {
+impl<'a, C> From<CommandWrapRef<'a, C>> for &'a Command {
+    fn from(a: CommandWrapRef<'a, C>) -> Self {
         a.command
     }
 }
 
-impl<'a, 'b, C: Default> From<&'b Command<'a>> for CommandWrapRef<'a, 'b, C> {
-    fn from(command: &'b Command<'a>) -> Self {
+impl<'a, C: Default> From<&'a Command> for CommandWrapRef<'a, C> {
+    fn from(command: &'a Command) -> Self {
         CommandWrapRef {
             command,
             config: C::default(),
@@ -55,8 +77,8 @@ impl<'a, 'b, C: Default> From<&'b Command<'a>> for CommandWrapRef<'a, 'b, C> {
     }
 }
 
-impl<'a, 'b, C: Default> From<&'b CommandWrap<'a>> for CommandWrapRef<'a, 'b, C> {
-    fn from(app: &'b CommandWrap<'a>) -> Self {
+impl<'a, C: Default> From<&'a CommandWrap> for CommandWrapRef<'a, C> {
+    fn from(app: &'a CommandWrap) -> Self {
         CommandWrapRef {
             command: &app.app,
             config: C::default(),
@@ -64,106 +86,150 @@ impl<'a, 'b, C: Default> From<&'b CommandWrap<'a>> for CommandWrapRef<'a, 'b, C>
     }
 }
 
-impl<'a, 'b> Serialize for &'b CommandWrap<'a> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let wrap_ref = CommandWrapRef::<()>::from(*self);
-        wrap_ref.serialize(serializer)
+impl Serialize for CommandWrap {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        CommandWrapRef::new(&self.app).serialize(serializer)
     }
 }
 
-impl<'a, 'b, C: SerializeConfig> Serialize for CommandWrapRef<'a, 'b, C> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let command = self.command;
-        let config = &self.config;
-        let r = ser_value!(command, serializer, config, [
-            (name, get_name),
-            #[cfg(feature = "color")]
-            [&] {crate::de::app::color::from_clap_type} (color, get_color),
-            is [
-                (no_binary_name, is_no_binary_name_set),
-                (dont_delimit_trailing_values,is_dont_delimit_trailing_values_set),
-                (disable_version_flag,is_disable_version_flag_set),
-                (propagate_version,is_propagate_version_set),
-                (next_line_help,is_next_line_help_set),
-                (disable_help_flag,is_disable_help_flag_set),
-                (disable_help_subcommand,is_disable_help_subcommand_set),
-                (disable_colored_help,is_disable_colored_help_set),
-                (dont_collapse_args_in_usage,is_dont_collapse_args_in_usage_set),
-                (arg_required_else_help,is_arg_required_else_help_set),
-                (allow_negative_numbers,is_allow_negative_numbers_set),
-                (trailing_var_arg,is_trailing_var_arg_set),
-                (allow_missing_positional,is_allow_missing_positional_set),
-                (hide,is_hide_set),
-                (subcommand_required,is_subcommand_required_set),
-                (allow_external_subcommands,is_allow_external_subcommands_set),
-                (allow_invalid_utf8_for_external_subcommands,is_allow_invalid_utf8_for_external_subcommands_set),
-                (args_conflicts_with_subcommands,is_args_conflicts_with_subcommands_set),
-                (subcommand_precedence_over_arg,is_subcommand_precedence_over_arg_set),
-                (subcommand_negates_reqs,is_subcommand_negates_reqs_set),
-                (multicall,is_multicall_set)
-            ],
-            opt [
-                (display_name, get_display_name),
-                (bin_name, get_bin_name),
-                (version, get_version),
-                (long_version, get_long_version),
-                (author, get_author),
-                (long_flag, get_long_flag),
-                [&] (short_flag, get_short_flag),
-                (about, get_about),
-                (long_about, get_long_about),
-                (next_help_heading, get_next_help_heading),
-                (subcommand_help_heading, get_subcommand_help_heading),
-                (subcommand_value_name, get_subcommand_value_name),
-                (before_help, get_before_help),
-                (before_long_help, get_before_long_help),
-                (after_help, get_after_help),
-                (after_long_help, get_after_long_help),
-            ]
-            iter [
-                (visible_aliases, Command::get_visible_aliases),
-                (visible_short_flag_aliases, Command::get_visible_short_flag_aliases),
-                (visible_long_flag_aliases, Command::get_visible_long_flag_aliases)
-                //missing get_hidden_aliases in Command
-            ]
-            //groups
-            specialize [
-                (args, |s| {super::arg::ArgsWrap::new(s, &self.config)}),
-                (subcommands, |s| {SubCommandsWrap(s, self.config.clone())})
-            ]
-        ]);
-        r
+impl<C: SerializeConfig> Serialize for CommandWrapRef<'_, C> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let c = self.command;
+        let mut m = Entries::new(serializer, self.config.serialize_all())?;
+
+        m.value("name", c.get_name())?;
+        m.opt("display_name", c.get_display_name())?;
+        m.opt("bin_name", c.get_bin_name())?;
+        m.opt("version", c.get_version())?;
+        m.opt("long_version", c.get_long_version())?;
+        m.opt("author", c.get_author())?;
+        m.opt("about", c.get_about().map(DisplayStr))?;
+        m.opt("long_about", c.get_long_about().map(DisplayStr))?;
+        m.opt("before_help", c.get_before_help().map(DisplayStr))?;
+        m.opt("before_long_help", c.get_before_long_help().map(DisplayStr))?;
+        m.opt("after_help", c.get_after_help().map(DisplayStr))?;
+        m.opt("after_long_help", c.get_after_long_help().map(DisplayStr))?;
+        m.opt("override_usage", c.get_overridden_usage().map(DisplayStr))?;
+        m.opt("next_help_heading", c.get_next_help_heading())?;
+        m.opt("subcommand_help_heading", c.get_subcommand_help_heading())?;
+        m.opt("subcommand_value_name", c.get_subcommand_value_name())?;
+        m.opt("short_flag", c.get_short_flag())?;
+        m.opt("long_flag", c.get_long_flag())?;
+
+        let visible: Vec<_> = c.get_visible_aliases().collect();
+        m.seq("visible_aliases", visible.iter())?;
+        m.seq("aliases", c.get_aliases())?;
+        let visible: Vec<_> = c.get_visible_short_flag_aliases().collect();
+        m.seq("visible_short_flag_aliases", visible.iter())?;
+        m.seq(
+            "short_flag_aliases",
+            c.get_all_short_flag_aliases()
+                .filter(|a| !visible.contains(a)),
+        )?;
+        let visible: Vec<_> = c.get_visible_long_flag_aliases().collect();
+        m.seq("visible_long_flag_aliases", visible.iter())?;
+        m.seq(
+            "long_flag_aliases",
+            c.get_all_long_flag_aliases()
+                .filter(|a| !visible.contains(a)),
+        )?;
+
+        #[cfg(feature = "color")]
+        {
+            let color = c.get_color();
+            if self.config.serialize_all() || color != clap::ColorChoice::Auto {
+                m.opt(
+                    "color",
+                    crate::de::app::color::ColorChoice1::from_clap_type(color),
+                )?;
+            }
+        }
+
+        m.flag("no_binary_name", c.is_no_binary_name_set())?;
+        m.flag("args_override_self", c.is_args_override_self())?;
+        m.flag(
+            "dont_delimit_trailing_values",
+            c.is_dont_delimit_trailing_values_set(),
+        )?;
+        m.flag("disable_version_flag", c.is_disable_version_flag_set())?;
+        m.flag("propagate_version", c.is_propagate_version_set())?;
+        m.flag("next_line_help", c.is_next_line_help_set())?;
+        m.flag("disable_help_flag", c.is_disable_help_flag_set())?;
+        m.flag(
+            "disable_help_subcommand",
+            c.is_disable_help_subcommand_set(),
+        )?;
+        m.flag("disable_colored_help", c.is_disable_colored_help_set())?;
+        m.flag(
+            "dont_collapse_args_in_usage",
+            c.is_dont_collapse_args_in_usage_set(),
+        )?;
+        m.flag("arg_required_else_help", c.is_arg_required_else_help_set())?;
+        m.flag("allow_negative_numbers", c.is_allow_negative_numbers_set())?;
+        m.flag("trailing_var_arg", c.is_trailing_var_arg_set())?;
+        m.flag(
+            "allow_missing_positional",
+            c.is_allow_missing_positional_set(),
+        )?;
+        m.flag("hide", c.is_hide_set())?;
+        m.flag("subcommand_required", c.is_subcommand_required_set())?;
+        m.flag(
+            "allow_external_subcommands",
+            c.is_allow_external_subcommands_set(),
+        )?;
+        m.flag(
+            "args_conflicts_with_subcommands",
+            c.is_args_conflicts_with_subcommands_set(),
+        )?;
+        m.flag(
+            "subcommand_precedence_over_arg",
+            c.is_subcommand_precedence_over_arg_set(),
+        )?;
+        m.flag(
+            "subcommand_negates_reqs",
+            c.is_subcommand_negates_reqs_set(),
+        )?;
+        m.flag("multicall", c.is_multicall_set())?;
+        m.flag("flatten_help", c.is_flatten_help_set())?;
+
+        if self.config.serialize_all()
+            || c.get_arguments()
+                .any(|a| !super::arg::is_generated_arg(c, a))
+        {
+            m.value("args", &super::arg::ArgsWrap::new(c, self.config.clone()))?;
+        }
+        if self.config.serialize_all() || c.get_groups().next().is_some() {
+            m.value(
+                "groups",
+                &super::group::GroupsWrap::new(c, self.config.clone()),
+            )?;
+        }
+        if self.config.serialize_all()
+            || c.get_subcommands().any(|s| !is_generated_subcommand(c, s))
+        {
+            m.value("subcommands", &SubCommandsWrap(c, self.config.clone()))?;
+        }
+        m.end()
     }
 }
 
-struct SubCommandsWrap<'a, 'b, C>(&'b Command<'a>, C);
+struct SubCommandsWrap<'a, C>(&'a Command, C);
 
-impl<'a, 'b, C: SerializeConfig> Serialize for SubCommandsWrap<'a, 'b, C> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
+impl<C: SerializeConfig> Serialize for SubCommandsWrap<'_, C> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.collect_seq(
             self.0
                 .get_subcommands()
+                .filter(|s| !is_generated_subcommand(self.0, s))
                 .map(|s| SubcommandWrap(s, self.1.clone())),
         )
     }
 }
 
-struct SubcommandWrap<'a, 'b, C>(&'b Command<'a>, C);
+struct SubcommandWrap<'a, C>(&'a Command, C);
 
-impl<'a, 'b, C: SerializeConfig> Serialize for SubcommandWrap<'a, 'b, C> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
+impl<C: SerializeConfig> Serialize for SubcommandWrap<'_, C> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.collect_map(Some((
             self.0.get_name(),
             CommandWrapRef {
@@ -172,4 +238,14 @@ impl<'a, 'b, C: SerializeConfig> Serialize for SubcommandWrap<'a, 'b, C> {
             },
         )))
     }
+}
+
+/// Whether the subcommand is the `help` subcommand auto generated by clap in [`Command::build`].
+fn is_generated_subcommand(command: &Command, sub: &Command) -> bool {
+    sub.get_name() == "help"
+        && !command.is_disable_help_subcommand_set()
+        && sub.is_disable_help_flag_set()
+        && sub.get_about().is_some_and(|a| {
+            a.to_string() == "Print this message or the help of the given subcommand(s)"
+        })
 }

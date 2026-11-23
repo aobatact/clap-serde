@@ -37,7 +37,7 @@ let app = clap_serde::yaml_to_app(&yaml).expect("parse failed from yaml");
 assert_eq!(app.get_name(), "app_clap_serde");
 ```
 */
-pub fn yaml_to_app(yaml: &Yaml) -> Result<clap::Command<'_>, Error> {
+pub fn yaml_to_app(yaml: &Yaml) -> Result<clap::Command, Error> {
     let wrap = YamlWrap { yaml };
     use serde::Deserialize;
     crate::CommandWrap::deserialize(wrap).map(|x| x.into())

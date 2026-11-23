@@ -1,18 +1,18 @@
-# ArgGropus Key List
+# ArgGroup Key List
 
-- clap : 3.0.10
-- clap-serde : 0.3.0
+- clap : 4.6
+- clap-serde : 0.6.0
 
-(Keys can be changed by the case-key features)
+(Keys can be changed by the case-key features. `null` values are ignored.)
 
 |key| type|
 |-|-|
-|arg| `&str` |
-|args| `Vec<&str>` |
-|conflicts_with| `&str` |
-|conflicts_with_all| `Vec<&str>` |
+|arg| `String` |
+|args| `Vec<String>` |
+|conflicts_with| `String` |
+|conflicts_with_all| `Vec<String>` |
+|id| `String`|
 |multiple| `bool`|
-|name| `&str`|
 |required| `bool`|
-|requires| `&str`|
-|requires_all| `Vec<&str>`|
+|requires| `String`|
+|requires_all| `Vec<String>`|
