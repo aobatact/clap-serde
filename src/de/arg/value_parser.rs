@@ -1,5 +1,5 @@
 use clap::builder::ValueParser as VP;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 macro_rules! enum_de_value {
     ($basety : ident, $newty :ident,
@@ -91,7 +91,7 @@ enum_de_value!(VP, ValueParser1,
 );
 
 enum_de!(VP, ValueParser2,
-    #[derive(Deserialize, Clone, Copy)]
+    #[derive(Deserialize, Serialize, Clone, Copy, PartialEq, Eq, Debug)]
     #[cfg_attr(feature = "kebab-case-key" ,serde(rename_all = "kebab-case"))]
     #[cfg_attr(feature = "snake-case-key" ,serde(rename_all = "snake_case"))]
     {}

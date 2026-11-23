@@ -603,3 +603,201 @@ fn override_arg_adds_missing() {
         .unwrap();
     assert_eq!(new_one.get_short(), Some('n'));
 }
+
+// ---- regression tests for the review of the clap 4 port ----
+
+/// Round trip through a JSON string.
+/// (`serde_json::Value` is not used because it sorts the keys and hides the order dependent bugs.)
+fn roundtrip<C: crate::SerializeConfig + Default>(c: &Command) -> Command {
+    let json = serde_json::to_string(&CommandWrapRef::<C>::from(c)).unwrap();
+    serde_json::from_str::<CommandWrap>(&json).unwrap().into()
+}
+
+/// Round trip through a YAML string.
+fn roundtrip_yaml<C: crate::SerializeConfig + Default>(c: &Command) -> Command {
+    let yaml = serde_yaml::to_string(&CommandWrapRef::<C>::from(c)).unwrap();
+    serde_yaml::from_str::<CommandWrap>(&yaml).unwrap().into()
+}
+
+#[test]
+fn no_skip_flag_actions_keep_working() {
+    use clap::{Arg, ArgAction};
+    let c = Command::new("x")
+        .arg(Arg::new("v").short('v').action(ArgAction::Count))
+        .arg(Arg::new("t").short('t').action(ArgAction::SetTrue))
+        .arg(Arg::new("f").short('f').action(ArgAction::SetFalse));
+    let json = serde_json::to_value(CommandWrapRef::new(&c).with_config(NoSkip)).unwrap();
+    assert_eq!(
+        json["args"][0]["v"]["value_parser"],
+        serde_json::Value::Null
+    );
+    let c2 = roundtrip::<NoSkip>(&c);
+    let m = c2.try_get_matches_from(["x", "-vv", "-t", "-f"]).unwrap();
+    assert_eq!(m.get_count("v"), 2);
+    assert!(m.get_flag("t"));
+    assert!(!m.get_flag("f"));
+}
+
+#[test]
+fn next_help_heading_does_not_leak_into_args() {
+    use clap::Arg;
+    let c = Command::new("x")
+        .arg(Arg::new("a").long("a"))
+        .next_help_heading("H")
+        .arg(Arg::new("b").long("b"))
+        .next_help_heading("I");
+    let heading = |c: &Command, id: &str| {
+        c.get_arguments()
+            .find(|a| a.get_id() == id)
+            .unwrap()
+            .get_help_heading()
+            .map(str::to_owned)
+    };
+    let check = |c2: Command| {
+        assert_eq!(heading(&c2, "a"), None);
+        assert_eq!(heading(&c2, "b").as_deref(), Some("H"));
+        assert_eq!(c2.get_next_help_heading(), Some("I"));
+    };
+    check(roundtrip::<()>(&c));
+    check(roundtrip::<NoSkip>(&c));
+    check(roundtrip_yaml::<()>(&c));
+    // toml writes the values before the tables, so `next_help_heading` comes before `args`.
+    let toml = toml::to_string(&CommandWrapRef::new(&c)).unwrap();
+    assert!(toml.find("next_help_heading").unwrap() < toml.find("[[args]]").unwrap());
+    check(toml::from_str::<CommandWrap>(&toml).unwrap().into());
+}
+
+#[test]
+fn indistinguishable_value_parsers_are_not_serialized() {
+    use clap::builder::{BoolishValueParser, FalseyValueParser};
+    use clap::Arg;
+    let c = Command::new("x")
+        .arg(
+            Arg::new("bool")
+                .long("bool")
+                .value_parser(clap::value_parser!(bool)),
+        )
+        .arg(
+            Arg::new("boolish")
+                .long("boolish")
+                .value_parser(BoolishValueParser::new()),
+        )
+        .arg(
+            Arg::new("falsey")
+                .long("falsey")
+                .value_parser(FalseyValueParser::new()),
+        );
+    let json = serde_json::to_value(CommandWrapRef::new(&c)).unwrap();
+    assert_eq!(json["args"][0]["bool"]["value_parser"], "bool");
+    assert!(json["args"][1]["boolish"].get("value_parser").is_none());
+    assert!(json["args"][2]["falsey"].get("value_parser").is_none());
+}
+
+#[test]
+fn display_order_roundtrip() {
+    use clap::Arg;
+    let c = Command::new("x")
+        .arg(Arg::new("a").long("a"))
+        .arg(Arg::new("z").long("z").display_order(100))
+        .arg(Arg::new("pos"))
+        .subcommand(Command::new("s1"))
+        .subcommand(Command::new("s2").display_order(0))
+        .arg(Arg::new("b").long("b"));
+    let orders = |c: &Command| {
+        (
+            c.get_arguments()
+                .map(|a| (a.get_id().to_string(), a.get_display_order()))
+                .collect::<Vec<_>>(),
+            c.get_subcommands()
+                .map(|s| (s.get_name().to_owned(), s.get_display_order()))
+                .collect::<Vec<_>>(),
+        )
+    };
+    assert_eq!(orders(&roundtrip::<()>(&c)), orders(&c));
+    assert_eq!(orders(&roundtrip::<NoSkip>(&c)), orders(&c));
+    // the implicit orders are not written
+    let json = serde_json::to_value(CommandWrapRef::new(&c)).unwrap();
+    assert!(json["args"][0]["a"].get("display_order").is_none());
+    assert_eq!(json["args"][1]["z"]["display_order"], 100);
+}
+
+#[test]
+fn next_display_order_null_resets() {
+    use clap::Arg;
+    let app: Command = serde_json::from_str::<CommandWrap>(
+        r#"{"name": "x", "next_display_order": null, "args": [{"a": {"long": "a"}}]}"#,
+    )
+    .unwrap()
+    .into();
+    assert_eq!(app.get_arguments().next().unwrap().get_display_order(), 999);
+    let _ = Arg::new("unused");
+}
+
+#[test]
+fn version_flag_is_not_disabled_implicitly() {
+    let c = Command::new("x");
+    let json = serde_json::to_value(CommandWrapRef::new(&c)).unwrap();
+    assert!(json.get("disable_version_flag").is_none());
+    assert!(json.get("dont_collapse_args_in_usage").is_none());
+    // adding the version after deserialization should enable `--version`
+    let c2 = roundtrip::<NoSkip>(&c).version("1.0");
+    assert!(!c2.is_disable_version_flag_set());
+
+    let c = Command::new("x").version("1.0").disable_version_flag(true);
+    assert!(roundtrip::<()>(&c).is_disable_version_flag_set());
+}
+
+#[test]
+#[cfg(feature = "allow-deprecated")]
+fn clap3_settings_names() {
+    const CLAP_YAML: &str = r#"
+name: app
+settings:
+    - hidden
+    - all_args_override_self
+    - subcommands_negate_reqs
+    - args_negate_subcommands
+    - subcommand_required_else_help
+    - derive_display_order
+    - no_auto_help
+    - no_auto_version
+    - wait_on_error
+    - use_long_format_for_help_subcommand
+    - allow_invalid_utf8_for_external_subcommands
+"#;
+    let app: Command = serde_yaml::from_str::<CommandWrap>(CLAP_YAML)
+        .unwrap()
+        .into();
+    assert!(app.is_hide_set());
+    assert!(app.is_args_override_self());
+    assert!(app.is_subcommand_negates_reqs_set());
+    assert!(app.is_args_conflicts_with_subcommands_set());
+    assert!(app.is_subcommand_required_set());
+    assert!(app.is_arg_required_else_help_set());
+}
+
+#[test]
+#[cfg(feature = "allow-deprecated")]
+fn global_settings_propagate() {
+    const CLAP_YAML: &str = r#"
+name: app
+global_settings: [disable_help_subcommand, hidden]
+setting: subcommand_required
+subcommands:
+    - sub1:
+        subcommands:
+            - nested: {}
+"#;
+    let app: Command = serde_yaml::from_str::<CommandWrap>(CLAP_YAML)
+        .unwrap()
+        .into();
+    let sub1 = app.find_subcommand("sub1").unwrap();
+    let nested = sub1.find_subcommand("nested").unwrap();
+    for c in [&app, sub1, nested] {
+        assert!(c.is_disable_help_subcommand_set(), "{}", c.get_name());
+        assert!(c.is_hide_set(), "{}", c.get_name());
+    }
+    // `setting` is not global
+    assert!(app.is_subcommand_required_set());
+    assert!(!sub1.is_subcommand_required_set());
+}

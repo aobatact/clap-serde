@@ -7,9 +7,12 @@
 - Removed keys which are removed in clap 4 (`takes_value`, `multiple_values`, `min_values`, `max_values`, etc.).
   Use `num_args`, `action`, `value_parser` and `possible_values` instead.
 - `setting(s)` / `global_setting(s)` are mapped to the methods of `Command` (only with `allow-deprecated`),
-  since `AppSettings` is removed in clap 4.
+  since `AppSettings` is removed in clap 4. `global_setting(s)` are applied to all the subcommands in the input.
+  The settings removed in clap 4 (e.g. `derive_display_order`) are ignored.
 - The key for `ArgAction` is `action` (`arg_action` is accepted with `allow-deprecated`).
-- `null` values are ignored on deserialization.
+- `null` values are ignored on deserialization
+  (except `next_help_heading`, `next_display_order` and `help_heading` of `Arg`, where `null` resets the value).
+- An empty `help_heading` of `Arg` means no heading.
 
 ## Features
 - Serialize `Command` with `CommandWrapRef` (and `CommandWrap`, `ArgWrapRef`, `ArgWrap`).

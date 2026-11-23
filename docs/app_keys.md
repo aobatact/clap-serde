@@ -54,8 +54,8 @@
 | max_term_width | `usize` | |
 | multicall | `bool` | |
 | name | `String` | |
-| next_display_order | `usize` | |
-| next_help_heading | `String` | |
+| next_display_order | `usize` (`null` disables the automatic display order) | |
+| next_help_heading | `String` (`null` resets the heading) | |
 | next_line_help | `bool` | |
 | no_binary_name | `bool` | |
 | override_help | `String` | |
@@ -86,8 +86,8 @@
 
 ## Settings
 For `setting`, `settings`, `global_setting`, `global_settings` (compatibility with clap 3 `AppSettings`).
-Each name calls the method of the same name with `true`
-(`global_*` are applied to the command itself, the same as `setting`).
+Each name calls the method of the same name with `true`.
+`global_*` are applied to the command and all of its subcommands (only the subcommands in the same input).
 
 - ignore_errors
 - allow_hyphen_values
@@ -116,6 +116,17 @@ Each name calls the method of the same name with `true`
 - hide_possible_values
 - help_expected
 - no_binary_name
+
+The names of clap 3 below are also accepted.
+
+| name | clap 4 |
+| - | - |
+| hidden | `hide` |
+| all_args_override_self | `args_override_self` |
+| subcommands_negate_reqs | `subcommand_negates_reqs` |
+| args_negate_subcommands | `args_conflicts_with_subcommands` |
+| subcommand_required_else_help | `subcommand_required` + `arg_required_else_help` |
+| wait_on_error, derive_display_order, use_long_format_for_help_subcommand, allow_invalid_utf8_for_external_subcommands, no_auto_help, no_auto_version | ignored (removed in clap 4) |
 
 ## ColorChoice
 - auto

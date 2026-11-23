@@ -111,8 +111,12 @@ By default, the flags with `false` and the values with `None` are skipped.
 Use [`NoSkip`](crate::NoSkip) to serialize all of them.
 
 Some properties are not serialized because clap does not provide getters for them
-(e.g. `requires`, `conflicts_with`, `default_value_if`, ranges of numeric `value_parser`,
-and custom value parsers).
+(e.g. `requires`, `conflicts_with`, `default_value_if`).
+
+`value_parser` is identified only by the type of the parsed value, because clap does not expose more.
+So `boolish` / `falsey` and custom parsers of unknown types are not serialized, and
+`non_empty_string`, the ranges of integer parsers and custom parsers of the known types
+are serialized as the basic parser of the type (e.g. `string`, `i64`).
 
 # features
 ## env
@@ -138,7 +142,8 @@ Allow deprecated keys, settings. Enabled by default.
 
 `setting` / `settings` / `global_setting` / `global_settings` (clap 3 `AppSettings`) are
 converted to the corresponding methods of `Command` (e.g. `settings: [arg_required_else_help]`
-calls `Command::arg_required_else_help(true)`).
+calls `Command::arg_required_else_help(true)`). `global_setting(s)` are also applied to all the subcommands.
+See [the key list](crate::documents::app_keys) for the supported names.
 
 ## override-arg
 

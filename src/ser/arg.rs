@@ -1,5 +1,5 @@
 use super::{DisplayStr, Entries, SerializeConfig};
-use crate::de::arg::{arg_action::ArgAction, value_hint::ValueHint};
+use crate::de::arg::{arg_action::ArgAction, value_hint::ValueHint, value_parser::ValueParser2};
 use crate::ArgWrap;
 use clap::{Arg, Command};
 use serde::{Serialize, Serializer};
@@ -13,12 +13,39 @@ use std::ops::Deref;
 pub struct ArgWrapRef<'a, C = ()> {
     arg: &'a Arg,
     config: C,
+    context: ArgContext,
+}
+
+/// How the arg will be built when it is deserialized in a [`Command`].
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct ArgContext {
+    /// The display order which [`Command::arg`] will assign implicitly.
+    pub(crate) implicit_display_order: usize,
+    /// Whether the command has `next_help_heading`,
+    /// which [`Command::arg`] will assign to the arg without heading.
+    pub(crate) command_has_heading: bool,
+}
+
+/// [`Arg::get_display_order`] returns this when display order is not set.
+pub(crate) const DEFAULT_DISPLAY_ORDER: usize = 999;
+
+impl Default for ArgContext {
+    fn default() -> Self {
+        Self {
+            implicit_display_order: DEFAULT_DISPLAY_ORDER,
+            command_has_heading: false,
+        }
+    }
 }
 
 impl<'a> ArgWrapRef<'a> {
     /// Create a wrapper for [`Arg`].
     pub fn new(arg: &'a Arg) -> Self {
-        Self { arg, config: () }
+        Self {
+            arg,
+            config: (),
+            context: ArgContext::default(),
+        }
     }
 }
 
@@ -29,6 +56,7 @@ impl<'a, C> ArgWrapRef<'a, C> {
         ArgWrapRef {
             arg: self.arg,
             config,
+            context: self.context,
         }
     }
 }
@@ -46,6 +74,7 @@ impl<'a, C: Default> From<&'a Arg> for ArgWrapRef<'a, C> {
         Self {
             arg,
             config: C::default(),
+            context: ArgContext::default(),
         }
     }
 }
@@ -55,6 +84,7 @@ impl<'a, C: Default> From<&'a ArgWrap> for ArgWrapRef<'a, C> {
         Self {
             arg: &arg.arg,
             config: C::default(),
+            context: ArgContext::default(),
         }
     }
 }
@@ -82,7 +112,13 @@ impl<C: SerializeConfig> Serialize for ArgProps<'_, '_, C> {
 
         m.opt("help", a.get_help().map(DisplayStr))?;
         m.opt("long_help", a.get_long_help().map(DisplayStr))?;
-        m.opt("help_heading", a.get_help_heading())?;
+        match a.get_help_heading() {
+            Some(h) => m.value("help_heading", h)?,
+            // An empty heading resets the heading which `Command::next_help_heading` would assign.
+            // (`null` is not used because some formats like toml do not support it.)
+            None if all || self.0.context.command_has_heading => m.value("help_heading", "")?,
+            None => {}
+        }
         m.opt("short", a.get_short())?;
         m.opt("long", a.get_long())?;
 
@@ -100,6 +136,12 @@ impl<C: SerializeConfig> Serialize for ArgProps<'_, '_, C> {
         )?;
 
         m.opt("index", a.get_index())?;
+        let display_order = a.get_display_order();
+        if display_order != self.0.context.implicit_display_order {
+            m.value("display_order", &display_order)?;
+        } else {
+            m.opt("display_order", None::<()>)?;
+        }
         m.opt(
             "value_names",
             a.get_value_names()
@@ -127,7 +169,7 @@ impl<C: SerializeConfig> Serialize for ArgProps<'_, '_, C> {
             m.opt("value_hint", ValueHint::from_clap_type(hint))?;
         }
         let value_type = value_parser_name(a.get_value_parser());
-        let possible_values = if value_type == Some("string") {
+        let possible_values = if matches!(value_type, Some(ValueParser2::String)) {
             a.get_possible_values()
         } else {
             // e.g. `bool` has possible values, but it is represented by `value_parser`
@@ -144,7 +186,11 @@ impl<C: SerializeConfig> Serialize for ArgProps<'_, '_, C> {
             )?;
         } else {
             m.opt("possible_values", None::<()>)?;
-            if all || !is_default_value_parser(action, value_type) {
+            if is_default_value_parser(action, value_type) {
+                // Writing the default explicitly may contradict the action (e.g. `count` with `string`),
+                // because `Arg::get_value_parser` returns `string` before `Command::build`.
+                m.opt("value_parser", None::<()>)?;
+            } else {
                 m.opt("value_parser", value_type)?;
             }
         }
@@ -175,41 +221,53 @@ impl<C: SerializeConfig> Serialize for ArgProps<'_, '_, C> {
     }
 }
 
-/// Name of the value parser which can be deserialized, if known.
-fn value_parser_name(value_parser: &clap::builder::ValueParser) -> Option<&'static str> {
+/// The value parser which can be deserialized, if known.
+///
+/// clap only exposes the type of the parsed value, so the value parser is identified by it.
+/// The parsers which cannot be identified (e.g. `boolish`, `falsey`) are `None`.
+/// `non_empty_string`, the ranges of the integer parsers and custom parsers cannot be distinguished
+/// from the basic parsers of the same type.
+fn value_parser_name(value_parser: &clap::builder::ValueParser) -> Option<ValueParser2> {
     use std::{ffi::OsString, path::PathBuf};
     let id = value_parser.type_id();
     macro_rules! find {
-        ($($t:ty => $name:literal),* $(,)?) => {
-            $(if id == TypeId::of::<$t>() { return Some($name); })*
+        ($($t:ty => $name:ident),* $(,)?) => {
+            $(if id == TypeId::of::<$t>() { return Some(ValueParser2::$name); })*
         };
     }
+    if id == TypeId::of::<bool>() {
+        // `boolish` and `falsey` also produce `bool`, but they accept more values.
+        let is_bool = value_parser.possible_values().is_some_and(|p| {
+            p.map(|p| p.get_name().to_owned())
+                .eq(["true", "false"].map(String::from))
+        });
+        return is_bool.then_some(ValueParser2::Bool);
+    }
     find!(
-        String => "string",
-        bool => "bool",
-        OsString => "os_string",
-        PathBuf => "path_buf",
-        i64 => "i64",
-        i32 => "i32",
-        i16 => "i16",
-        i8 => "i8",
-        u64 => "u64",
-        u32 => "u32",
-        u16 => "u16",
-        u8 => "u8",
+        String => String,
+        OsString => OsString,
+        PathBuf => PathBuf,
+        i64 => I64,
+        i32 => I32,
+        i16 => I16,
+        i8 => I8,
+        u64 => U64,
+        u32 => U32,
+        u16 => U16,
+        u8 => U8,
     );
     None
 }
 
 /// Whether the value parser is what clap selects for the action by default.
-fn is_default_value_parser(action: &clap::ArgAction, value_type: Option<&str>) -> bool {
+fn is_default_value_parser(action: &clap::ArgAction, value_type: Option<ValueParser2>) -> bool {
     use clap::ArgAction::*;
     match value_type {
         // unknown value parsers cannot be serialized
         None => true,
-        Some("string") => true,
-        Some("bool") => matches!(action, SetTrue | SetFalse),
-        Some("u8") => matches!(action, Count),
+        Some(ValueParser2::String) => true,
+        Some(ValueParser2::Bool) => matches!(action, SetTrue | SetFalse),
+        Some(ValueParser2::U8) => matches!(action, Count),
         Some(_) => false,
     }
 }
@@ -250,12 +308,27 @@ impl<'a, C> ArgsWrap<'a, C> {
 impl<C: SerializeConfig> Serialize for ArgsWrap<'_, C> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let c = self.command;
+        let command_has_heading = c.get_next_help_heading().is_some();
+        // `Command::arg` assigns the display order to the non positional args in order.
+        let mut order = 0;
         serializer.collect_seq(
             c.get_arguments()
                 .filter(|arg| !is_generated_arg(c, arg))
-                .map(|arg| ArgWrapRef {
-                    arg,
-                    config: self.config.clone(),
+                .map(|arg| {
+                    let implicit_display_order = if arg.is_positional() {
+                        DEFAULT_DISPLAY_ORDER
+                    } else {
+                        order += 1;
+                        order - 1
+                    };
+                    ArgWrapRef {
+                        arg,
+                        config: self.config.clone(),
+                        context: ArgContext {
+                            implicit_display_order,
+                            command_has_heading,
+                        },
+                    }
                 }),
         )
     }

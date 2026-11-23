@@ -39,6 +39,8 @@ pub type AppWrap = CommandWrap;
 
 #[cfg(all(test, feature = "snake-case-key"))]
 mod tests;
+#[cfg(test)]
+mod tests_case;
 
 mod util;
 pub use util::load;

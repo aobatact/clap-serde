@@ -91,6 +91,8 @@ impl<'de> Visitor<'de> for CommandVisitor {
         let mut app = self.0;
         //TODO: check the first key to get name from the input?
         //currently the name change in `Clap::Command::name` doesn't change the `Clap::Command::id` so might cause problems?
+        #[cfg(feature = "allow-deprecated")]
+        let mut global_settings = appsettings::SettingNames::default();
         while let Some(key) = map.next_key::<String>()? {
             app = parse_value!(key, app, map, Command, {
                 (about, String),
@@ -138,7 +140,7 @@ impl<'de> Visitor<'de> for CommandVisitor {
                 (max_term_width, usize),
                 (multicall, bool),
                 (name, String),
-                (next_display_order, Option<usize>),
+                // next_display_order : specialized
                 // next_help_heading : specialized
                 (next_line_help, bool),
                 (no_binary_name, bool),
@@ -184,6 +186,7 @@ impl<'de> Visitor<'de> for CommandVisitor {
                 "color" => {
                     #[cfg(feature = "color")] { parse_opt!(app, map, color::ColorChoice1, |v| app.color(v.into())) }
                     #[cfg(not(feature = "color"))] { return Err(Error::custom("color feature disabled"))}}
+                "next_display_order" => app.next_display_order(map.next_value::<Option<usize>>()?)
                 "next_help_heading" => match map.next_value::<Option<String>>()? {
                     Some(h) => app.next_help_heading(h),
                     None => app.next_help_heading(clap::builder::Resettable::Reset),
@@ -194,15 +197,27 @@ impl<'de> Visitor<'de> for CommandVisitor {
                 "help_template" => {
                     #[cfg(feature = "help")] { parse_value_inner!(app, map, Command, String, help_template) }
                     #[cfg(not(feature = "help"))] { return Err(Error::custom("help feature disabled"))}}
-                "setting" | "settings" | "global_setting" | "global_settings" => {
+                "setting" | "settings" => {
                     #[cfg(feature = "allow-deprecated")]
-                    { appsettings::apply_settings(app, map.next_value()?)? }
+                    { map.next_value::<appsettings::SettingNames>()?.validate()?.apply(app) }
+                    #[cfg(not(feature = "allow-deprecated"))]
+                    { return Err(Error::custom(format_args!("deprecated key: {}", key))) }
+                }
+                "global_setting" | "global_settings" => {
+                    // applied to the subcommands after all the keys are read.
+                    #[cfg(feature = "allow-deprecated")]
+                    {
+                        global_settings.extend(map.next_value::<appsettings::SettingNames>()?.validate()?);
+                        app
+                    }
                     #[cfg(not(feature = "allow-deprecated"))]
                     { return Err(Error::custom(format_args!("deprecated key: {}", key))) }
                 }
             ]);
         }
 
+        #[cfg(feature = "allow-deprecated")]
+        let app = global_settings.apply_global(app);
         Ok(app.into())
     }
 }

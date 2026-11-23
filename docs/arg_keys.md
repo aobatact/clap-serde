@@ -26,7 +26,7 @@
 |group|`String`||
 |groups|`Vec<String>`||
 |help|`String`||
-|help_heading|`String`||
+|help_heading|`String` (empty string or `null` means no heading, overriding `next_help_heading` of the command)||
 |hide|`bool`||
 |hide_default_value|`bool`||
 |hide_env | `bool`|env|

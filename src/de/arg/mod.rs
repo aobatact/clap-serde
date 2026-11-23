@@ -5,7 +5,7 @@ use std::ops::Deref;
 
 pub(crate) mod arg_action;
 pub(crate) mod value_hint;
-mod value_parser;
+pub(crate) mod value_parser;
 
 /// Wrapper of [`Arg`] to deserialize with [`DeserializeSeed`](`serde::de::DeserializeSeed`).
 #[derive(Debug, Clone)]
@@ -180,7 +180,7 @@ impl<'de> Visitor<'de> for ArgVisitor {
                     (group, String),
                     (groups, Vec<String>),
                     (help, String),
-                    (help_heading, String),
+                    // help_heading : specialized
                     (hide, bool),
                     (hide_default_value, bool),
                     // hide_env : specialized
@@ -285,6 +285,12 @@ impl<'de> Visitor<'de> for ArgVisitor {
                     "hide_env_values" => {
                         #[cfg(feature = "env")] { parse_value_inner!(arg, map, Arg, bool, hide_env_values) }
                         #[cfg(not(feature = "env"))] { return Err(Error::custom("env feature disabled"))}}
+                    // An empty string or `null` resets the heading
+                    // (the arg will not have the heading of `Command::next_help_heading`).
+                    "help_heading" => match map.next_value::<Option<String>>()? {
+                        Some(h) if !h.is_empty() => arg.help_heading(h),
+                        _ => arg.help_heading(clap::builder::Resettable::Reset),
+                    }
                     "num_args" => parse_opt!(arg, map, NumArgs, |v| arg.num_args(v))
                     "possible_values" => parse_opt!(arg, map, Vec<String>, |v| {
                         if v.is_empty() {
