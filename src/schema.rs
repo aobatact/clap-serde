@@ -122,33 +122,8 @@ const VALUE_PARSERS: &[&str] = &[
 ];
 
 /// Convert the snake_case name to the case of the case-key feature.
-#[cfg(any(
-    feature = "snake-case-key",
-    not(any(feature = "kebab-case-key", feature = "pascal-case-key"))
-))]
 pub(crate) fn key(s: &str) -> String {
-    s.to_string()
-}
-
-#[cfg(all(not(feature = "snake-case-key"), feature = "kebab-case-key"))]
-pub(crate) fn key(s: &str) -> String {
-    s.replace('_', "-")
-}
-
-#[cfg(all(
-    not(feature = "snake-case-key"),
-    not(feature = "kebab-case-key"),
-    feature = "pascal-case-key"
-))]
-pub(crate) fn key(s: &str) -> String {
-    s.split('_')
-        .map(|w| {
-            let mut c = w.chars();
-            c.next()
-                .map(|f| f.to_ascii_uppercase().to_string() + c.as_str())
-                .unwrap_or_default()
-        })
-        .collect()
+    crate::util::case_key(s).into_owned()
 }
 
 fn str_ty() -> Value {

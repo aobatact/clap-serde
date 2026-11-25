@@ -110,3 +110,105 @@ fn deserialize_cased_keys() {
     let sub = c.find_subcommand("sub").unwrap();
     assert_eq!(sub.get_visible_aliases().collect::<Vec<_>>(), ["s"]);
 }
+
+fn rich_command() -> Command {
+    Command::new("app")
+        .about("about")
+        .next_help_heading("Heading")
+        .arg_required_else_help(true)
+        .arg(
+            Arg::new("in_file")
+                .long("in-file")
+                .value_name("FILE")
+                .value_hint(ValueHint::FilePath)
+                .num_args(1..=2),
+        )
+        .arg(
+            Arg::new("verbose")
+                .short('v')
+                .action(ArgAction::Count)
+                .visible_short_aliases(['V']),
+        )
+        .group(clap::ArgGroup::new("my_group").args(["in_file", "verbose"]))
+        .subcommand(
+            Command::new("sub_cmd")
+                .long_flag("sub-cmd")
+                .arg(Arg::new("x").long("x")),
+        )
+}
+
+/// Check that the keys of the properties (not ids) follow the case-key feature.
+fn check_keys(v: &serde_json::Value, kind: &str) {
+    use crate::util::case_key;
+    let obj = v.as_object().unwrap_or_else(|| panic!("{kind}: {v}"));
+    for (k, child) in obj {
+        let snake = k.replace('-', "_");
+        let snake =
+            if k.contains('_') || k.contains('-') || k.chars().all(|c| c.is_ascii_lowercase()) {
+                snake
+            } else {
+                // PascalCase to snake_case
+                let mut s = String::new();
+                for (i, c) in k.chars().enumerate() {
+                    if c.is_ascii_uppercase() && i > 0 {
+                        s.push('_');
+                    }
+                    s.push(c.to_ascii_lowercase());
+                }
+                s
+            };
+        assert_eq!(k, &case_key(&snake), "{kind} key `{k}`");
+        let entries = |c: &serde_json::Value| -> Vec<serde_json::Value> {
+            match c {
+                serde_json::Value::Array(a) => a
+                    .iter()
+                    .flat_map(|e| e.as_object().unwrap().values().cloned())
+                    .collect(),
+                serde_json::Value::Object(o) => o.values().cloned().collect(),
+                _ => vec![],
+            }
+        };
+        match (kind, snake.as_str()) {
+            ("command", "args") => entries(child).iter().for_each(|a| check_keys(a, "arg")),
+            ("command", "groups") => entries(child).iter().for_each(|g| check_keys(g, "group")),
+            ("command", "subcommands") => {
+                entries(child).iter().for_each(|c| check_keys(c, "command"))
+            }
+            _ => {}
+        }
+    }
+}
+
+#[test]
+fn serialized_keys_follow_case_feature() {
+    let c = rich_command();
+    for json in [
+        serde_json::to_value(CommandWrapRef::new(&c)).unwrap(),
+        serde_json::to_value(CommandWrapRef::new(&c).with_config(NoSkip)).unwrap(),
+    ] {
+        check_keys(&json, "command");
+        // ids are not converted
+        let args = &json[crate::util::case_key("args").as_ref()];
+        assert!(args[0].get("in_file").is_some(), "{args}");
+        let c2: Command = serde_json::from_value::<CommandWrap>(json).unwrap().into();
+        assert!(c2.find_subcommand("sub_cmd").is_some());
+        assert!(c2.get_arguments().any(|a| a.get_id() == "in_file"));
+    }
+}
+
+#[test]
+#[cfg(feature = "schema")]
+fn serialized_output_validates_against_schema() {
+    let validator = jsonschema::validator_for(&crate::json_schema()).unwrap();
+    let c = rich_command();
+    for json in [
+        serde_json::to_value(CommandWrapRef::new(&c)).unwrap(),
+        serde_json::to_value(CommandWrapRef::new(&c).with_config(NoSkip)).unwrap(),
+    ] {
+        let errors: Vec<_> = validator
+            .iter_errors(&json)
+            .map(|e| e.to_string())
+            .collect();
+        assert!(errors.is_empty(), "{json}: {errors:?}");
+    }
+}

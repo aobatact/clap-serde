@@ -1,6 +1,8 @@
 use serde::ser::{SerializeMap, Serializer};
 use serde::Serialize;
 
+use crate::util::case_key;
+
 pub(crate) mod app;
 pub(crate) mod arg;
 pub(crate) mod group;
@@ -49,6 +51,7 @@ impl SerializeConfig for NoSkip {
 }
 
 /// Helper which writes the entries of a map, honoring [`SerializeConfig`].
+/// The keys are converted to the case of the case-key feature.
 pub(crate) struct Entries<M> {
     map: M,
     all: bool,
@@ -71,13 +74,13 @@ impl<M: SerializeMap> Entries<M> {
         key: &'static str,
         value: &T,
     ) -> Result<(), M::Error> {
-        self.map.serialize_entry(key, value)
+        self.map.serialize_entry(&case_key(key), value)
     }
 
     /// Write the flag if it is `true` (or when serializing all).
     pub(crate) fn flag(&mut self, key: &'static str, value: bool) -> Result<(), M::Error> {
         if self.all || value {
-            self.map.serialize_entry(key, &value)?;
+            self.map.serialize_entry(&case_key(key), &value)?;
         }
         Ok(())
     }
@@ -89,8 +92,8 @@ impl<M: SerializeMap> Entries<M> {
         value: Option<T>,
     ) -> Result<(), M::Error> {
         match value {
-            Some(v) => self.map.serialize_entry(key, &v),
-            None if self.all => self.map.serialize_entry(key, &()),
+            Some(v) => self.map.serialize_entry(&case_key(key), &v),
+            None if self.all => self.map.serialize_entry(&case_key(key), &()),
             None => Ok(()),
         }
     }
@@ -103,7 +106,7 @@ impl<M: SerializeMap> Entries<M> {
     ) -> Result<(), M::Error> {
         let v: Vec<T> = value.into_iter().collect();
         if self.all || !v.is_empty() {
-            self.map.serialize_entry(key, &v)?;
+            self.map.serialize_entry(&case_key(key), &v)?;
         }
         Ok(())
     }
