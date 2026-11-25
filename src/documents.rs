@@ -1,6 +1,9 @@
 /*!
-Documents of keys.
+Documents of the data model and keys.
 */
+
+#[doc = include_str!("../docs/data_model.md")]
+pub mod data_model {}
 
 #[doc = include_str!("../docs/app_keys.md")]
 pub mod app_keys {}

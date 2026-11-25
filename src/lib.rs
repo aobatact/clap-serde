@@ -41,6 +41,8 @@ pub type AppWrap = CommandWrap;
 mod tests;
 #[cfg(test)]
 mod tests_case;
+#[cfg(all(test, feature = "snake-case-key", feature = "allow-deprecated"))]
+mod tests_docs;
 
 mod util;
 pub use util::load;
