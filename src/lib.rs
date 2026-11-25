@@ -21,6 +21,11 @@ mod ser;
 #[cfg(feature = "docsrs")]
 pub mod documents;
 
+#[cfg(feature = "schema")]
+mod schema;
+#[cfg(feature = "schema")]
+pub use schema::json_schema;
+
 #[cfg(feature = "yaml")]
 #[deprecated(since = "0.4.0", note = "use serde-yaml instead")]
 mod yaml;
@@ -43,6 +48,8 @@ mod tests;
 mod tests_case;
 #[cfg(all(test, feature = "snake-case-key", feature = "allow-deprecated"))]
 mod tests_docs;
+#[cfg(all(test, feature = "schema"))]
+mod tests_schema;
 
 mod util;
 pub use util::load;

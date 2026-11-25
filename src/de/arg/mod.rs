@@ -341,7 +341,8 @@ impl<'de, const USE_ARRAY: bool> DeserializeSeed<'de> for Args<USE_ARRAY> {
         D: serde::Deserializer<'de>,
     {
         if USE_ARRAY {
-            deserializer.deserialize_seq(self)
+            // Accept both a sequence of single-entry maps and a map.
+            deserializer.deserialize_any(self)
         } else {
             deserializer.deserialize_map(self)
         }

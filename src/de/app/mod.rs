@@ -6,7 +6,7 @@ use serde::{
 use std::ops::Deref;
 
 #[cfg(feature = "allow-deprecated")]
-mod appsettings;
+pub(crate) mod appsettings;
 #[cfg(feature = "color")]
 pub(crate) mod color;
 
@@ -255,7 +255,8 @@ impl<'de, const KV_ARRAY: bool> DeserializeSeed<'de> for SubCommands<KV_ARRAY> {
         D: serde::Deserializer<'de>,
     {
         if KV_ARRAY {
-            deserializer.deserialize_seq(self)
+            // Accept both a sequence of single-entry maps and a map.
+            deserializer.deserialize_any(self)
         } else {
             deserializer.deserialize_map(self)
         }

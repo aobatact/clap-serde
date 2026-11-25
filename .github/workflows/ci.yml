@@ -24,6 +24,12 @@ jobs:
             flags: --no-default-features --features kebab-case-key
           - name: pascal-case-key
             flags: --no-default-features --features pascal-case-key
+          - name: kebab-case-key + schema
+            flags: --no-default-features --features kebab-case-key,schema,allow-deprecated,env,color,help
+          - name: pascal-case-key + schema
+            flags: --no-default-features --features pascal-case-key,schema,allow-deprecated,env,color,help
+          - name: schema without optional features
+            flags: --no-default-features --features snake-case-key,schema
           - name: yaml
             flags: --features yaml
           - name: env

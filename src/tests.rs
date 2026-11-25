@@ -824,3 +824,20 @@ subcommands:
     assert!(app.is_subcommand_required_set());
     assert!(!sub1.is_subcommand_required_set());
 }
+
+/// `args` and `subcommands` accept both a sequence and a map in any self-describing format.
+#[test]
+fn args_and_subcommands_accept_map_and_seq() {
+    let check = |c: CommandWrap| {
+        assert!(c.get_arguments().any(|a| a.get_id() == "x"));
+        assert!(c.find_subcommand("s").is_some());
+    };
+    check(serde_json::from_str(r#"{"name":"a","args":{"x":{}},"subcommands":{"s":{}}}"#).unwrap());
+    check(
+        serde_json::from_str(r#"{"name":"a","args":[{"x":{}}],"subcommands":[{"s":{}}]}"#).unwrap(),
+    );
+    check(serde_yaml::from_str("name: a\nargs:\n  x: {}\nsubcommands:\n  s: {}\n").unwrap());
+    check(serde_yaml::from_str("name: a\nargs:\n  - x: {}\nsubcommands:\n  - s: {}\n").unwrap());
+    check(toml::from_str("name = \"a\"\n[args]\nx = {}\n[subcommands]\ns = {}\n").unwrap());
+    check(toml::from_str("name = \"a\"\n[[args]]\nx = {}\n[[subcommands]]\ns = {}\n").unwrap());
+}

@@ -84,6 +84,7 @@ const SETTING_NAMES: &[&str] = &[
     "args_conflicts_with_subcommands",
     "subcommand_precedence_over_arg",
     "arg_required_else_help",
+    "dont_collapse_args_in_usage",
     "next_line_help",
     "disable_colored_help",
     "disable_help_flag",
@@ -95,6 +96,32 @@ const SETTING_NAMES: &[&str] = &[
     "help_expected",
     "no_binary_name",
 ];
+
+/// The setting names of clap 3 which are renamed or removed in clap 4.
+#[cfg(feature = "schema")]
+const CLAP3_SETTING_NAMES: &[&str] = &[
+    "hidden",
+    "all_args_override_self",
+    "subcommands_negate_reqs",
+    "args_negate_subcommands",
+    "subcommand_required_else_help",
+    "wait_on_error",
+    "derive_display_order",
+    "use_long_format_for_help_subcommand",
+    "allow_invalid_utf8_for_external_subcommands",
+    "no_auto_help",
+    "no_auto_version",
+];
+
+/// All the accepted setting names (snake_case).
+#[cfg(feature = "schema")]
+pub(crate) fn all_setting_names() -> Vec<&'static str> {
+    SETTING_NAMES
+        .iter()
+        .chain(CLAP3_SETTING_NAMES)
+        .copied()
+        .collect()
+}
 
 /// One or more setting names.
 #[derive(Default)]

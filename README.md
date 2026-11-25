@@ -148,6 +148,21 @@ converted to the corresponding methods of `Command` (e.g. `settings: [arg_requir
 calls `Command::arg_required_else_help(true)`). `global_setting(s)` are also applied to all the subcommands.
 See [the key list](crate::documents::app_keys) for the supported names.
 
+## schema
+
+Provides [`json_schema`](crate::json_schema), which returns the [JSON Schema](https://json-schema.org/)
+of the input (following the case-key feature and the enabled features).
+
+The schema for the default `snake-case-key` (with `env`, `color`, `help` and `allow-deprecated`)
+is also in the repository as
+[`schema/clap-serde.schema.json`](https://github.com/aobatact/clap-serde/blob/main/schema/clap-serde.schema.json),
+which can be used by the editors. For example, with the YAML language server:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/aobatact/clap-serde/main/schema/clap-serde.schema.json
+name: app
+```
+
 ## override-arg
 
 Override a `Arg` with `DeserializeSeed`. If the `Arg` does not exist, a new one is added.
