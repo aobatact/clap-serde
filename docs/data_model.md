@@ -96,6 +96,7 @@ Each `Arg` can also set its own heading with `help_heading`.
 which can be deserialized again with [`CommandWrap`](crate::CommandWrap).
 
 - `name` and the other keys of the command.
+  The keys and enum values follow the case-key feature, as in the input.
 - `args` as a sequence of single-entry maps.
 - `groups` as a map.
 - `subcommands` as a sequence of single-entry maps.

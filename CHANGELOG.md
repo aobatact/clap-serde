@@ -9,6 +9,8 @@
   self-describing format (previously the map form worked only with some formats such as TOML).
 
 ## Fixes
+- The serializer outputs the keys in the case of the case-key feature
+  (previously always snake_case with `kebab-case-key` / `pascal-case-key`).
 - `dont_collapse_args_in_usage` is listed in the error message of unknown settings.
 
 # 0.6.0
