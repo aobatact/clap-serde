@@ -1,80 +1,110 @@
-# App Key List
-- clap : 3.0.10
-- clap-serde : 0.3.0
+# Command Key List
+- clap : 4.6
+- clap-serde : 0.6.0
 
-(Keys can be changed by the case-key features)
+(Keys can be changed by the case-key features. `null` values are ignored.)
 
 | key | type | feature |
 | - | - | - |
-| about| `&str`|
-| after_help| `&str`|
-| after_long_help| `&str`|
-| alias| `&str`|
-| aliases| `Vec<&str>`|
-| (arg) | not supported single arg (now)|
-| args | [Args](`crate::documents::arg_keys`) |
-| author| `&str`|
-| before_help| `&str`|
-| before_long_help| `&str`|
-| bin_name| `&str`|
-| color | [`ColorChoice`](#colorchoice)| color |
-| display_order| `usize`|
-| global_setting | [`AppSettings`](#appsettings) |
-| global_settings | `Vec<`[`AppSettings`](#appsettings)`>` |
-| (group) | not supported single group (now)|
-| groups | [ArgGroup](`crate::documents::arg_groups_keys`) |
-| help_heading| `Option<&str>`|
-| help_template| `&str`|
-| long_about| `&str`|
-| long_flag| `&str`|
-| long_flag_alias| `&str`|
-| long_flag_aliases| `Vec<&str>`|
-| long_version| `&str`|
-| max_term_width| `usize`|
-| name| `&str`|
-| override_help| `&str`|
-| override_usage| `&str`|
-| setting | [`AppSettings`](#appsettings) |
-| settings | `Vec<`[`AppSettings`](#appsettings)`>` |
-| short_flag|`char`|
-| short_flag_alias|`char`|
-| short_flag_aliases| `Vec<char>`|
-| (subcommand) | not supported single subcommand (now)|
-| subcommands | `Map<&str, App>`|
-| term_width| `usize`|
-| version| `&str`|
-| visible_alias| `&str`|
-| visible_aliases| `Vec<&str>`|
-| visible_long_flag_alias| `&str`|
-| visible_long_flag_aliases| `Vec<&str>`|
-| visible_short_flag_alias|`char`|
-| visible_short_flag_aliases| `Vec<char>`|
+| about | `String` | |
+| after_help | `String` | |
+| after_long_help | `String` | |
+| alias | `String` | |
+| aliases | `Vec<String>` | |
+| allow_external_subcommands | `bool` | |
+| allow_hyphen_values | `bool` | |
+| allow_missing_positional | `bool` | |
+| allow_negative_numbers | `bool` | |
+| (arg) | not supported single arg (now) | |
+| arg_required_else_help | `bool` | |
+| args | `Vec<Map<String, `[Arg](`crate::documents::arg_keys`)`>>` | |
+| args_map | `Map<String, `[Arg](`crate::documents::arg_keys`)`>` | |
+| args_conflicts_with_subcommands | `bool` | |
+| args_override_self | `bool` | |
+| author | `String` | |
+| before_help | `String` | |
+| before_long_help | `String` | |
+| bin_name | `String` | |
+| color | [`ColorChoice`](#colorchoice) | color |
+| disable_colored_help | `bool` | |
+| disable_help_flag | `bool` | |
+| disable_help_subcommand | `bool` | |
+| disable_version_flag | `bool` | |
+| display_name | `String` | |
+| display_order | `usize` | |
+| dont_collapse_args_in_usage | `bool` | |
+| dont_delimit_trailing_values | `bool` | |
+| flatten_help | `bool` | |
+| global_setting | [`Settings`](#settings) | allow-deprecated |
+| global_settings | `Vec<`[`Settings`](#settings)`>` | allow-deprecated |
+| (group) | not supported single group (now) | |
+| groups | `Map<String, `[ArgGroup](`crate::documents::arg_groups_keys`)`>` | |
+| help_expected | `bool` | |
+| help_template | `String` | help |
+| hide | `bool` | |
+| hide_possible_values | `bool` | |
+| ignore_errors | `bool` | |
+| infer_long_args | `bool` | |
+| infer_subcommands | `bool` | |
+| long_about | `String` | |
+| long_flag | `String` | |
+| long_flag_alias | `String` | |
+| long_flag_aliases | `Vec<String>` | |
+| long_version | `String` | |
+| max_term_width | `usize` | |
+| multicall | `bool` | |
+| name | `String` | |
+| next_display_order | `usize` (`null` disables the automatic display order) | |
+| next_help_heading | `String` (`null` resets the heading) | |
+| next_line_help | `bool` | |
+| no_binary_name | `bool` | |
+| override_help | `String` | |
+| override_usage | `String` | |
+| propagate_version | `bool` | |
+| setting | [`Settings`](#settings) | allow-deprecated |
+| settings | `Vec<`[`Settings`](#settings)`>` | allow-deprecated |
+| short_flag | `char` | |
+| short_flag_alias | `char` | |
+| short_flag_aliases | `Vec<char>` | |
+| (subcommand) | not supported single subcommand (now) | |
+| subcommands | `Vec<Map<String, Command>>` | |
+| subcommands_map | `Map<String, Command>` | |
+| subcommand_help_heading | `String` | |
+| subcommand_negates_reqs | `bool` | |
+| subcommand_precedence_over_arg | `bool` | |
+| subcommand_required | `bool` | |
+| subcommand_value_name | `String` | |
+| term_width | `usize` | |
+| trailing_var_arg | `bool` | |
+| version | `String` | |
+| visible_alias | `String` | |
+| visible_aliases | `Vec<String>` | |
+| visible_long_flag_alias | `String` | |
+| visible_long_flag_aliases | `Vec<String>` | |
+| visible_short_flag_alias | `char` | |
+| visible_short_flag_aliases | `Vec<char>` | |
 
-
-## AppSettings
-For setting, settings, global_setting, global_settings,
+## Settings
+For `setting`, `settings`, `global_setting`, `global_settings` (compatibility with clap 3 `AppSettings`).
+Each name calls the method of the same name with `true`.
+`global_*` are applied to the command and all of its subcommands (only the subcommands in the same input).
 
 - ignore_errors
-- wait_on_error
 - allow_hyphen_values
 - allow_negative_numbers
-- all_args_override_self
+- args_override_self
 - allow_missing_positional
 - trailing_var_arg
 - dont_delimit_trailing_values
 - infer_long_args
 - infer_subcommands
 - subcommand_required
-- subcommand_required_else_help
 - allow_external_subcommands
 - multicall
-- allow_invalid_utf_8_for_external_subcommands
-- use_long_format_for_help_subcommand
-- subcommands_negate_reqs
-- args_negate_subcommands
+- subcommand_negates_reqs
+- args_conflicts_with_subcommands
 - subcommand_precedence_over_arg
 - arg_required_else_help
-- derive_display_order
 - dont_collapse_args_in_usage
 - next_line_help
 - disable_colored_help
@@ -82,14 +112,23 @@ For setting, settings, global_setting, global_settings,
 - disable_help_subcommand
 - disable_version_flag
 - propagate_version
-- hidden
+- hide
 - hide_possible_values
 - help_expected
 - no_binary_name
-- no_auto_help
-- no_auto_version
 
-# ColorChoice
+The names of clap 3 below are also accepted.
+
+| name | clap 4 |
+| - | - |
+| hidden | `hide` |
+| all_args_override_self | `args_override_self` |
+| subcommands_negate_reqs | `subcommand_negates_reqs` |
+| args_negate_subcommands | `args_conflicts_with_subcommands` |
+| subcommand_required_else_help | `subcommand_required` + `arg_required_else_help` |
+| wait_on_error, derive_display_order, use_long_format_for_help_subcommand, allow_invalid_utf8_for_external_subcommands, no_auto_help, no_auto_version | ignored (removed in clap 4) |
+
+## ColorChoice
 - auto
 - always
 - never

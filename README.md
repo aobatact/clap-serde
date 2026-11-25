@@ -1,5 +1,5 @@
 # clap-serde
-Provides a wrapper to deserialize [clap](https://crates.io/crates/clap) app using [serde](https://crates.io/crates/serde).
+Provides wrappers to deserialize and serialize [clap](https://crates.io/crates/clap) (v4) `Command` using [serde](https://crates.io/crates/serde).
 
 [![Crates.io](https://img.shields.io/crates/v/clap-serde?style=flat-square)](https://crates.io/crates/clap-serde)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)](https://github.com/aobatact/clap-serde/blob/main/LICENSE-APACHE)
@@ -25,11 +25,11 @@ banana = { short = "b", long = "banana", aliases = ["musa_spp"] }
 fruit = { args = ["apple", "banana"] }
 "#;
 
-let app: clap::App = toml::from_str::<clap_serde::AppWrap>(CLAP_TOML)
+let app: clap::Command = toml::from_str::<clap_serde::CommandWrap>(CLAP_TOML)
     .expect("parse failed")
     .into();
 assert_eq!(app.get_name(), "app_clap_serde");
-assert_eq!(app.get_about(), Some("test-clap-serde"));
+assert_eq!(app.get_about().unwrap().to_string(), "test-clap-serde");
 ```
 
 ## json
@@ -52,11 +52,11 @@ const CLAP_JSON: &'static str = r#"{
 }
 }"#;
 
-let app: clap::App = serde_json::from_str::<clap_serde::CommandWrap>(CLAP_JSON)
+let app: clap::Command = serde_json::from_str::<clap_serde::CommandWrap>(CLAP_JSON)
     .expect("parse failed")
     .into();
 assert_eq!(app.get_name(), "app_clap_serde");
-assert_eq!(app.get_about(), Some("test-clap-serde"));
+assert_eq!(app.get_about().unwrap().to_string(), "test-clap-serde");
 ```
 
 ## yaml
@@ -87,29 +87,67 @@ let app: clap_serde::CommandWrap = serde_yaml::from_str(CLAP_YAML).expect("fail 
 assert_eq!(app.get_name(), "app_clap_serde");
 ```
 
+## serialize
+
+`Command` can be serialized with [`CommandWrapRef`](crate::CommandWrapRef),
+and the output can be deserialized again with [`CommandWrap`](crate::CommandWrap).
+
+```rust
+use clap::{Arg, ArgAction, Command};
+use clap_serde::{CommandWrap, CommandWrapRef};
+
+let command = Command::new("app")
+    .about("an app")
+    .arg(Arg::new("verbose").short('v').action(ArgAction::Count))
+    .subcommand(Command::new("sub").about("a subcommand"));
+
+let json = serde_json::to_string(&CommandWrapRef::new(&command)).unwrap();
+let command2: Command = serde_json::from_str::<CommandWrap>(&json).unwrap().into();
+assert_eq!(command2.get_name(), "app");
+assert_eq!(command2.get_subcommands().count(), 1);
+```
+
+By default, the flags with `false` and the values with `None` are skipped.
+Use [`NoSkip`](crate::NoSkip) to serialize all of them.
+
+Some properties are not serialized because clap does not provide getters for them
+(e.g. `requires`, `conflicts_with`, `default_value_if`).
+
+`value_parser` is identified only by the type of the parsed value, because clap does not expose more.
+So `boolish` / `falsey` and custom parsers of unknown types are not serialized, and
+`non_empty_string`, the ranges of integer parsers and custom parsers of the known types
+are serialized as the basic parser of the type (e.g. `string`, `i64`).
+
 # features
 ## env
 Enables env feature in clap.
+## help
+Enables help feature in clap (needed for `help_template`). Enabled by default.
 ## yaml (deprecated, use serde-yaml instead)
 Enables to use yaml.
 ## color
 Enablse color feature in clap.
 
 ## (key case settings)
-Settings names format for keys and [`AppSettings`](`clap::AppSettings`).
+Settings names format for keys and enum values (e.g. `ArgAction`, `ValueHint`).
 #### snake-case-key
 snake_case. Enabled by default.
 #### pascal-case-key
-PascalCase. Same as variants name in enum at `AppSettings`.
+PascalCase. Same as variants name in enums.
 #### kebab-case-key 
 kebab-case.
 
 ## allow-deprecated
 Allow deprecated keys, settings. Enabled by default.
 
-## override-args
+`setting` / `settings` / `global_setting` / `global_settings` (clap 3 `AppSettings`) are
+converted to the corresponding methods of `Command` (e.g. `settings: [arg_required_else_help]`
+calls `Command::arg_required_else_help(true)`). `global_setting(s)` are also applied to all the subcommands.
+See [the key list](crate::documents::app_keys) for the supported names.
 
-Override a `Arg` with `DeserializeSeed`.
+## override-arg
+
+Override a `Arg` with `DeserializeSeed`. If the `Arg` does not exist, a new one is added.
 
 ```rust
 # #[cfg(feature = "override-arg")]
@@ -127,8 +165,8 @@ apple = { short = "a" }
 "#;
 let app = Command::new("app").arg(Arg::new("apple").default_value("aaa"));
 let wrap = clap_serde::CommandWrap::from(app);
-let mut de = toml::Deserializer::new(CLAP_TOML);
-let wrap2 = wrap.deserialize(&mut de).unwrap();
+let de = toml::Deserializer::parse(CLAP_TOML).unwrap();
+let wrap2 = wrap.deserialize(de).unwrap();
 let apple = wrap2
     .get_arguments()
     .find(|a| a.get_id() == "apple")

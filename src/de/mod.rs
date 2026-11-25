@@ -1,6 +1,6 @@
 #[macro_use]
 mod macros;
 
-mod app;
-mod arg;
-mod group;
+pub(crate) mod app;
+pub(crate) mod arg;
+pub(crate) mod group;
