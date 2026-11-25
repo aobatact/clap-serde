@@ -34,11 +34,6 @@ subcommands:
         about : subcommand_1
     - sub2: 
         about : subcommand_2
-
-setting: trailing_var_arg
-
-settings: 
-    - help_expected
 "#;
 
     let app: CommandWrap = serde_yaml::from_str(CLAP_YAML).expect("fail to make yaml");
@@ -513,7 +508,7 @@ default_value_if = ["flag", "true", "a"]
 [[args]]
 [args.flag]
 long = "flag"
-arg_action = "set_true"
+action = "set_true"
 [[args]]
 [args.rest]
 num_args = { min = 1 }
@@ -569,6 +564,34 @@ settings:
     assert!(app.is_disable_help_subcommand_set());
 
     assert!(serde_yaml::from_str::<CommandWrap>("name: app\nsetting: no_such_setting").is_err());
+}
+
+#[test]
+#[cfg(not(feature = "allow-deprecated"))]
+fn deprecated_keys_are_error_without_allow_deprecated() {
+    for yaml in [
+        "name: app\nsetting: subcommand_required",
+        "name: app\nsettings: [propagate_version]",
+        "name: app\nglobal_settings: [hidden]",
+        "name: app\nargs:\n    - flag:\n        arg_action: set_true",
+    ] {
+        let err = serde_yaml::from_str::<CommandWrap>(yaml)
+            .err()
+            .unwrap_or_else(|| panic!("should be error: {yaml}"));
+        assert!(err.to_string().contains("deprecated key"), "{yaml}: {err}");
+    }
+}
+
+#[test]
+#[cfg(feature = "allow-deprecated")]
+fn arg_action_compat() {
+    let app: Command = serde_yaml::from_str::<CommandWrap>(
+        "name: app\nargs:\n    - flag:\n        long: flag\n        arg_action: set_true",
+    )
+    .unwrap()
+    .into();
+    let m = app.try_get_matches_from(["app", "--flag"]).unwrap();
+    assert!(m.get_flag("flag"));
 }
 
 #[test]

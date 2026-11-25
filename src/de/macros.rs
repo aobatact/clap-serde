@@ -86,7 +86,11 @@ macro_rules! parse_value {
     }
 }
 
-#[cfg(feature = "snake-case-key")]
+// Also used when no case feature is set, so that only the `compile_error!` in lib.rs is reported.
+#[cfg(any(
+    feature = "snake-case-key",
+    not(any(feature = "kebab-case-key", feature = "pascal-case-key"))
+))]
 macro_rules! convert_case_to {
     ($key:expr) => {
         String::from(AsRef::<str>::as_ref(&$key))
@@ -95,7 +99,10 @@ macro_rules! convert_case_to {
 
 // if const heap is stabilized, should convert the target keys instead.
 
-#[cfg(not(feature = "snake-case-key"))]
+#[cfg(all(
+    not(feature = "snake-case-key"),
+    any(feature = "kebab-case-key", feature = "pascal-case-key")
+))]
 macro_rules! convert_case_to {
     ($key:expr) => {
         convert_case::Casing::to_case(&AsRef::<str>::as_ref(&$key), convert_case::Case::Snake)

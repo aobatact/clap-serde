@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: test (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: default
+            flags: ""
+          - name: snake-case-key only
+            flags: --no-default-features --features snake-case-key
+          - name: kebab-case-key
+            flags: --no-default-features --features kebab-case-key
+          - name: pascal-case-key
+            flags: --no-default-features --features pascal-case-key
+          - name: yaml
+            flags: --features yaml
+          - name: env
+            flags: --features env
+          - name: color
+            flags: --features color
+          - name: override-arg
+            flags: --features override-arg
+          - name: all (snake) without allow-deprecated
+            flags: --no-default-features --features snake-case-key,help,yaml,env,color,override-arg
+          - name: docsrs
+            flags: --features docsrs
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test ${{ matrix.flags }}
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --features docsrs -- -D warnings
