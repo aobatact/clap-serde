@@ -6,6 +6,9 @@ Provides wrappers to deserialize and serialize [clap](https://crates.io/crates/c
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/aobatact/clap-serde/blob/main/LICENSE-MIT)
 [![API Reference](https://img.shields.io/docsrs/clap-serde?style=flat-square)](https://docs.rs/clap-serde)
 
+See [the data model](crate::documents::data_model) for the structure of the input and output,
+and [the key list](crate::documents::app_keys) for the supported keys.
+
 ## toml
 
 ```rust
