@@ -7,6 +7,7 @@ This page describes the overall structure of the input of [`CommandWrap`](crate:
 and the output of [`CommandWrapRef`](crate::CommandWrapRef).
 For the list of keys, see [Command](crate::documents::app_keys), [Arg](crate::documents::arg_keys)
 and [ArgGroup](crate::documents::arg_groups_keys).
+The JSON Schema of the input is available with the `schema` feature (see the README).
 
 ## Structure
 

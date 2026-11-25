@@ -1,0 +1,2259 @@
+{
+  "$defs": {
+    "arg": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/arg_action"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::action",
+          "markdownDescription": "[`Arg::action`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.action)"
+        },
+        "alias": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::alias",
+          "markdownDescription": "[`Arg::alias`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.alias)"
+        },
+        "aliases": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::aliases",
+          "markdownDescription": "[`Arg::aliases`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.aliases)"
+        },
+        "allow_hyphen_values": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::allow_hyphen_values",
+          "markdownDescription": "[`Arg::allow_hyphen_values`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.allow_hyphen_values)"
+        },
+        "allow_negative_numbers": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::allow_negative_numbers",
+          "markdownDescription": "[`Arg::allow_negative_numbers`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.allow_negative_numbers)"
+        },
+        "arg_action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/arg_action"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "deprecated": true,
+          "description": "Deprecated. Use action instead.",
+          "markdownDescription": "Deprecated. Use `action` instead."
+        },
+        "conflicts_with": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::conflicts_with",
+          "markdownDescription": "[`Arg::conflicts_with`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.conflicts_with)"
+        },
+        "conflicts_with_all": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::conflicts_with_all",
+          "markdownDescription": "[`Arg::conflicts_with_all`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.conflicts_with_all)"
+        },
+        "default_missing_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::default_missing_value",
+          "markdownDescription": "[`Arg::default_missing_value`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.default_missing_value)"
+        },
+        "default_missing_values": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::default_missing_values",
+          "markdownDescription": "[`Arg::default_missing_values`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.default_missing_values)"
+        },
+        "default_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::default_value",
+          "markdownDescription": "[`Arg::default_value`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.default_value)"
+        },
+        "default_value_if": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/default_value_if"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::default_value_if",
+          "markdownDescription": "[`Arg::default_value_if`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.default_value_if)"
+        },
+        "default_value_ifs": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/default_value_if"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::default_value_ifs",
+          "markdownDescription": "[`Arg::default_value_ifs`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.default_value_ifs)"
+        },
+        "default_values": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::default_values",
+          "markdownDescription": "[`Arg::default_values`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.default_values)"
+        },
+        "display_order": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/usize"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::display_order",
+          "markdownDescription": "[`Arg::display_order`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.display_order)"
+        },
+        "env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::env",
+          "markdownDescription": "[`Arg::env`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.env)"
+        },
+        "exclusive": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::exclusive",
+          "markdownDescription": "[`Arg::exclusive`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.exclusive)"
+        },
+        "global": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::global",
+          "markdownDescription": "[`Arg::global`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.global)"
+        },
+        "group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::group",
+          "markdownDescription": "[`Arg::group`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.group)"
+        },
+        "groups": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::groups",
+          "markdownDescription": "[`Arg::groups`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.groups)"
+        },
+        "help": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::help",
+          "markdownDescription": "[`Arg::help`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.help)"
+        },
+        "help_heading": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::help_heading",
+          "markdownDescription": "[`Arg::help_heading`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.help_heading)"
+        },
+        "hide": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::hide",
+          "markdownDescription": "[`Arg::hide`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.hide)"
+        },
+        "hide_default_value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::hide_default_value",
+          "markdownDescription": "[`Arg::hide_default_value`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.hide_default_value)"
+        },
+        "hide_env": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::hide_env",
+          "markdownDescription": "[`Arg::hide_env`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.hide_env)"
+        },
+        "hide_env_values": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::hide_env_values",
+          "markdownDescription": "[`Arg::hide_env_values`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.hide_env_values)"
+        },
+        "hide_long_help": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::hide_long_help",
+          "markdownDescription": "[`Arg::hide_long_help`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.hide_long_help)"
+        },
+        "hide_possible_values": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::hide_possible_values",
+          "markdownDescription": "[`Arg::hide_possible_values`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.hide_possible_values)"
+        },
+        "hide_short_help": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::hide_short_help",
+          "markdownDescription": "[`Arg::hide_short_help`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.hide_short_help)"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::id",
+          "markdownDescription": "[`Arg::id`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.id)"
+        },
+        "ignore_case": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::ignore_case",
+          "markdownDescription": "[`Arg::ignore_case`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.ignore_case)"
+        },
+        "index": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/usize"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::index",
+          "markdownDescription": "[`Arg::index`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.index)"
+        },
+        "last": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::last",
+          "markdownDescription": "[`Arg::last`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.last)"
+        },
+        "long": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::long",
+          "markdownDescription": "[`Arg::long`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.long)"
+        },
+        "long_help": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::long_help",
+          "markdownDescription": "[`Arg::long_help`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.long_help)"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "deprecated": true,
+          "description": "Deprecated. Use id instead.",
+          "markdownDescription": "Deprecated. Use `id` instead."
+        },
+        "next_line_help": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::next_line_help",
+          "markdownDescription": "[`Arg::next_line_help`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.next_line_help)"
+        },
+        "num_args": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/num_args"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::num_args",
+          "markdownDescription": "[`Arg::num_args`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.num_args)"
+        },
+        "number_of_values": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/usize"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::number_of_values",
+          "markdownDescription": "[`Arg::number_of_values`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.number_of_values)"
+        },
+        "overrides_with": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::overrides_with",
+          "markdownDescription": "[`Arg::overrides_with`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.overrides_with)"
+        },
+        "overrides_with_all": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::overrides_with_all",
+          "markdownDescription": "[`Arg::overrides_with_all`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.overrides_with_all)"
+        },
+        "positional": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Ignored. Only output by serialization.",
+          "markdownDescription": "Ignored. Only output by serialization."
+        },
+        "possible_values": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Sets PossibleValuesParser as the value parser.",
+          "markdownDescription": "Sets `PossibleValuesParser` as the value parser."
+        },
+        "raw": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::raw",
+          "markdownDescription": "[`Arg::raw`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.raw)"
+        },
+        "require_delimiter": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "deprecated": true,
+          "description": "Deprecated. Use use_value_delimiter instead.",
+          "markdownDescription": "Deprecated. Use `use_value_delimiter` instead."
+        },
+        "require_equals": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::require_equals",
+          "markdownDescription": "[`Arg::require_equals`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.require_equals)"
+        },
+        "required": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::required",
+          "markdownDescription": "[`Arg::required`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.required)"
+        },
+        "required_if_eq": {
+          "$ref": "#/$defs/string_pair",
+          "description": "Arg::required_if_eq : [arg, value]",
+          "markdownDescription": "[`Arg::required_if_eq`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.required_if_eq) : `[arg, value]`"
+        },
+        "required_if_eq_all": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/string_pair"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::required_if_eq_all",
+          "markdownDescription": "[`Arg::required_if_eq_all`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.required_if_eq_all)"
+        },
+        "required_if_eq_any": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/string_pair"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::required_if_eq_any",
+          "markdownDescription": "[`Arg::required_if_eq_any`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.required_if_eq_any)"
+        },
+        "required_unless_present": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::required_unless_present",
+          "markdownDescription": "[`Arg::required_unless_present`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.required_unless_present)"
+        },
+        "required_unless_present_all": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::required_unless_present_all",
+          "markdownDescription": "[`Arg::required_unless_present_all`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.required_unless_present_all)"
+        },
+        "required_unless_present_any": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::required_unless_present_any",
+          "markdownDescription": "[`Arg::required_unless_present_any`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.required_unless_present_any)"
+        },
+        "requires": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::requires",
+          "markdownDescription": "[`Arg::requires`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.requires)"
+        },
+        "requires_all": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::requires_all",
+          "markdownDescription": "[`Arg::requires_all`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.requires_all)"
+        },
+        "requires_if": {
+          "$ref": "#/$defs/string_pair",
+          "description": "Arg::requires_if : [value, arg]",
+          "markdownDescription": "[`Arg::requires_if`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.requires_if) : `[value, arg]`"
+        },
+        "requires_ifs": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/string_pair"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::requires_ifs",
+          "markdownDescription": "[`Arg::requires_ifs`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.requires_ifs)"
+        },
+        "short": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/char"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::short",
+          "markdownDescription": "[`Arg::short`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.short)"
+        },
+        "short_alias": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/char"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::short_alias",
+          "markdownDescription": "[`Arg::short_alias`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.short_alias)"
+        },
+        "short_aliases": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/char"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::short_aliases",
+          "markdownDescription": "[`Arg::short_aliases`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.short_aliases)"
+        },
+        "trailing_var_arg": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::trailing_var_arg",
+          "markdownDescription": "[`Arg::trailing_var_arg`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.trailing_var_arg)"
+        },
+        "use_delimiter": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "deprecated": true,
+          "description": "Deprecated. Use use_value_delimiter instead.",
+          "markdownDescription": "Deprecated. Use `use_value_delimiter` instead."
+        },
+        "use_value_delimiter": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::use_value_delimiter",
+          "markdownDescription": "[`Arg::use_value_delimiter`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.use_value_delimiter)"
+        },
+        "value_delimiter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/char"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::value_delimiter",
+          "markdownDescription": "[`Arg::value_delimiter`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.value_delimiter)"
+        },
+        "value_hint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/value_hint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::value_hint",
+          "markdownDescription": "[`Arg::value_hint`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.value_hint)"
+        },
+        "value_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::value_name",
+          "markdownDescription": "[`Arg::value_name`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.value_name)"
+        },
+        "value_names": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::value_names",
+          "markdownDescription": "[`Arg::value_names`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.value_names)"
+        },
+        "value_parser": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/value_parser"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::value_parser",
+          "markdownDescription": "[`Arg::value_parser`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.value_parser)"
+        },
+        "value_terminator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::value_terminator",
+          "markdownDescription": "[`Arg::value_terminator`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.value_terminator)"
+        },
+        "visible_alias": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::visible_alias",
+          "markdownDescription": "[`Arg::visible_alias`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.visible_alias)"
+        },
+        "visible_aliases": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::visible_aliases",
+          "markdownDescription": "[`Arg::visible_aliases`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.visible_aliases)"
+        },
+        "visible_short_alias": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/char"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::visible_short_alias",
+          "markdownDescription": "[`Arg::visible_short_alias`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.visible_short_alias)"
+        },
+        "visible_short_aliases": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/char"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Arg::visible_short_aliases",
+          "markdownDescription": "[`Arg::visible_short_aliases`](https://docs.rs/clap/4.6/clap/struct.Arg.html#method.visible_short_aliases)"
+        }
+      },
+      "type": "object"
+    },
+    "arg_action": {
+      "enum": [
+        "set",
+        "append",
+        "set_true",
+        "set_false",
+        "count",
+        "help",
+        "help_short",
+        "help_long",
+        "version"
+      ]
+    },
+    "arg_group": {
+      "additionalProperties": false,
+      "properties": {
+        "arg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ArgGroup::arg",
+          "markdownDescription": "[`ArgGroup::arg`](https://docs.rs/clap/4.6/clap/struct.ArgGroup.html#method.arg)"
+        },
+        "args": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ArgGroup::args",
+          "markdownDescription": "[`ArgGroup::args`](https://docs.rs/clap/4.6/clap/struct.ArgGroup.html#method.args)"
+        },
+        "conflicts_with": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ArgGroup::conflicts_with",
+          "markdownDescription": "[`ArgGroup::conflicts_with`](https://docs.rs/clap/4.6/clap/struct.ArgGroup.html#method.conflicts_with)"
+        },
+        "conflicts_with_all": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ArgGroup::conflicts_with_all",
+          "markdownDescription": "[`ArgGroup::conflicts_with_all`](https://docs.rs/clap/4.6/clap/struct.ArgGroup.html#method.conflicts_with_all)"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ArgGroup::id",
+          "markdownDescription": "[`ArgGroup::id`](https://docs.rs/clap/4.6/clap/struct.ArgGroup.html#method.id)"
+        },
+        "multiple": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ArgGroup::multiple",
+          "markdownDescription": "[`ArgGroup::multiple`](https://docs.rs/clap/4.6/clap/struct.ArgGroup.html#method.multiple)"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "deprecated": true,
+          "description": "Deprecated. Use id instead.",
+          "markdownDescription": "Deprecated. Use `id` instead."
+        },
+        "required": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ArgGroup::required",
+          "markdownDescription": "[`ArgGroup::required`](https://docs.rs/clap/4.6/clap/struct.ArgGroup.html#method.required)"
+        },
+        "requires": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ArgGroup::requires",
+          "markdownDescription": "[`ArgGroup::requires`](https://docs.rs/clap/4.6/clap/struct.ArgGroup.html#method.requires)"
+        },
+        "requires_all": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ArgGroup::requires_all",
+          "markdownDescription": "[`ArgGroup::requires_all`](https://docs.rs/clap/4.6/clap/struct.ArgGroup.html#method.requires_all)"
+        }
+      },
+      "type": "object"
+    },
+    "args": {
+      "anyOf": [
+        {
+          "items": {
+            "additionalProperties": {
+              "$ref": "#/$defs/arg"
+            },
+            "maxProperties": 1,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/arg"
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "args_map": {
+      "additionalProperties": {
+        "$ref": "#/$defs/arg"
+      },
+      "type": "object"
+    },
+    "char": {
+      "maxLength": 1,
+      "minLength": 1,
+      "type": "string"
+    },
+    "color_choice": {
+      "enum": [
+        "auto",
+        "always",
+        "never"
+      ]
+    },
+    "command": {
+      "additionalProperties": false,
+      "properties": {
+        "about": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::about",
+          "markdownDescription": "[`Command::about`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.about)"
+        },
+        "after_help": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::after_help",
+          "markdownDescription": "[`Command::after_help`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.after_help)"
+        },
+        "after_long_help": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::after_long_help",
+          "markdownDescription": "[`Command::after_long_help`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.after_long_help)"
+        },
+        "alias": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::alias",
+          "markdownDescription": "[`Command::alias`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.alias)"
+        },
+        "aliases": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::aliases",
+          "markdownDescription": "[`Command::aliases`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.aliases)"
+        },
+        "allow_external_subcommands": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::allow_external_subcommands",
+          "markdownDescription": "[`Command::allow_external_subcommands`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.allow_external_subcommands)"
+        },
+        "allow_hyphen_values": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::allow_hyphen_values",
+          "markdownDescription": "[`Command::allow_hyphen_values`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.allow_hyphen_values)"
+        },
+        "allow_missing_positional": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::allow_missing_positional",
+          "markdownDescription": "[`Command::allow_missing_positional`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.allow_missing_positional)"
+        },
+        "allow_negative_numbers": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::allow_negative_numbers",
+          "markdownDescription": "[`Command::allow_negative_numbers`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.allow_negative_numbers)"
+        },
+        "arg_required_else_help": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::arg_required_else_help",
+          "markdownDescription": "[`Command::arg_required_else_help`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.arg_required_else_help)"
+        },
+        "args": {
+          "$ref": "#/$defs/args",
+          "description": "Args. A sequence of single-entry maps [{ id: Arg }] or a map { id: Arg }.",
+          "markdownDescription": "Args. A sequence of single-entry maps `[{ id: Arg }]` or a map `{ id: Arg }`."
+        },
+        "args_conflicts_with_subcommands": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::args_conflicts_with_subcommands",
+          "markdownDescription": "[`Command::args_conflicts_with_subcommands`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.args_conflicts_with_subcommands)"
+        },
+        "args_map": {
+          "$ref": "#/$defs/args_map",
+          "description": "Args as a map { id: Arg }.",
+          "markdownDescription": "Args as a map `{ id: Arg }`."
+        },
+        "args_override_self": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::args_override_self",
+          "markdownDescription": "[`Command::args_override_self`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.args_override_self)"
+        },
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::author",
+          "markdownDescription": "[`Command::author`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.author)"
+        },
+        "before_help": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::before_help",
+          "markdownDescription": "[`Command::before_help`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.before_help)"
+        },
+        "before_long_help": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::before_long_help",
+          "markdownDescription": "[`Command::before_long_help`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.before_long_help)"
+        },
+        "bin_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::bin_name",
+          "markdownDescription": "[`Command::bin_name`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.bin_name)"
+        },
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/color_choice"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::color",
+          "markdownDescription": "[`Command::color`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.color)"
+        },
+        "disable_colored_help": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::disable_colored_help",
+          "markdownDescription": "[`Command::disable_colored_help`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.disable_colored_help)"
+        },
+        "disable_help_flag": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::disable_help_flag",
+          "markdownDescription": "[`Command::disable_help_flag`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.disable_help_flag)"
+        },
+        "disable_help_subcommand": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::disable_help_subcommand",
+          "markdownDescription": "[`Command::disable_help_subcommand`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.disable_help_subcommand)"
+        },
+        "disable_version_flag": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::disable_version_flag",
+          "markdownDescription": "[`Command::disable_version_flag`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.disable_version_flag)"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::display_name",
+          "markdownDescription": "[`Command::display_name`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.display_name)"
+        },
+        "display_order": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/usize"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::display_order",
+          "markdownDescription": "[`Command::display_order`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.display_order)"
+        },
+        "dont_collapse_args_in_usage": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::dont_collapse_args_in_usage",
+          "markdownDescription": "[`Command::dont_collapse_args_in_usage`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.dont_collapse_args_in_usage)"
+        },
+        "dont_delimit_trailing_values": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::dont_delimit_trailing_values",
+          "markdownDescription": "[`Command::dont_delimit_trailing_values`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.dont_delimit_trailing_values)"
+        },
+        "flatten_help": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::flatten_help",
+          "markdownDescription": "[`Command::flatten_help`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.flatten_help)"
+        },
+        "global_setting": {
+          "$ref": "#/$defs/settings",
+          "deprecated": true,
+          "description": "clap 3 AppSettings applied to the subcommands too (deprecated).",
+          "markdownDescription": "clap 3 `AppSettings` applied to the subcommands too (deprecated)."
+        },
+        "global_settings": {
+          "$ref": "#/$defs/settings",
+          "deprecated": true,
+          "description": "clap 3 AppSettings applied to the subcommands too (deprecated).",
+          "markdownDescription": "clap 3 `AppSettings` applied to the subcommands too (deprecated)."
+        },
+        "groups": {
+          "$ref": "#/$defs/groups",
+          "description": "ArgGroups as a map { id: ArgGroup }.",
+          "markdownDescription": "ArgGroups as a map `{ id: ArgGroup }`."
+        },
+        "help_expected": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::help_expected",
+          "markdownDescription": "[`Command::help_expected`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.help_expected)"
+        },
+        "help_heading": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "deprecated": true,
+          "description": "Deprecated. Use next_help_heading instead.",
+          "markdownDescription": "Deprecated. Use `next_help_heading` instead."
+        },
+        "help_template": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::help_template",
+          "markdownDescription": "[`Command::help_template`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.help_template)"
+        },
+        "hide": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::hide",
+          "markdownDescription": "[`Command::hide`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.hide)"
+        },
+        "hide_possible_values": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::hide_possible_values",
+          "markdownDescription": "[`Command::hide_possible_values`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.hide_possible_values)"
+        },
+        "ignore_errors": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::ignore_errors",
+          "markdownDescription": "[`Command::ignore_errors`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.ignore_errors)"
+        },
+        "infer_long_args": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::infer_long_args",
+          "markdownDescription": "[`Command::infer_long_args`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.infer_long_args)"
+        },
+        "infer_subcommands": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::infer_subcommands",
+          "markdownDescription": "[`Command::infer_subcommands`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.infer_subcommands)"
+        },
+        "long_about": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::long_about",
+          "markdownDescription": "[`Command::long_about`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.long_about)"
+        },
+        "long_flag": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::long_flag",
+          "markdownDescription": "[`Command::long_flag`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.long_flag)"
+        },
+        "long_flag_alias": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::long_flag_alias",
+          "markdownDescription": "[`Command::long_flag_alias`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.long_flag_alias)"
+        },
+        "long_flag_aliases": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::long_flag_aliases",
+          "markdownDescription": "[`Command::long_flag_aliases`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.long_flag_aliases)"
+        },
+        "long_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::long_version",
+          "markdownDescription": "[`Command::long_version`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.long_version)"
+        },
+        "max_term_width": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/usize"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::max_term_width",
+          "markdownDescription": "[`Command::max_term_width`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.max_term_width)"
+        },
+        "multicall": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::multicall",
+          "markdownDescription": "[`Command::multicall`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.multicall)"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::name",
+          "markdownDescription": "[`Command::name`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.name)"
+        },
+        "next_display_order": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/usize"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::next_display_order",
+          "markdownDescription": "[`Command::next_display_order`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.next_display_order)"
+        },
+        "next_help_heading": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::next_help_heading",
+          "markdownDescription": "[`Command::next_help_heading`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.next_help_heading)"
+        },
+        "next_line_help": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::next_line_help",
+          "markdownDescription": "[`Command::next_line_help`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.next_line_help)"
+        },
+        "no_binary_name": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::no_binary_name",
+          "markdownDescription": "[`Command::no_binary_name`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.no_binary_name)"
+        },
+        "override_help": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::override_help",
+          "markdownDescription": "[`Command::override_help`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.override_help)"
+        },
+        "override_usage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::override_usage",
+          "markdownDescription": "[`Command::override_usage`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.override_usage)"
+        },
+        "propagate_version": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::propagate_version",
+          "markdownDescription": "[`Command::propagate_version`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.propagate_version)"
+        },
+        "setting": {
+          "$ref": "#/$defs/settings",
+          "deprecated": true,
+          "description": "clap 3 AppSettings (deprecated).",
+          "markdownDescription": "clap 3 `AppSettings` (deprecated)."
+        },
+        "settings": {
+          "$ref": "#/$defs/settings",
+          "deprecated": true,
+          "description": "clap 3 AppSettings (deprecated).",
+          "markdownDescription": "clap 3 `AppSettings` (deprecated)."
+        },
+        "short_flag": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/char"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::short_flag",
+          "markdownDescription": "[`Command::short_flag`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.short_flag)"
+        },
+        "short_flag_alias": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/char"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::short_flag_alias",
+          "markdownDescription": "[`Command::short_flag_alias`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.short_flag_alias)"
+        },
+        "short_flag_aliases": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/char"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::short_flag_aliases",
+          "markdownDescription": "[`Command::short_flag_aliases`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.short_flag_aliases)"
+        },
+        "subcommand_help_heading": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::subcommand_help_heading",
+          "markdownDescription": "[`Command::subcommand_help_heading`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.subcommand_help_heading)"
+        },
+        "subcommand_negates_reqs": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::subcommand_negates_reqs",
+          "markdownDescription": "[`Command::subcommand_negates_reqs`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.subcommand_negates_reqs)"
+        },
+        "subcommand_precedence_over_arg": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::subcommand_precedence_over_arg",
+          "markdownDescription": "[`Command::subcommand_precedence_over_arg`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.subcommand_precedence_over_arg)"
+        },
+        "subcommand_required": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::subcommand_required",
+          "markdownDescription": "[`Command::subcommand_required`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.subcommand_required)"
+        },
+        "subcommand_value_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::subcommand_value_name",
+          "markdownDescription": "[`Command::subcommand_value_name`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.subcommand_value_name)"
+        },
+        "subcommands": {
+          "$ref": "#/$defs/subcommands",
+          "description": "Subcommands. A sequence of single-entry maps [{ name: Command }] or a map { name: Command }.",
+          "markdownDescription": "Subcommands. A sequence of single-entry maps `[{ name: Command }]` or a map `{ name: Command }`."
+        },
+        "subcommands_map": {
+          "$ref": "#/$defs/subcommands_map",
+          "description": "Subcommands as a map { name: Command }.",
+          "markdownDescription": "Subcommands as a map `{ name: Command }`."
+        },
+        "term_width": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/usize"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::term_width",
+          "markdownDescription": "[`Command::term_width`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.term_width)"
+        },
+        "trailing_var_arg": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::trailing_var_arg",
+          "markdownDescription": "[`Command::trailing_var_arg`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.trailing_var_arg)"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::version",
+          "markdownDescription": "[`Command::version`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.version)"
+        },
+        "visible_alias": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::visible_alias",
+          "markdownDescription": "[`Command::visible_alias`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.visible_alias)"
+        },
+        "visible_aliases": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::visible_aliases",
+          "markdownDescription": "[`Command::visible_aliases`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.visible_aliases)"
+        },
+        "visible_long_flag_alias": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::visible_long_flag_alias",
+          "markdownDescription": "[`Command::visible_long_flag_alias`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.visible_long_flag_alias)"
+        },
+        "visible_long_flag_aliases": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::visible_long_flag_aliases",
+          "markdownDescription": "[`Command::visible_long_flag_aliases`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.visible_long_flag_aliases)"
+        },
+        "visible_short_flag_alias": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/char"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::visible_short_flag_alias",
+          "markdownDescription": "[`Command::visible_short_flag_alias`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.visible_short_flag_alias)"
+        },
+        "visible_short_flag_aliases": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/char"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Command::visible_short_flag_aliases",
+          "markdownDescription": "[`Command::visible_short_flag_aliases`](https://docs.rs/clap/4.6/clap/struct.Command.html#method.visible_short_flag_aliases)"
+        }
+      },
+      "type": "object"
+    },
+    "default_value_if": {
+      "items": false,
+      "minItems": 3,
+      "prefixItems": [
+        {
+          "type": "string"
+        },
+        {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      ],
+      "type": "array"
+    },
+    "groups": {
+      "additionalProperties": {
+        "$ref": "#/$defs/arg_group"
+      },
+      "type": "object"
+    },
+    "num_args": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/usize"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "max": {
+              "$ref": "#/$defs/usize"
+            },
+            "min": {
+              "$ref": "#/$defs/usize"
+            }
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "settings": {
+      "anyOf": [
+        {
+          "enum": [
+            "ignore_errors",
+            "allow_hyphen_values",
+            "allow_negative_numbers",
+            "args_override_self",
+            "allow_missing_positional",
+            "trailing_var_arg",
+            "dont_delimit_trailing_values",
+            "infer_long_args",
+            "infer_subcommands",
+            "subcommand_required",
+            "allow_external_subcommands",
+            "multicall",
+            "subcommand_negates_reqs",
+            "args_conflicts_with_subcommands",
+            "subcommand_precedence_over_arg",
+            "arg_required_else_help",
+            "dont_collapse_args_in_usage",
+            "next_line_help",
+            "disable_colored_help",
+            "disable_help_flag",
+            "disable_help_subcommand",
+            "disable_version_flag",
+            "propagate_version",
+            "hide",
+            "hide_possible_values",
+            "help_expected",
+            "no_binary_name",
+            "hidden",
+            "all_args_override_self",
+            "subcommands_negate_reqs",
+            "args_negate_subcommands",
+            "subcommand_required_else_help",
+            "wait_on_error",
+            "derive_display_order",
+            "use_long_format_for_help_subcommand",
+            "allow_invalid_utf8_for_external_subcommands",
+            "no_auto_help",
+            "no_auto_version"
+          ]
+        },
+        {
+          "items": {
+            "enum": [
+              "ignore_errors",
+              "allow_hyphen_values",
+              "allow_negative_numbers",
+              "args_override_self",
+              "allow_missing_positional",
+              "trailing_var_arg",
+              "dont_delimit_trailing_values",
+              "infer_long_args",
+              "infer_subcommands",
+              "subcommand_required",
+              "allow_external_subcommands",
+              "multicall",
+              "subcommand_negates_reqs",
+              "args_conflicts_with_subcommands",
+              "subcommand_precedence_over_arg",
+              "arg_required_else_help",
+              "dont_collapse_args_in_usage",
+              "next_line_help",
+              "disable_colored_help",
+              "disable_help_flag",
+              "disable_help_subcommand",
+              "disable_version_flag",
+              "propagate_version",
+              "hide",
+              "hide_possible_values",
+              "help_expected",
+              "no_binary_name",
+              "hidden",
+              "all_args_override_self",
+              "subcommands_negate_reqs",
+              "args_negate_subcommands",
+              "subcommand_required_else_help",
+              "wait_on_error",
+              "derive_display_order",
+              "use_long_format_for_help_subcommand",
+              "allow_invalid_utf8_for_external_subcommands",
+              "no_auto_help",
+              "no_auto_version"
+            ]
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "string_pair": {
+      "items": false,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "type": "array"
+    },
+    "subcommands": {
+      "anyOf": [
+        {
+          "items": {
+            "additionalProperties": {
+              "$ref": "#/$defs/command"
+            },
+            "maxProperties": 1,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/command"
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "subcommands_map": {
+      "additionalProperties": {
+        "$ref": "#/$defs/command"
+      },
+      "type": "object"
+    },
+    "usize": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "value_hint": {
+      "enum": [
+        "unknown",
+        "other",
+        "any_path",
+        "file_path",
+        "dir_path",
+        "executable_path",
+        "command_name",
+        "command_string",
+        "command_with_arguments",
+        "username",
+        "hostname",
+        "url",
+        "email_address"
+      ]
+    },
+    "value_parser": {
+      "anyOf": [
+        {
+          "enum": [
+            "bool",
+            "string",
+            "os_string",
+            "path_buf",
+            "boolish",
+            "falsey",
+            "non_empty_string",
+            "i64",
+            "i32",
+            "i16",
+            "i8",
+            "u64",
+            "u32",
+            "u16",
+            "u8"
+          ]
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "max": {
+              "type": "integer"
+            },
+            "max_inclusive": {
+              "default": true,
+              "type": "boolean"
+            },
+            "min": {
+              "type": "integer"
+            },
+            "type": {
+              "enum": [
+                "bool",
+                "string",
+                "os_string",
+                "path_buf",
+                "boolish",
+                "falsey",
+                "non_empty_string",
+                "i64",
+                "i32",
+                "i16",
+                "i8",
+                "u64",
+                "u32",
+                "u16",
+                "u8"
+              ]
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "$ref": "#/$defs/command",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Definition of a clap Command for clap-serde",
+  "required": [
+    "name"
+  ],
+  "title": "clap-serde Command"
+}

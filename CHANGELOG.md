@@ -1,5 +1,16 @@
 # Change Log
 
+# Unreleased
+
+## Features
+- Add `schema` feature and `json_schema()`, which returns the JSON Schema of the input.
+  The schema is also available as `schema/clap-serde.schema.json`.
+- `args` and `subcommands` accept both a sequence of single-entry maps and a map in any
+  self-describing format (previously the map form worked only with some formats such as TOML).
+
+## Fixes
+- `dont_collapse_args_in_usage` is listed in the error message of unknown settings.
+
 # 0.6.0
 
 ## Breaking Changes
