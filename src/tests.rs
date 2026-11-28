@@ -407,6 +407,8 @@ fn serialize_roundtrip() {
     assert_eq!(verbose["action"], "count");
     assert_eq!(verbose["short_aliases"], serde_json::json!(["w"]));
     assert_eq!(verbose["visible_short_aliases"], serde_json::json!(["L"]));
+    assert_eq!(verbose["visible_aliases"], serde_json::json!(["loud"]));
+    assert_eq!(verbose["aliases"], serde_json::json!(["noisy"]));
     let count = &args[1]["count"];
     assert_eq!(count["num_args"], serde_json::json!({"min": 1, "max": 3}));
     assert_eq!(count["value_parser"], "u32");
