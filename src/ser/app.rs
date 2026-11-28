@@ -129,8 +129,7 @@ impl<C: SerializeConfig> Serialize for CommandWrapRef<'_, C> {
             m.opt("display_order", None::<()>)?;
         }
 
-        let visible: Vec<_> = c.get_visible_aliases().collect();
-        m.seq("visible_aliases", visible.iter())?;
+        m.seq("visible_aliases", c.get_visible_aliases())?;
         m.seq("aliases", c.get_aliases())?;
         let visible: Vec<_> = c.get_visible_short_flag_aliases().collect();
         m.seq("visible_short_flag_aliases", visible.iter())?;

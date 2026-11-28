@@ -122,8 +122,10 @@ impl<C: SerializeConfig> Serialize for ArgProps<'_, '_, C> {
         m.opt("short", a.get_short())?;
         m.opt("long", a.get_long())?;
 
-        let visible = a.get_visible_aliases().unwrap_or_default();
-        m.seq("visible_aliases", visible.iter())?;
+        m.seq(
+            "visible_aliases",
+            a.get_visible_aliases().unwrap_or_default(),
+        )?;
         m.seq("aliases", a.get_aliases().unwrap_or_default())?;
         let visible = a.get_visible_short_aliases().unwrap_or_default();
         m.seq("visible_short_aliases", visible.iter())?;
